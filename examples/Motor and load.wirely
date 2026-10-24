@@ -4,7 +4,7 @@
  "title": "Motor and load",
  "components": [
   {
-   "id": "d3de0e69",
+   "id": "2fc81a1d",
    "kind": "battery",
    "ref": "B1",
    "x": 0,
@@ -16,7 +16,7 @@
    }
   },
   {
-   "id": "de6b5ad8",
+   "id": "cbe13d04",
    "kind": "switch",
    "ref": "S1",
    "x": 90,
@@ -28,7 +28,7 @@
    }
   },
   {
-   "id": "0bac4aa7",
+   "id": "65abed06",
    "kind": "ammeter",
    "ref": "AM1",
    "x": 190,
@@ -38,7 +38,7 @@
    "props": {}
   },
   {
-   "id": "fb881b60",
+   "id": "93816418",
    "kind": "motor",
    "ref": "M1",
    "x": 280,
@@ -51,7 +51,7 @@
    }
   },
   {
-   "id": "5c5c305f",
+   "id": "a0c40fa2",
    "kind": "note",
    "ref": "T1",
    "x": 140,
@@ -65,7 +65,7 @@
  ],
  "wires": [
   {
-   "id": "5e045142",
+   "id": "216501ac",
    "points": [
     [
      0,
@@ -82,7 +82,7 @@
    ]
   },
   {
-   "id": "f8ec0448",
+   "id": "f4351534",
    "points": [
     [
      120,
@@ -95,7 +95,7 @@
    ]
   },
   {
-   "id": "4108a6ac",
+   "id": "77966793",
    "points": [
     [
      220,
@@ -112,7 +112,7 @@
    ]
   },
   {
-   "id": "ceb6fde4",
+   "id": "a4758c0b",
    "points": [
     [
      280,

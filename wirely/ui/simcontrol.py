@@ -146,6 +146,8 @@ class SimController(QObject):
                 info["rpm"] = d.rpm
             elif k == "relay":
                 info["_on"] = d.on
+            elif k == "optocoupler":
+                info["_ir"] = d.glow()
             elif k == "buzzer":
                 info["level"] = d.level()
             elif k == "sevenseg":

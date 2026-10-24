@@ -13,8 +13,8 @@ against ngspice. So the numbers it shows are the numbers you'd measure.
 
 I wanted to try circuits out before building them — at work and at home — in something that's quick and
 friendly to use. The friendly drag-and-drop simulators are mostly paid-for and aimed only at schools, and the
-free professional tools (SPICE and friends) are powerful but you spend your time on netlists, models and
-graph settings rather than on the circuit.
+free professional tools, such as LTspice and ngspice, are powerful but you spend your time on netlists,
+models and graph settings rather than on the circuit.
 
 I wanted something in between: a simulator that is **as easy as drawing the circuit**, but **free**, **runs
 locally**, and is **accurate enough to trust at work** —
@@ -22,7 +22,7 @@ locally**, and is **accurate enough to trust at work** —
 - sketch a circuit and **see straight away** whether it works: what lights, what's too hot, what pops,
 - **click switches and drag sliders** while it runs, and **hover over any wire** to read its voltage and current,
 - look at signals on a **graph (oscilloscope)** — 555 timers, filters, PWM, a buck converter,
-- use real part numbers (**BC547, 2N2222, TIP31C, IRF540, IRLZ44N, LM358, TL071, NE555, 1N4148, 1N4007 …**),
+- use real part numbers (**BC547, 2N2222, TIP31, IRF540, IRLZ44N, LM358, TL071, PC817, 1N4148, 1N4007 …**),
 - **export** clean diagrams for reports, documentation and worksheets.
 
 So I built Wirely (with a lot of help from Claude, an AI assistant), testing every revision against known
@@ -30,7 +30,7 @@ answers.
 
 ## What it does
 
-- **Schematic editor** — a parts gallery of 54 parts with British/IEC symbols, drag-and-drop, wiring by
+- **Schematic editor** — a parts gallery of 55 parts with British/IEC symbols, drag-and-drop, wiring by
   dragging pin to pin, junctions, rotate and flip, undo/redo, copy/paste, text notes, autosave and crash
   recovery.
 - **Live simulation** — glowing LEDs and lamps, motors with back-EMF that slow under load, relays that click,
@@ -41,7 +41,8 @@ answers.
 - **Things break, like the real thing** — LEDs without a resistor, overloaded resistors, reversed
   electrolytics, transistors killed by a coil's voltage spike: they pop and tell you why.
 - **Graph and logic probe** — up to four probes, frequency read-outs, adjustable time and volts per division.
-- **Chips** — 555 timer, op-amps, logic gates, 4017 counter, 4511 decoder, 7-segment display, MOSFETs,
+- **Chips** — 555 timer, op-amps, logic gates, 4017 counter, 4511 decoder, 7-segment display,
+  optoisolators (PC817, 4N25, 4N35, TLP521, 6N139), MOSFETs,
   transistors, relays, signal generator with PWM.
 - **Export** — PNG, SVG and PDF (always on white paper), and a parts list you can copy or save as CSV.
 - **Feels modern** — a flat look with light and dark themes, a splash screen, and an installer that makes
@@ -173,7 +174,7 @@ gives the parts list.
 
 ### Examples
 
-**File → Open example** has 19 circuits to open and play with, from an LED and resistor, through 555 timers, logic,
+**File → Open example** has 20 circuits to open and play with, from an LED and resistor, through 555 timers, logic,
 op-amps, relays and motors, up to a buck converter.
 
 **Dark mode** — the moon button at the top right. Press **F1** in the app for every mouse and keyboard shortcut.
@@ -187,7 +188,7 @@ step-size control. Chips that switch (the 555, logic, square waves) tell the sol
 switch, so it lands a time step on that moment — that keeps timing accurate. Op-amps are a macro-model with the
 real chip's gain, gain-bandwidth, slew rate, output swing and current limit.
 
-The automatic tests (174 of them) check it against answers worked out by hand — voltage dividers, the diode
+The automatic tests (184 of them) check it against answers worked out by hand — voltage dividers, the diode
 equation, LED current, transistor gain and saturation, Zener regulation, RC and RL curves, a half-wave
 rectifier, 555 astable and monostable timing, op-amp gains, integrator ramp and slew rate, a Schmitt-trigger
 oscillator, logic truth tables and counters — and against **ngspice** itself. For example, the buck converter:

@@ -14,5 +14,4 @@ The circuit solver is Wirely's own. The automatic tests compare it with ngspice
 (https://ngspice.sourceforge.io/, modified BSD licence) when ngspice happens to be installed;
 ngspice is not part of Wirely and isn't needed to run it.
 
-Wirely is an independent program. It is not made by, connected to or endorsed by New Wave Concepts or
-Circuit Wizard. All of Wirely's icons, symbols and artwork were drawn for Wirely.
+All of Wirely's icons, symbols and artwork were drawn for Wirely.

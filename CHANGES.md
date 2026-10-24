@@ -4,6 +4,10 @@
 Everything below, together: the circuit editor (r1), live simulation (r2), chips, logic and the graph (r3),
 sound, relays, motors and sensors (r4), and the Wirely name, icons and downloads (r5).
 
+- New part: **optoisolator** (optocoupler) — PC817, 4N25, 4N35, TLP521 and 6N139 (Darlington), with an
+  example circuit. Its two sides are truly separate circuits, each with its own supply.
+- Fixed: a circuit joined to another only through a relay's contacts or an optoisolator now gets its own 0 V
+  reference, so its own supply can be anything (before, a separate DC power supply there could fail to solve).
 - The graph's Auto time setting now follows the fastest repeating signal on any probe (before, it only
   looked at probe A — so a buck converter, where A is smooth DC, showed a 5-second sweep of a 1 kHz signal).
 

@@ -622,6 +622,7 @@ class Relay(Device):
     It pulls in at 75 % of the coil current it's designed for and lets go below 30 %."""
     n_internal = 1
     reactive = True
+    pin_groups = ((0, 1), (2, 3, 4))      # the coil and the contacts are separate circuits
     RP = 100e3
 
     def update_params(self):
@@ -721,8 +722,129 @@ class PhotoTransistor(BJT):
         self.i_pins = [ic + self.iph, ie]
 
 
+# ------------------------------------------------------------------------------------------- optoisolator
+# type: (typical current transfer ratio CTR = Ic / If, max LED current, max collector current, max Vce)
+OPTOS = {
+    "PC817": (1.3, 0.05, 0.05, 35.0),
+    "4N25": (0.5, 0.06, 0.05, 30.0),
+    "4N35": (1.0, 0.06, 0.1, 30.0),
+    "TLP521": (1.0, 0.05, 0.05, 55.0),
+    "6N139": (5.0, 0.02, 0.06, 18.0),      # Darlington output: very high gain, lower voltage
+}
+OPTO_IS, OPTO_N, OPTO_RS = 1.7e-12, 2.0, 2.0     # infrared LED: about 1.2 V at 20 mA
+
+
+class Optocoupler(BJT):
+    """Optoisolator (optocoupler): an infrared LED (A, K) shining on an NPN phototransistor (C, E) in one
+    package, with no electrical connection between the two sides. The light makes a base current inside the
+    transistor, so the collector current is about CTR × the LED current until the transistor saturates.
+    Internal nodes: [0] the LED junction (behind its series resistance), [1] the transistor's base."""
+    n_internal = 2
+    pin_groups = ((0, 1), (2, 3))         # A–K and C–E are separate circuits
+
+    def update_params(self):
+        ctr, self.if_max, self.icmax, self.vceo = OPTOS.get(self.prop("model"), OPTOS["PC817"])
+        self.pol, self.Is, self.bf, self.br = 1, 1e-14, 400.0, 5.0
+        self.k = ctr / self.bf                     # base current per amp of LED current
+        self.pmax = 0.15
+        self.vcrit = VT * math.log(VT / (math.sqrt(2) * self.Is))
+        self.nvt = OPTO_N * VT
+        self.vcrit_led = self.nvt * math.log(self.nvt / (math.sqrt(2) * OPTO_IS))
+        self.vbe_last = self.vbc_last = self.vbe_acc = self.vbc_acc = 0.0
+        self.vd_last = self.vd_acc = 0.0
+        self.ic = self.ib = self.i_led = 0.0
+
+    def _bce(self):
+        return (self.internal[1], self.nodes[2], self.nodes[3])
+
+    def begin_iter(self):
+        super().begin_iter()
+        self.vd_last = self.vd_acc
+
+    @staticmethod
+    def led(vd):
+        e = sexp(vd / (OPTO_N * VT))
+        return OPTO_IS * (e - 1.0) + GMIN * vd, OPTO_IS * e / (OPTO_N * VT) + GMIN
+
+    def stamp(self, S, x, ctx):
+        a, k_, c, e = self.nodes
+        j, b = self.internal
+        if self.blown:
+            S.g(a, k_, 1 / R_OFF)
+            S.g(a, j, 1.0)
+            S.g(c, e, 1 / R_OFF)
+            S.g(b, e, 1.0)
+            return
+        # the infrared LED, with its series resistance
+        S.g(a, j, 1.0 / OPTO_RS)
+        vd = v(x, j) - v(x, k_)
+        vl = pnjlim(vd, self.vd_last, self.nvt, self.vcrit_led)
+        if abs(vl - vd) > 1e-9:
+            ctx.limited = True
+        self.vd_last = vl
+        i, g = self.led(vl)
+        S.g(j, k_, g)
+        S.i(j, k_, i - g * vl)
+        # its light: a current from the collector into the base, k × the LED current
+        iph = self.k * max(0.0, i)
+        gph = self.k * g if i > 0 else 0.0
+        vk = v(x, k_)
+        S.nonlinear([c, b, j, k_], [iph, -iph, 0.0, 0.0],
+                    [[0, 0, gph, -gph], [0, 0, -gph, gph], [0, 0, 0, 0], [0, 0, 0, 0]],
+                    [v(x, c), v(x, b), vk + vl, vk])
+        # the phototransistor
+        super().stamp(S, x, ctx)
+
+    def accept(self, x, ctx):
+        a, k_, c, e = self.nodes
+        j, b = self.internal
+        vb, vc, ve = v(x, b), v(x, c), v(x, e)
+        if self.blown:
+            self.i_led = (v(x, a) - v(x, k_)) / R_OFF
+            self.ic = self.ib = 0.0
+            iph = 0.0
+        else:
+            vd = v(x, j) - v(x, k_)
+            self.i_led, _g = self.led(vd)
+            self.vd_last = self.vd_acc = vd
+            ic, ib, _d1, _d2 = self.currents(vb - ve, vb - vc)
+            self.ic, self.ib = ic, ib
+            self.vbe_acc, self.vbc_acc = vb - ve, vb - vc
+            iph = self.k * max(0.0, self.i_led)
+        i_c = self.ic + iph                      # what flows in at the collector pin
+        self.i_pins = [self.i_led, -self.i_led, i_c, -i_c]
+        self.vd = v(x, a) - v(x, k_)
+        self.power = self.vd * self.i_led + i_c * (vc - ve)
+        self.current = self.i_led
+        if self.blown:
+            return
+        ref, model = self.comp.ref, self.prop("model")
+        if abs(vc - ve) > 1.5 * self.vceo:
+            self.blown = True
+            self.event = spike_message(ref, abs(vc - ve), self.vceo)
+            return
+        led_bad = self.i_led > self.if_max
+        out_bad = abs(i_c) > self.icmax
+        self.warn = "over" if (led_bad or out_bad) else None
+        if self._overload(led_bad or out_bad, ctx.h, 0.05,
+                          self.i_led > 3 * self.if_max or abs(i_c) > 4 * self.icmax):
+            self.blown = True
+            if led_bad:
+                self.event = (f"{ref} popped! {self.i_led * 1000:.0f} mA is too much for the LED inside a {model} "
+                              f"(max {self.if_max * 1000:.0f} mA). Add a resistor in series with pins A–K.")
+            else:
+                self.event = (f"{ref} burnt out — {abs(i_c) * 1000:.0f} mA through its output is too much for a "
+                              f"{model} (max {self.icmax * 1000:.0f} mA). Add a resistor to the load.")
+
+    def glow(self):
+        """0..1: how hard the (invisible, infrared) LED inside is shining."""
+        if self.blown:
+            return 0.0
+        return max(0.0, min(1.0, (self.i_led - 1e-4) / 0.01)) ** 0.6
+
+
 FACTORY = {
-    "inductor": Inductor, "relay": Relay, "phototransistor": PhotoTransistor,
+    "inductor": Inductor, "relay": Relay, "phototransistor": PhotoTransistor, "optocoupler": Optocoupler,
     "nmos": MOSFET, "pmos": MOSFET, "opamp": OpAmp, "timer555": Timer555,
     "not": Gate, "and": Gate, "or": Gate, "nand": Gate, "nor": Gate, "xor": Gate, "schmitt_not": Gate,
     "dff": DFF, "counter4017": Counter4017, "decoder4511": Decoder4511,

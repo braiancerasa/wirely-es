@@ -445,12 +445,39 @@ def buck_converter():
     return c
 
 
+def optoisolator():
+    c = Circuit()
+    c.title = "Optoisolator"
+    b1 = c.add("battery", 0, 150, rot=1, props={"voltage": 9})                 # + (0,120) - (0,180)
+    s1 = c.add("switch", 90, 0)                                                 # (60,0)-(120,0)
+    r1 = c.add("resistor", 190, 0, props={"resistance": 1e3})                 # (160,0)-(220,0)
+    u1 = c.add("optocoupler", 300, 150, props={"model": "PC817"})             # A (260,130) K (260,170) C (340,130) E (340,170)
+    b2 = c.add("battery", 600, 150, rot=1, props={"voltage": 9})               # + (600,120) - (600,180)
+    r2 = c.add("resistor", 470, 0, props={"resistance": 1e3})                 # (440,0)-(500,0)
+    led = c.add("led", 400, 60, rot=1, props={"colour": "Green"})             # A (400,30) K (400,90)
+    assert pin(c, u1, "A") == (260, 130) and pin(c, u1, "E") == (340, 170) and pin(c, led, "K") == (400, 90)
+    # input side
+    wire(c, pin(c, b1, "+"), (0, 0), pin(c, s1, "1"))
+    wire(c, pin(c, s1, "2"), pin(c, r1, "1"))
+    wire(c, pin(c, r1, "2"), (260, 0), pin(c, u1, "A"))
+    wire(c, pin(c, u1, "K"), (260, 300), (0, 300), pin(c, b1, "-"))
+    c.add("ground", 0, 300)
+    # output side: its own battery, not joined to the input side anywhere
+    wire(c, pin(c, b2, "+"), (600, 0), pin(c, r2, "2"))
+    wire(c, pin(c, r2, "1"), (400, 0), pin(c, led, "A"))
+    wire(c, pin(c, led, "K"), (400, 130), pin(c, u1, "C"))
+    wire(c, pin(c, u1, "E"), (340, 300), (600, 300), pin(c, b2, "-"))
+    c.add("note", 300, -60, props={"text": "Two separate circuits: switch S1 on the left lights LED1 on the right\n"
+                                           "through the light inside U1 only — no wire joins the two sides."})
+    return c
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     for fn in (led_and_resistor, voltage_divider, night_light, two_way_switch, capacitor_charging,
                buzzer_and_motor, flasher_555, led_chaser, opamp_light_sensor, logic_gates, mosfet_motor,
                rc_filter_graph, binary_display, relay_lamp, motor_load, doorbell_555, burglar_alarm,
-               rain_alarm, buck_converter):
+               rain_alarm, buck_converter, optoisolator):
         c = fn()
         path = os.path.join(OUT, c.title + ".wirely")
         c.save(path)

@@ -774,6 +774,43 @@ def _phototransistor(c):
     c.arrow(-22, -28, -10, -16, 5, 1.5)
 
 
+def _optocoupler(c):
+    """Optoisolator: LED on the left (A top, K bottom), phototransistor on the right (C top, E bottom)."""
+    c.rect(-30, -32, 60, 64, None, 1.2)
+    # the LED, pointing down
+    c.line(-40, -20, -18, -20)
+    c.line(-18, -20, -18, -8)
+    c.poly([(-27, -8), (-9, -8), (-18, 6)], c.paper)
+    c.line(-27, 6, -9, 6, 2.2)
+    c.line(-18, 6, -18, 20)
+    c.line(-18, 20, -40, 20)
+    # its light, lit up while the simulation runs and the LED conducts
+    ir = c.props.get("_ir", 0.0)
+    if ir > 0.02:
+        lit = QColor(255, 170, 30)
+        c.p.setPen(Qt.NoPen)
+        glow = QColor(255, 190, 60, int(70 * ir))
+        c.p.setBrush(glow)
+        c.p.drawRoundedRect(QRectF(-7, -11, 16, 20), 6, 6)
+        old = c.ink
+        c.ink = lit
+        c.arrow(-5, -5, 6, -5, 4.5, 1.6)
+        c.arrow(-5, 3, 6, 3, 4.5, 1.6)
+        c.ink = old
+    else:
+        c.arrow(-5, -5, 6, -5, 4.5, 1.5)
+        c.arrow(-5, 3, 6, 3, 4.5, 1.5)
+    # the phototransistor
+    c.line(12, -11, 12, 11, 2.6)
+    c.line(12, -5, 26, -14)
+    c.line(26, -14, 26, -20)
+    c.line(26, -20, 40, -20)
+    c.line(12, 5, 26, 14)
+    c.line(26, 14, 26, 20)
+    c.line(26, 20, 40, 20)
+    c.arrow(12 + 14 * 0.35, 5 + 9 * 0.35, 24.5, 13, 5.5, 0.1)
+
+
 def note_lines(props):
     return (str(props.get("text", "")) or " ").split("\n")
 
@@ -790,7 +827,7 @@ def _note(c):
 
 DRAW.update({
     "inductor": _inductor, "relay": _relay, "reed_switch": _reed_switch, "tilt_switch": _tilt_switch,
-    "moisture": _moisture, "phototransistor": _phototransistor, "note": _note,
+    "moisture": _moisture, "phototransistor": _phototransistor, "optocoupler": _optocoupler, "note": _note,
 })
 
 

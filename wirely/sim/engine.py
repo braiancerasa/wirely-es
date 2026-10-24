@@ -81,14 +81,18 @@ class Simulator:
 
         grounded = set()
         for comp, cls, nodes in dev_raw_nodes:
-            real = [n for n in nodes if n >= 0]
-            if len(real) < len(nodes):
-                for n in real:
-                    grounded.add(n)
-            for n in real[1:]:
-                ra, rb = find(real[0]), find(n)
-                if ra != rb:
-                    parent[ra] = rb
+            # parts with electrically separate sides (an optoisolator's LED and transistor, a relay's coil and
+            # contacts) only join up the pins within each side
+            for group in getattr(cls, "pin_groups", None) or (tuple(range(len(nodes))),):
+                gnodes = [nodes[i] for i in group if i < len(nodes)]
+                real = [n for n in gnodes if n >= 0]
+                if len(real) < len(gnodes):
+                    for n in real:
+                        grounded.add(n)
+                for n in real[1:]:
+                    ra, rb = find(real[0]), find(n)
+                    if ra != rb:
+                        parent[ra] = rb
         grounded_roots = {find(n) for n in grounded}
         ref_of_root = {}
         # prefer the negative terminal of a supply as the island's 0 V

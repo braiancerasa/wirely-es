@@ -311,6 +311,14 @@ _PARTS += [
             (_p("light", "Light level", 500.0, "lux", min=0, max=100000),),
             (-25, -30, 45, 60), "A transistor turned on by light instead of a base current. Collector at the top.",
             "light sensor photo", short="Phototransistor"),
+    PartDef("optocoupler", "Optoisolator", "Transistors", "U",
+            (("A", -40, -20), ("K", -40, 20), ("C", 40, -20), ("E", 40, 20)),
+            (_p("model", "Type", "PC817", kind="choice", choices=("PC817", "4N25", "4N35", "TLP521", "6N139"),
+                on_label=True),),
+            (-40, -32, 80, 64), "An LED shining on a phototransistor inside one package: current through A–K "
+            "switches C–E on, with no electrical connection between the two sides. Needs a resistor in series "
+            "with the LED.", "optocoupler opto isolator coupler pc817 4n25 4n35 tlp521 6n139 isolation",
+            short="Optoisolator"),
     PartDef("note", "Text note", "Labels", "T", (),
             (_p("text", "Text", "Note", kind="text"),),
             (-40, -10, 80, 20), "A note on the diagram — for reports, documentation or worksheets. Double-click to change the text.",

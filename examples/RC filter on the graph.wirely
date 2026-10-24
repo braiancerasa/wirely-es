@@ -4,7 +4,7 @@
  "title": "RC filter on the graph",
  "components": [
   {
-   "id": "ec46e620",
+   "id": "90c01c67",
    "kind": "signal_gen",
    "ref": "SG1",
    "x": 0,
@@ -20,7 +20,7 @@
    }
   },
   {
-   "id": "3d2fd900",
+   "id": "47a07ef3",
    "kind": "resistor",
    "ref": "R1",
    "x": 130,
@@ -33,7 +33,7 @@
    }
   },
   {
-   "id": "0a063fde",
+   "id": "bddf4618",
    "kind": "capacitor",
    "ref": "C1",
    "x": 220,
@@ -45,7 +45,7 @@
    }
   },
   {
-   "id": "78c3391e",
+   "id": "e85afc3c",
    "kind": "ground",
    "ref": "GND1",
    "x": 0,
@@ -55,7 +55,7 @@
    "props": {}
   },
   {
-   "id": "14083411",
+   "id": "a8e230a6",
    "kind": "scope_probe",
    "ref": "P1",
    "x": 50,
@@ -67,7 +67,7 @@
    }
   },
   {
-   "id": "021fac0d",
+   "id": "d3055a68",
    "kind": "scope_probe",
    "ref": "P2",
    "x": 220,
@@ -81,7 +81,7 @@
  ],
  "wires": [
   {
-   "id": "57cdad62",
+   "id": "45ca0a1e",
    "points": [
     [
      0,
@@ -98,7 +98,7 @@
    ]
   },
   {
-   "id": "526872e2",
+   "id": "c311a5d5",
    "points": [
     [
      160,
@@ -115,7 +115,7 @@
    ]
   },
   {
-   "id": "50d6871e",
+   "id": "c8293782",
    "points": [
     [
      0,

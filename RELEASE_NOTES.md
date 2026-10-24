@@ -17,9 +17,9 @@ For the workplace, the classroom and the workbench.
 - **Press Play** and it runs: LEDs glow, lamps light, motors spin up and slow under load, relays click, buzzers and speakers make real sound, meters read. Wires are coloured by voltage and current flows along them. Click switches and drag sliders (light, temperature, moisture …) while it runs; hover over any wire for its voltage and current.
 - **Parts that pop:** an LED without a resistor, an overloaded resistor, a transistor hit by a relay's voltage spike — each with a message saying what happened and how to fix it.
 - **Graph (oscilloscope)** and **logic probe**.
-- **Chips and more:** 555 timer, op-amps, logic gates, D flip-flop, 4017 counter, 4511 decoder, 7-segment display, MOSFETs and transistors (many types), relays, inductors, sensors, signal generator with PWM.
-- **19 example circuits**, from an LED and resistor to a 555 doorbell, LED chaser and buck converter.
+- **Chips and more:** 555 timer, op-amps, logic gates, D flip-flop, 4017 counter, 4511 decoder, 7-segment display, optoisolators, MOSFETs and transistors (many types), relays, inductors, sensors, signal generator with PWM.
+- **20 example circuits**, from an LED and resistor to a 555 doorbell, LED chaser, optoisolator and buck converter.
 
 ## Accuracy
 
-Wirely has its own circuit solver (the same method as SPICE). 174 automatic tests check it against textbook formulas — LED current, transistor gain, RC and RL curves, 555 timing, op-amp gain, buck converter output — and against ngspice.
+Wirely has its own circuit solver (the same method as SPICE). 184 automatic tests check it against textbook formulas — LED current, transistor gain, RC and RL curves, 555 timing, op-amp gain, buck converter output — and against ngspice.

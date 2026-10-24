@@ -1,0 +1,258 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Optoisolator",
+ "components": [
+  {
+   "id": "36c73ff7",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "e91fd76c",
+   "kind": "switch",
+   "ref": "S1",
+   "x": 90,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "16da4b5a",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 190,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 1000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "1d9781e7",
+   "kind": "optocoupler",
+   "ref": "U1",
+   "x": 300,
+   "y": 150,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "model": "PC817"
+   }
+  },
+  {
+   "id": "fecefff4",
+   "kind": "battery",
+   "ref": "B2",
+   "x": 600,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "13d23a10",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 470,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 1000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "2c02b78b",
+   "kind": "led",
+   "ref": "LED1",
+   "x": 400,
+   "y": 60,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Green",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "c843366a",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 300,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "525877cb",
+   "kind": "note",
+   "ref": "T1",
+   "x": 300,
+   "y": -60,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Two separate circuits: switch S1 on the left lights LED1 on the right\nthrough the light inside U1 only — no wire joins the two sides."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "e7856cbb",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     60,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "730e5e1e",
+   "points": [
+    [
+     120,
+     0
+    ],
+    [
+     160,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "e3194f2f",
+   "points": [
+    [
+     220,
+     0
+    ],
+    [
+     260,
+     0
+    ],
+    [
+     260,
+     130
+    ]
+   ]
+  },
+  {
+   "id": "4151d6ca",
+   "points": [
+    [
+     260,
+     170
+    ],
+    [
+     260,
+     300
+    ],
+    [
+     0,
+     300
+    ],
+    [
+     0,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "856d5403",
+   "points": [
+    [
+     600,
+     120
+    ],
+    [
+     600,
+     0
+    ],
+    [
+     500,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "e57aa8af",
+   "points": [
+    [
+     440,
+     0
+    ],
+    [
+     400,
+     0
+    ],
+    [
+     400,
+     30
+    ]
+   ]
+  },
+  {
+   "id": "ea2637e6",
+   "points": [
+    [
+     400,
+     90
+    ],
+    [
+     400,
+     130
+    ],
+    [
+     340,
+     130
+    ]
+   ]
+  },
+  {
+   "id": "3ed8eb09",
+   "points": [
+    [
+     340,
+     170
+    ],
+    [
+     340,
+     300
+    ],
+    [
+     600,
+     300
+    ],
+    [
+     600,
+     180
+    ]
+   ]
+  }
+ ]
+}
