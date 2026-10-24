@@ -65,7 +65,7 @@ def test_push_button_only_while_held(win):
     run_for(win, 0.15)
     assert win.scene.live_part(lamp.id)["_glow"] > 0.8
     release(win, (pb.x, pb.y - 5))
-    run_for(win, 0.15)
+    run_for(win, 0.5)               # the filament glows for a moment as it cools, then goes out
     assert win.scene.live_part(lamp.id)["_glow"] == 0.0
     win.a_stop.trigger()
 

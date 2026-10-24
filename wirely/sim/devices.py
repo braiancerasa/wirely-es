@@ -212,12 +212,19 @@ class Resistor(Resistive):
     def resistance(self):
         return self.R
 
+    TAU = 1.0       # how quickly a resistor heats up (s): short surges are fine, lasting overloads are not
+
     def after(self, ctx):
         if self.blown:
             return
-        hot = self.power > self.rating
-        self.warn = "hot" if hot else None
-        if self._overload(self.power > 2 * self.rating, ctx.h, 0.5, self.power > 8 * self.rating):
+        # heat in the resistor, as the power that would hold it at its present temperature
+        if ctx.dc:
+            self.heat = self.power
+        else:
+            self.heat = getattr(self, "heat", 0.0)
+            self.heat += (self.power - self.heat) * (1 - math.exp(-ctx.h / self.TAU))
+        self.warn = "hot" if self.heat > self.rating else None
+        if self.heat > 2 * self.rating or self.power > 1000 * self.rating:
             self.blown = True
             self.event = (f"{self.comp.ref} burnt out — {self.power:.2f} W is far more than its "
                           f"{self.rating:g} W rating.")
@@ -602,26 +609,105 @@ def spike_message(ref, volts, vmax):
             "relay coil, motor or inductor, put a diode across the coil (pointing towards +) to catch the spike.")
 
 
-class Lamp(Resistive):
+class Lamp(Device):
+    """Filament lamp. The tungsten filament's resistance is proportional to its temperature: cold, it's about a
+    twelfth of its hot (rated) resistance, so a lamp takes a big surge of current when first switched on, and
+    its current–voltage graph curves over instead of being a straight line.
+
+    The filament heats up with the power put in and loses heat by radiation (∝ T⁴, Stefan–Boltzmann), so at a
+    steady voltage T ∝ P^¼ and the current goes as V^0.6 — as real lamps measure. It takes a moment to heat up
+    and to cool down (about 50 ms near full brightness)."""
+    nonlinear = True
+    reactive = True
+    COLD = 1 / 12          # cold resistance as a fraction of the hot (rated) resistance
+    TAU = 0.05             # cooling time constant near full brightness (s)
+
     def update_params(self):
         V, P = float(self.prop("voltage")), float(self.prop("power"))
-        self.Prated = P
-        self.R = V * V / P if P > 0 else 100.0
+        self.Vr = max(V, 1e-3)
+        self.Prated = P if P > 0 else 0.36
+        self.R = self.Vr * self.Vr / self.Prated          # hot resistance, at its rated voltage
+        self.Rc = self.R * self.COLD
+        self.Ir = self.Vr / self.R
+        self.Vk = self.Vr * self.COLD ** 2.5                # below this the filament is effectively cold
+        self.Cth = 4 * self.Prated * self.TAU               # heat capacity (in "rated watts" per unit θ)
+        if not hasattr(self, "theta"):
+            self.theta = self.COLD                          # filament temperature as a fraction of its hot one
+            self.current = 0.0
 
-    def resistance(self):
-        return self.R
+    # --- the steady state (filament at the temperature its power gives it): I = Ir·(V/Vr)^0.6
+    def _steady(self, vd):
+        av = abs(vd)
+        if av <= self.Vk:
+            return vd / self.Rc, 1.0 / self.Rc
+        i = self.Ir * (av / self.Vr) ** 0.6
+        return math.copysign(i, vd), 0.6 * i / av
 
-    def after(self, ctx):
+    def hot_resistance(self):
+        return self.R * self.theta                          # R ∝ T
+
+    def radiated(self):
+        """Power the filament is radiating (light and heat), as a fraction of its rating."""
+        c4 = self.COLD ** 4
+        return max(0.0, (self.theta ** 4 - c4) / (1 - c4))
+
+    def stamp(self, S, x, ctx):
+        a, c = self.nodes
         if self.blown:
+            S.g(a, c, 1 / R_OFF)
             return
-        if self._overload(self.power > 1.6 * self.Prated, ctx.h, 0.2, self.power > 4 * self.Prated):
+        if ctx.dc:
+            vd = v(x, a) - v(x, c)
+            i, g = self._steady(vd)
+            S.g(a, c, g)
+            S.i(a, c, i - g * vd)
+        else:
+            S.g(a, c, 1.0 / self.hot_resistance())
+
+    def accept(self, x, ctx):
+        a, c = self.nodes
+        vd = v(x, a) - v(x, c)
+        if self.blown:
+            i = vd / R_OFF
+        elif ctx.dc:
+            i = self._steady(vd)[0]
+        else:
+            i = vd / self.hot_resistance()
+        self.vd, self.current = vd, i
+        self.i_pins = [i, -i]
+        self.power = vd * i
+        if self.blown:
+            self.theta = self.COLD
+            return
+        if ctx.dc:
+            self.theta = max(self.COLD, abs(vd / i) / self.R) if abs(i) > 1e-15 else self.COLD
+        else:
+            # heat the filament through the step in small slices (it changes fast while it's cold)
+            n = max(1, min(400, int(math.ceil(ctx.h / 2e-4))))
+            dt = ctx.h / n
+            v2 = vd * vd
+            th = self.theta
+            c4 = self.COLD ** 4
+            for _ in range(n):
+                p_in = v2 / (self.R * th)
+                p_out = self.Prated * (th ** 4 - c4) / (1 - c4)
+                th = max(self.COLD, th + dt * (p_in - p_out) / self.Cth)
+            self.theta = th
+        h = 0.0 if ctx.dc else ctx.h
+        rad = self.radiated()
+        if self._overload(rad > 1.6, h, 0.2, rad > 4.0):
             self.blown = True
-            self.event = f"{self.comp.ref} blew — its filament can't take {self.power:.1f} W."
+            self.event = f"{self.comp.ref} blew — its filament can't take {rad * self.Prated:.1f} W."
+
+    def after_dc(self):
+        pass
 
     def glow(self):
-        if self.blown or self.Prated <= 0:
+        """How bright it looks: visible light rises very steeply with filament temperature (about T¹⁰), so a
+        lamp on half power looks much dimmer than half, and goes dark quickly as it cools."""
+        if self.blown:
             return 0.0
-        f = (self.power / self.Prated - 0.02) / 0.98       # a filament shows nothing below ~2 % power
+        f = (self.theta ** 10 - 0.003) / 0.997
         return max(0.0, min(1.0, f)) ** 0.5
 
 

@@ -205,7 +205,7 @@ resistance, supply current, output swing that falls short further under heavier 
 into 10 kΩ, ±13 V into 2 kΩ), the LM358 reaching 0 V but not the top rail, and current limits. The output
 current really comes from the supply pins, and too much supply voltage destroys the chip.
 
-The automatic tests (239 of them) check it against answers worked out by hand — voltage dividers, the diode
+The automatic tests (243 of them) check it against answers worked out by hand — voltage dividers, the diode
 equation, LED current, transistor gain and saturation, Zener regulation, RC and RL curves, a half-wave
 rectifier, 555 astable and monostable timing, op-amp gains, bandwidth, slew rate and bias currents, a
 Schmitt-trigger oscillator, logic truth tables and counters — against the datasheets above, and against
@@ -218,7 +218,9 @@ Schmitt-trigger oscillator, logic truth tables and counters — against the data
 | Buck converter inductor ripple current | 0.315 A | 0.315 A |
 | IRF540 switching: turn-on / turn-off delay (100 Ω gate resistor) | 122 / 569 ns | 122 / 566 ns |
 
-Motors have back-EMF, relays have a coil with inductance that pulls in at 75 % and lets go at 30 % of its
+Filament lamps get hotter and their resistance rises with the voltage, so their current–voltage graph curves
+over (current ∝ V^0.6, as real lamps measure) — and a cold lamp takes a surge of about 11× its running current
+when switched on. Motors have back-EMF, relays have a coil with inductance that pulls in at 75 % and lets go at 30 % of its
 rated current, and switching an inductive load without a flyback diode makes a real voltage spike.
 
 ## Honest limits

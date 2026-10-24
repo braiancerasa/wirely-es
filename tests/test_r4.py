@@ -55,11 +55,11 @@ def test_relay_pulls_in_and_lets_go():
     s.run_until(0.05)
     assert not rl.on and lamp.glow() == 0
     s.set_value(comps[1].id, "closed", True)
-    s.run_until(0.1)
+    s.run_until(0.4)                                 # (the filament takes a moment to warm up)
     assert rl.on and lamp.glow() > 0.8
     assert rl.current == pytest.approx((9 - 0.1) / rl.Rc, rel=0.05)    # coil current with the transistor on
     s.set_value(comps[1].id, "closed", False)
-    s.run_until(0.15)
+    s.run_until(0.8)                                 # (… and glows for a moment as it cools)
     assert not rl.on and lamp.glow() == 0
     assert not s.device(comps[4].id).blown          # the diode protected the transistor
     assert rl.clicks == 2

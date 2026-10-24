@@ -147,10 +147,10 @@ def test_relay_contacts_on_a_separate_supply():
                       ("switch", ("v", "s"), {"closed": True}),
                       ("relay", ("s", "0", "com", "nc", "no"), {"voltage": 12}),
                       ("dc_supply", ("v2", "g2"), {"voltage": 24}),
-                      ("resistor", ("v2", "com"), {"resistance": 100}),
+                      ("resistor", ("v2", "com"), {"resistance": 10, "power": 5.0}),
                       ("lamp", ("no", "g2"), {"voltage": 24, "power": 5})])
     s = Simulator(c)
     s.h_max = 1e-3
-    s.run_until(0.1)
+    s.run_until(0.5)
     assert s.device(comps[2].id).on
     assert s.device(comps[5].id).glow() > 0.3

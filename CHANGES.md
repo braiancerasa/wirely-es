@@ -1,5 +1,12 @@
 # Changes
 
+## 1.2.0 — real filament lamps
+- **Filament lamps behave like real ones:** the filament's resistance rises as it heats up, so the current–voltage
+  graph curves (I ∝ V^0.6, as measured on real lamps — the GCSE/A-level required practical), a cold lamp takes a
+  surge of about 11× its running current at switch-on, and it takes a moment to brighten and to fade.
+- **Resistors heat up over about a second** before burning out, so a brief surge (like a lamp's switch-on) is fine
+  but a lasting overload still burns them out.
+
 ## 1.1.0 — more accurate MOSFETs and op-amps
 - **MOSFETs fitted to their datasheets:** threshold voltage and on-resistance at the datasheet's gate voltages,
   mobility falling at high gate voltage, the body diode, internal gate resistance, and voltage-dependent gate and
