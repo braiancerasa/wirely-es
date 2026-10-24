@@ -289,7 +289,6 @@ shot("hover_reading.png")
 w.a_stop.trigger()
 
 example("Buck converter")
-w.graph.tbox.setCurrentText("1 ms/div")
 play()
 run_for(9.0)
 shot("buck_converter.png")

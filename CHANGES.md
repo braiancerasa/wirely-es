@@ -4,6 +4,9 @@
 Everything below, together: the circuit editor (r1), live simulation (r2), chips, logic and the graph (r3),
 sound, relays, motors and sensors (r4), and the Wirely name, icons and downloads (r5).
 
+- The graph's Auto time setting now follows the fastest repeating signal on any probe (before, it only
+  looked at probe A — so a buck converter, where A is smooth DC, showed a 5-second sweep of a 1 kHz signal).
+
 ## r5 — Wirely (became 1.0.0)
 - **New name: Wirely** (was Sparkbench). Circuits are now `.wirely` files; old `.spark` files still open.
 - **New logo** (a W drawn as a wire, with current flowing along it) and a **file icon** for `.wirely` circuits.

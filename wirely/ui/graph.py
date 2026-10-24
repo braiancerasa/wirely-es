@@ -136,14 +136,17 @@ class GraphPanel(QWidget):
         tdiv = TIMEBASES[self.tbox.currentIndex()][1]
         if tdiv is not None:
             return tdiv
-        # auto: about three cycles of channel A (or the first channel) on screen, else 0.5 s per square
+        # auto: about three cycles of the fastest repeating signal on any probe, else 0.5 s per square.
+        # (Looking at every probe matters: in a buck converter probe A is smooth DC and only B repeats.)
+        fastest = None
         for ch in sorted(self.traces):
             ts, vs = self.traces[ch].window(self.t_now - 10.0, self.t_now)
             f = frequency(ts, vs)
-            if f:
-                want = 3.0 / f / DIVS_X
-                return min(NICE, key=lambda n: abs(n - want) if n >= want * 0.6 else 1e9)
-            break
+            if f and (fastest is None or f > fastest):
+                fastest = f
+        if fastest:
+            want = 3.0 / fastest / DIVS_X
+            return min(NICE, key=lambda n: abs(n - want) if n >= want * 0.6 else 1e9)
         return 0.5
 
     def volt_range(self, t0, t1):

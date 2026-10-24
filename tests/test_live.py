@@ -198,3 +198,26 @@ def test_hovering_a_wire_shows_voltage_and_current(win):
     assert lines[1] == f"Current: {__import__('wirely.model.units', fromlist=['fmt']).fmt(abs(i_led), 'A')} ↓"
     win.a_stop.trigger()
     assert win.scene.hover_info is None
+
+
+def test_graph_auto_timebase_follows_the_fastest_probe(qapp=None):
+    """Buck converter case: probe A is smooth DC, probe B switches at 1 kHz — Auto must zoom in on B."""
+    import math
+
+    from PySide6.QtWidgets import QApplication
+
+    from wirely.ui.graph import GraphPanel
+    QApplication.instance() or QApplication([])
+    g = GraphPanel()
+    samples = []
+    t = 0.0
+    while t < 0.05:
+        a = 5.9 * (1 - math.exp(-t / 0.005))
+        b = 12.0 if (t * 1000) % 1.0 < 0.5 else -0.4
+        samples.append((t, {"A": a, "B": b}))
+        t += 2e-5
+    g.add_samples(samples, t)
+    assert g.timebase() <= 1e-3          # about three 1 ms cycles across the screen
+    only_dc = GraphPanel()
+    only_dc.add_samples([(s[0], {"A": s[1]["A"]}) for s in samples], t)
+    assert only_dc.timebase() == 0.5     # nothing repeats: the usual slow sweep
