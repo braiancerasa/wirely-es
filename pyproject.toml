@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wirely"
+version = "1.0.0"
+description = "Free circuit design and simulation app: draw a circuit, press play, watch it work"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "Richard Willmott" }]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["PySide6>=6.5", "numpy>=1.24"]
+
+[project.scripts]
+wirely = "wirely.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["wirely*"]
+
+[tool.setuptools.package-data]
+wirely = ["assets/*"]

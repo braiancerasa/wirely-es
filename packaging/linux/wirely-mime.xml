@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Teaches Linux desktops that *.wirely files are Wirely circuits (packaging/linux/install-desktop.sh) -->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-wirely">
+    <comment>Wirely circuit</comment>
+    <icon name="application-x-wirely"/>
+    <glob pattern="*.wirely"/>
+    <glob pattern="*.spark"/>
+  </mime-type>
+</mime-info>

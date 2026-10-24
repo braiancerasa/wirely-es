@@ -1,0 +1,136 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Motor and load",
+ "components": [
+  {
+   "id": "d3de0e69",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 6
+   }
+  },
+  {
+   "id": "de6b5ad8",
+   "kind": "switch",
+   "ref": "S1",
+   "x": 90,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "0bac4aa7",
+   "kind": "ammeter",
+   "ref": "AM1",
+   "x": 190,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "fb881b60",
+   "kind": "motor",
+   "ref": "M1",
+   "x": 280,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 6,
+    "load": "None"
+   }
+  },
+  {
+   "id": "5c5c305f",
+   "kind": "note",
+   "ref": "T1",
+   "x": 140,
+   "y": 350,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Switch on: the motor takes a big current to start,\nthen less. Double-click M1 to change its load."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "5e045142",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     60,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "f8ec0448",
+   "points": [
+    [
+     120,
+     0
+    ],
+    [
+     160,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "4108a6ac",
+   "points": [
+    [
+     220,
+     0
+    ],
+    [
+     280,
+     0
+    ],
+    [
+     280,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "ceb6fde4",
+   "points": [
+    [
+     280,
+     180
+    ],
+    [
+     280,
+     300
+    ],
+    [
+     0,
+     300
+    ],
+    [
+     0,
+     180
+    ]
+   ]
+  }
+ ]
+}

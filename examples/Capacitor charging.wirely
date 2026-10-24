@@ -1,0 +1,232 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Capacitor charging",
+ "components": [
+  {
+   "id": "f0c1d8b1",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 100,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "cb48fd96",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 60,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 10000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "e198a506",
+   "kind": "spdt",
+   "ref": "S1",
+   "x": 150,
+   "y": 10,
+   "rot": 0,
+   "flip": true,
+   "props": {
+    "position": "A"
+   }
+  },
+  {
+   "id": "60b7cc2c",
+   "kind": "electrolytic",
+   "ref": "C1",
+   "x": 260,
+   "y": 100,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "capacitance": 0.00047,
+    "max_voltage": 25.0
+   }
+  },
+  {
+   "id": "1f6cacf4",
+   "kind": "voltmeter",
+   "ref": "VM1",
+   "x": 340,
+   "y": 100,
+   "rot": 1,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "c5aefbaa",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 120,
+   "y": 60,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 1000,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "162c74e2",
+   "kind": "led",
+   "ref": "LED1",
+   "x": 120,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Green",
+    "max_current": 0.03
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "729f50f4",
+   "points": [
+    [
+     0,
+     70
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     30,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "f9484f6c",
+   "points": [
+    [
+     90,
+     0
+    ],
+    [
+     120,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "6fd3ab86",
+   "points": [
+    [
+     180,
+     10
+    ],
+    [
+     260,
+     10
+    ],
+    [
+     260,
+     80
+    ]
+   ]
+  },
+  {
+   "id": "c492eaad",
+   "points": [
+    [
+     260,
+     10
+    ],
+    [
+     340,
+     10
+    ],
+    [
+     340,
+     70
+    ]
+   ]
+  },
+  {
+   "id": "a4a11f4b",
+   "points": [
+    [
+     120,
+     20
+    ],
+    [
+     120,
+     30
+    ]
+   ]
+  },
+  {
+   "id": "bdbfe272",
+   "points": [
+    [
+     120,
+     90
+    ],
+    [
+     120,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "a4ad5aff",
+   "points": [
+    [
+     0,
+     130
+    ],
+    [
+     0,
+     220
+    ],
+    [
+     340,
+     220
+    ],
+    [
+     340,
+     130
+    ]
+   ]
+  },
+  {
+   "id": "83921a88",
+   "points": [
+    [
+     260,
+     120
+    ],
+    [
+     260,
+     220
+    ]
+   ]
+  },
+  {
+   "id": "532223ee",
+   "points": [
+    [
+     120,
+     180
+    ],
+    [
+     120,
+     220
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+#!/bin/sh
+# Starts Wirely from inside the AppImage.
+HERE="$(dirname "$(readlink -f "$0")")"
+if [ -z "${QT_QPA_PLATFORM:-}" ]; then
+  if [ -n "${WAYLAND_DISPLAY:-}" ] && [ -z "${DISPLAY:-}" ]; then
+    export QT_QPA_PLATFORM=wayland
+  fi
+fi
+exec "$HERE/usr/lib/wirely/Wirely" "$@"

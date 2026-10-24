@@ -1,0 +1,165 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Voltage divider",
+ "components": [
+  {
+   "id": "05333868",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 100,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "423e2716",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 120,
+   "y": 40,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 10000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "b13f62bc",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 120,
+   "y": 160,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 4700.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "af145f84",
+   "kind": "voltmeter",
+   "ref": "VM1",
+   "x": 220,
+   "y": 160,
+   "rot": 1,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "b6097f12",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 120,
+   "y": 240,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  }
+ ],
+ "wires": [
+  {
+   "id": "9d874b5c",
+   "points": [
+    [
+     0,
+     70
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     120,
+     0
+    ],
+    [
+     120,
+     10
+    ]
+   ]
+  },
+  {
+   "id": "8e6eb201",
+   "points": [
+    [
+     120,
+     70
+    ],
+    [
+     120,
+     130
+    ]
+   ]
+  },
+  {
+   "id": "c30a42b1",
+   "points": [
+    [
+     120,
+     100
+    ],
+    [
+     220,
+     100
+    ],
+    [
+     220,
+     130
+    ]
+   ]
+  },
+  {
+   "id": "38f3c641",
+   "points": [
+    [
+     120,
+     190
+    ],
+    [
+     120,
+     240
+    ]
+   ]
+  },
+  {
+   "id": "6458fb2f",
+   "points": [
+    [
+     220,
+     190
+    ],
+    [
+     220,
+     220
+    ],
+    [
+     120,
+     220
+    ]
+   ]
+  },
+  {
+   "id": "5d87ac53",
+   "points": [
+    [
+     0,
+     130
+    ],
+    [
+     0,
+     220
+    ],
+    [
+     120,
+     220
+    ]
+   ]
+  }
+ ]
+}

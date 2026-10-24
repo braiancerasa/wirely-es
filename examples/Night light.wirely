@@ -1,0 +1,197 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Night light",
+ "components": [
+  {
+   "id": "6c6d7547",
+   "kind": "rail_pos",
+   "ref": "V1",
+   "x": 0,
+   "y": -60,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "edf68a53",
+   "kind": "var_resistor",
+   "ref": "VR1",
+   "x": 0,
+   "y": 60,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 47000.0,
+    "setting": 50.0
+   }
+  },
+  {
+   "id": "670f2914",
+   "kind": "ldr",
+   "ref": "LDR1",
+   "x": 0,
+   "y": 180,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "light": 500.0
+   }
+  },
+  {
+   "id": "35f964e7",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 90,
+   "y": 120,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 4700.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "c5b94bcc",
+   "kind": "npn",
+   "ref": "Q1",
+   "x": 150,
+   "y": 120,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "model": "BC548"
+   }
+  },
+  {
+   "id": "1baf7f9a",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 160,
+   "y": -20,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "373afdda",
+   "kind": "led",
+   "ref": "LED1",
+   "x": 160,
+   "y": 60,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Yellow",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "1b72d73a",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 260,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  }
+ ],
+ "wires": [
+  {
+   "id": "a5932bf0",
+   "points": [
+    [
+     0,
+     -60
+    ],
+    [
+     0,
+     30
+    ]
+   ]
+  },
+  {
+   "id": "4e27c7b4",
+   "points": [
+    [
+     0,
+     -60
+    ],
+    [
+     160,
+     -60
+    ],
+    [
+     160,
+     -50
+    ]
+   ]
+  },
+  {
+   "id": "9d5c0958",
+   "points": [
+    [
+     160,
+     10
+    ],
+    [
+     160,
+     30
+    ]
+   ]
+  },
+  {
+   "id": "151d78c8",
+   "points": [
+    [
+     0,
+     90
+    ],
+    [
+     0,
+     150
+    ]
+   ]
+  },
+  {
+   "id": "c8c8a1ed",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     60,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "600e5ffb",
+   "points": [
+    [
+     0,
+     210
+    ],
+    [
+     0,
+     260
+    ],
+    [
+     160,
+     260
+    ],
+    [
+     160,
+     150
+    ]
+   ]
+  }
+ ]
+}

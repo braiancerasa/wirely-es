@@ -1,0 +1,18 @@
+Wirely is licensed under the GNU General Public License v3 (see LICENSE).
+
+It uses these libraries, which are installed separately (not included in this folder):
+
+- Qt 6 and PySide6 (Qt for Python) — The Qt Company — GNU LGPL v3.
+  https://www.qt.io/  https://doc.qt.io/qtforpython/
+
+- NumPy — NumPy developers — BSD 3-clause licence.  https://numpy.org/
+
+The downloadable apps are built with PyInstaller (GPL with a bundling exception), the Windows installer with
+Inno Setup, and the Linux AppImage with appimagetool. These tools are not part of Wirely itself.
+
+The circuit solver is Wirely's own. The automatic tests compare it with ngspice
+(https://ngspice.sourceforge.io/, modified BSD licence) when ngspice happens to be installed;
+ngspice is not part of Wirely and isn't needed to run it.
+
+Wirely is an independent program. It is not made by, connected to or endorsed by New Wave Concepts or
+Circuit Wizard. All of Wirely's icons, symbols and artwork were drawn for Wirely.

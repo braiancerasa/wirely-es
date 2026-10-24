@@ -1,0 +1,212 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Rain alarm (moisture sensor)",
+ "components": [
+  {
+   "id": "d2b0766e",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "e2efed52",
+   "kind": "moisture",
+   "ref": "MS1",
+   "x": 120,
+   "y": 70,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "moisture": 0.0
+   }
+  },
+  {
+   "id": "3062ab59",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 120,
+   "y": 230,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 47000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "cd668f75",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 180,
+   "y": 150,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 4700.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "5bc48736",
+   "kind": "npn",
+   "ref": "Q1",
+   "x": 240,
+   "y": 150,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "model": "BC548"
+   }
+  },
+  {
+   "id": "91aa6ee1",
+   "kind": "buzzer",
+   "ref": "BZ1",
+   "x": 250,
+   "y": 60,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 6.0
+   }
+  },
+  {
+   "id": "d4656d5d",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 300,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "50cde46d",
+   "kind": "note",
+   "ref": "T1",
+   "x": 130,
+   "y": 350,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Drag the moisture slider: when the probes get wet the buzzer sounds."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "19647cae",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     250,
+     0
+    ],
+    [
+     250,
+     30
+    ]
+   ]
+  },
+  {
+   "id": "a76bc731",
+   "points": [
+    [
+     120,
+     40
+    ],
+    [
+     120,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "0b0847c8",
+   "points": [
+    [
+     120,
+     100
+    ],
+    [
+     120,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "28c4ef66",
+   "points": [
+    [
+     120,
+     150
+    ],
+    [
+     150,
+     150
+    ]
+   ]
+  },
+  {
+   "id": "302431aa",
+   "points": [
+    [
+     250,
+     90
+    ],
+    [
+     250,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "920a28b7",
+   "points": [
+    [
+     0,
+     180
+    ],
+    [
+     0,
+     300
+    ],
+    [
+     250,
+     300
+    ],
+    [
+     250,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "cea8a9a5",
+   "points": [
+    [
+     120,
+     260
+    ],
+    [
+     120,
+     300
+    ]
+   ]
+  }
+ ]
+}

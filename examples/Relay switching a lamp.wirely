@@ -1,0 +1,331 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Relay switching a lamp",
+ "components": [
+  {
+   "id": "e8e66ab2",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "c2321afe",
+   "kind": "switch",
+   "ref": "S1",
+   "x": 100,
+   "y": 70,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "c27a784c",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 150,
+   "y": 150,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 4700.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "ab18d7c1",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 100,
+   "y": 230,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 47000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "48148123",
+   "kind": "npn",
+   "ref": "Q1",
+   "x": 210,
+   "y": 150,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "model": "BC548"
+   }
+  },
+  {
+   "id": "8968c82d",
+   "kind": "relay",
+   "ref": "RL1",
+   "x": 240,
+   "y": 60,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "63931a0f",
+   "kind": "diode",
+   "ref": "D1",
+   "x": 180,
+   "y": 60,
+   "rot": 3,
+   "flip": false,
+   "props": {
+    "model": "1N4148"
+   }
+  },
+  {
+   "id": "b3900c61",
+   "kind": "lamp",
+   "ref": "L1",
+   "x": 400,
+   "y": 180,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9,
+    "power": 0.5
+   }
+  },
+  {
+   "id": "6e124452",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 300,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "07ff6922",
+   "kind": "note",
+   "ref": "T1",
+   "x": 330,
+   "y": -40,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "The diode across the relay coil protects Q1.\nDelete it and see what happens!"
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "300eef40",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     330,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "fa2be41a",
+   "points": [
+    [
+     100,
+     40
+    ],
+    [
+     100,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "133a899c",
+   "points": [
+    [
+     100,
+     100
+    ],
+    [
+     100,
+     150
+    ],
+    [
+     120,
+     150
+    ]
+   ]
+  },
+  {
+   "id": "ed575b33",
+   "points": [
+    [
+     100,
+     150
+    ],
+    [
+     100,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "6409934b",
+   "points": [
+    [
+     220,
+     30
+    ],
+    [
+     220,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "f5159323",
+   "points": [
+    [
+     180,
+     30
+    ],
+    [
+     180,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "c843d22f",
+   "points": [
+    [
+     180,
+     90
+    ],
+    [
+     220,
+     90
+    ]
+   ]
+  },
+  {
+   "id": "9c5be88e",
+   "points": [
+    [
+     220,
+     90
+    ],
+    [
+     220,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "5df606c2",
+   "points": [
+    [
+     260,
+     90
+    ],
+    [
+     260,
+     100
+    ],
+    [
+     330,
+     100
+    ],
+    [
+     330,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "fe786d93",
+   "points": [
+    [
+     270,
+     30
+    ],
+    [
+     270,
+     20
+    ],
+    [
+     400,
+     20
+    ],
+    [
+     400,
+     150
+    ]
+   ]
+  },
+  {
+   "id": "66956f71",
+   "points": [
+    [
+     0,
+     180
+    ],
+    [
+     0,
+     300
+    ],
+    [
+     400,
+     300
+    ],
+    [
+     400,
+     210
+    ]
+   ]
+  },
+  {
+   "id": "c7ebcbd3",
+   "points": [
+    [
+     100,
+     260
+    ],
+    [
+     100,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "7804bcbc",
+   "points": [
+    [
+     220,
+     180
+    ],
+    [
+     220,
+     300
+    ]
+   ]
+  }
+ ]
+}

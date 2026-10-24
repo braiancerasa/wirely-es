@@ -1,0 +1,381 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "555 doorbell",
+ "components": [
+  {
+   "id": "adadb44c",
+   "kind": "battery",
+   "ref": "B1",
+   "x": -80,
+   "y": 200,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "d53c8760",
+   "kind": "push_make",
+   "ref": "S1",
+   "x": -80,
+   "y": 100,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "pressed": false
+   }
+  },
+  {
+   "id": "72a23e69",
+   "kind": "timer555",
+   "ref": "IC1",
+   "x": 300,
+   "y": 200,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "dcbc327f",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 160,
+   "y": 100,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 1000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "70bfdc24",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 160,
+   "y": 210,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 10000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "1d9dbaaa",
+   "kind": "capacitor",
+   "ref": "C1",
+   "x": 200,
+   "y": 300,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "capacitance": 1e-07
+   }
+  },
+  {
+   "id": "a4548b34",
+   "kind": "capacitor",
+   "ref": "C2",
+   "x": 320,
+   "y": 300,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "capacitance": 1e-08
+   }
+  },
+  {
+   "id": "feb74b2f",
+   "kind": "electrolytic",
+   "ref": "C3",
+   "x": 410,
+   "y": 200,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "capacitance": 1e-05,
+    "max_voltage": 25.0
+   }
+  },
+  {
+   "id": "234f50db",
+   "kind": "speaker",
+   "ref": "LS1",
+   "x": 480,
+   "y": 280,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "impedance": 8.0
+   }
+  },
+  {
+   "id": "560c5332",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": -80,
+   "y": 360,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "35df8dd0",
+   "kind": "note",
+   "ref": "T1",
+   "x": 200,
+   "y": -10,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Press the button (and turn your sound up) — about 690 Hz."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "c99fd405",
+   "points": [
+    [
+     320,
+     140
+    ],
+    [
+     320,
+     60
+    ]
+   ]
+  },
+  {
+   "id": "88a5f7c9",
+   "points": [
+    [
+     280,
+     140
+    ],
+    [
+     280,
+     60
+    ]
+   ]
+  },
+  {
+   "id": "e0359973",
+   "points": [
+    [
+     160,
+     70
+    ],
+    [
+     160,
+     60
+    ]
+   ]
+  },
+  {
+   "id": "8c070908",
+   "points": [
+    [
+     160,
+     130
+    ],
+    [
+     160,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "2b432378",
+   "points": [
+    [
+     240,
+     180
+    ],
+    [
+     160,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "b389f06b",
+   "points": [
+    [
+     240,
+     200
+    ],
+    [
+     200,
+     200
+    ],
+    [
+     200,
+     280
+    ]
+   ]
+  },
+  {
+   "id": "8c52eee2",
+   "points": [
+    [
+     240,
+     220
+    ],
+    [
+     200,
+     220
+    ]
+   ]
+  },
+  {
+   "id": "418b1e06",
+   "points": [
+    [
+     160,
+     240
+    ],
+    [
+     200,
+     240
+    ]
+   ]
+  },
+  {
+   "id": "07520276",
+   "points": [
+    [
+     320,
+     260
+    ],
+    [
+     320,
+     280
+    ]
+   ]
+  },
+  {
+   "id": "e65354cd",
+   "points": [
+    [
+     320,
+     320
+    ],
+    [
+     320,
+     360
+    ]
+   ]
+  },
+  {
+   "id": "62227184",
+   "points": [
+    [
+     280,
+     260
+    ],
+    [
+     280,
+     360
+    ]
+   ]
+  },
+  {
+   "id": "c2bb6737",
+   "points": [
+    [
+     200,
+     320
+    ],
+    [
+     200,
+     360
+    ]
+   ]
+  },
+  {
+   "id": "dcc08738",
+   "points": [
+    [
+     -80,
+     70
+    ],
+    [
+     -80,
+     60
+    ],
+    [
+     320,
+     60
+    ]
+   ]
+  },
+  {
+   "id": "7d18014a",
+   "points": [
+    [
+     -80,
+     130
+    ],
+    [
+     -80,
+     170
+    ]
+   ]
+  },
+  {
+   "id": "2d43e5f6",
+   "points": [
+    [
+     360,
+     200
+    ],
+    [
+     390,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "c594e0dc",
+   "points": [
+    [
+     430,
+     200
+    ],
+    [
+     480,
+     200
+    ],
+    [
+     480,
+     250
+    ]
+   ]
+  },
+  {
+   "id": "d4b87a07",
+   "points": [
+    [
+     -80,
+     230
+    ],
+    [
+     -80,
+     360
+    ],
+    [
+     480,
+     360
+    ],
+    [
+     480,
+     310
+    ]
+   ]
+  }
+ ]
+}
