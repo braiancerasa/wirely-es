@@ -1,8 +1,13 @@
 #!/bin/sh
 # Starts Wirely from inside the AppImage.
 HERE="$(dirname "$(readlink -f "$0")")"
+# Use X11 when it's there (on Wayland desktops that's XWayland, which every mainstream desktop provides and which
+# gives normal title bars everywhere); native Wayland only when there's no X server at all.
+# Set QT_QPA_PLATFORM yourself to override (e.g. QT_QPA_PLATFORM=wayland).
 if [ -z "${QT_QPA_PLATFORM:-}" ]; then
-  if [ -n "${WAYLAND_DISPLAY:-}" ] && [ -z "${DISPLAY:-}" ]; then
+  if [ -n "${DISPLAY:-}" ]; then
+    export QT_QPA_PLATFORM=xcb
+  elif [ -n "${WAYLAND_DISPLAY:-}" ]; then
     export QT_QPA_PLATFORM=wayland
   fi
 fi

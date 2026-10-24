@@ -90,6 +90,10 @@ class MosParams:
         self.bd_is = (self.idmax / 6) / math.exp(0.72 / (self.bd_n * VT))
         k = (1 + self.vcap / CAP_VJ) ** CAP_M          # datasheet capacitances are measured at vcap
         self.rg = 2.0 if self.idmax >= 1 else 10.0      # internal gate resistance (typical datasheet values)
+        # avalanche: it breaks down a little above its rating, and can absorb this much energy (J) doing so —
+        # power MOSFETs are rated for it (IRF540: about 0.2 J); small-signal ones much less
+        self.bv = 1.15 * self.vdss
+        self.eas = (0.8e-4 if self.idmax >= 1 else 0.8e-5) * self.idmax * self.vdss
         self.cgs = self.ciss - self.crss
         self.cgd0 = self.crss * k
         self.cds0 = max(self.coss - self.crss, 0.0) * k
@@ -211,6 +215,7 @@ class MOSFET(Device):
         self.vgs_acc = self.vds_acc = self.vbd_acc = 0.0
         self.vgs_last = self.vds_last = self.vbd_last = 0.0
         self.id = 0.0
+        self._e_av = self._v_av = 0.0
 
     def begin_iter(self):
         self.vgs_last, self.vds_last, self.vbd_last = self.vgs_acc, self.vds_acc, self.vbd_acc
@@ -252,8 +257,20 @@ class MOSFET(Device):
         return i0 * lam, di_dvov * dvov * lam, di_dvds * lam + i0 * self.lam
 
     def _bd(self, vf):
+        """Body diode current and slope; vf < −BV is avalanche breakdown (conducts backwards)."""
         e = sexp(vf / self.bd_nvt)
-        return self.P.bd_is * (e - 1.0) + GMIN * vf, self.P.bd_is * e / self.bd_nvt + GMIN
+        i = self.P.bd_is * (e - 1.0) + GMIN * vf
+        g = self.P.bd_is * e / self.bd_nvt + GMIN
+        u = -(vf + self.P.bv) / VT
+        if u > -40:
+            eb = sexp(u)
+            i -= 1e-3 * eb
+            g += 1e-3 * eb / VT
+        return i, g
+
+    def _avalanche(self, vf):
+        u = -(vf + self.P.bv) / VT
+        return 1e-3 * sexp(u) if u > -40 else 0.0
 
     def _cap_nodes(self):
         """(capacitor, anode node, cathode node) — anode/cathode as for its junction."""
@@ -293,6 +310,8 @@ class MOSFET(Device):
         an, ca = (s, dp) if p > 0 else (dp, s)
         vf = v(x, an) - v(x, ca)
         vl = pnjlim(vf, self.vbd_last, self.bd_nvt, self.bd_vcrit)
+        if vf < -self.P.bv:      # limit in the breakdown direction too
+            vl = -self.P.bv - pnjlim(-vf - self.P.bv, -self.vbd_last - self.P.bv, VT, 0.6)
         if abs(vl - vf) > 1e-9:
             ctx.limited = True
         self.vbd_last = vl
@@ -335,6 +354,20 @@ class MOSFET(Device):
             self.blown = True
             self.event = spike_message(self.comp.ref, abs(vd - vs), vmax)
             return
+        # avalanche breakdown: add up the energy it absorbs while it lasts
+        i_av = self._avalanche(self.vbd_acc)
+        if i_av > 1e-3:
+            self._e_av += i_av * abs(vdp - vs) * ctx.h
+            self._v_av = max(self._v_av, abs(vd - vs))
+            if self._e_av > self.P.eas:
+                self.blown = True
+                self.event = (f"{self.comp.ref} was destroyed — it's rated for {vmax:.0f} V, but the circuit pushed "
+                              f"it past that: it broke down at {self._v_av:.0f} V and overheated. Use a higher-voltage "
+                              "MOSFET, or if it switches a coil or motor, put a diode across the coil to catch the "
+                              "spike.")
+                return
+        else:
+            self._e_av = self._v_av = 0.0
         bad = abs(self.id) > 1.5 * self.idmax or self.power > 1.5 * self.pmax
         self.warn = "over" if (abs(self.id) > self.idmax or self.power > self.pmax) else None
         if self._overload(bad, ctx.h, 0.2):

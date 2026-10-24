@@ -1,11 +1,11 @@
 ; Inno Setup script for the Wirely installer. build_exe.bat and the GitHub build run it automatically;
 ; or open it in Inno Setup and press Compile. Needs dist\Wirely (from PyInstaller) first.
-; The version comes from the command line (ISCC /DAppVersion=1.0.0 /DAppRevision=1.0.0); these are fallbacks.
+; The version comes from the command line (ISCC /DAppVersion=1.1.0 /DAppRevision=1.1.0); these are fallbacks.
 #ifndef AppVersion
-  #define AppVersion "1.0.0"
+  #define AppVersion "1.1.0"
 #endif
 #ifndef AppRevision
-  #define AppRevision "1.0.0"
+  #define AppRevision "1.1.0"
 #endif
 #define AppName "Wirely"
 
@@ -36,6 +36,10 @@ ChangesAssociations=yes
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Shortcuts:"
 Name: "assoc"; Description: "Open .wirely circuit files with Wirely"; GroupDescription: "Files:"
+
+[InstallDelete]
+; installing over an older version: clear out its libraries first, so no stale files are left behind
+Type: filesandordirs; Name: "{app}\_internal"
 
 [Files]
 Source: "..\dist\Wirely\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion

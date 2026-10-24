@@ -147,7 +147,9 @@ Like the real parts, things fail when you push them too far — and Wirely tells
 - an LED straight across a battery (too much current — add a resistor),
 - a resistor carrying more than its power rating,
 - an electrolytic capacitor connected the wrong way round,
-- a transistor or MOSFET switching a relay coil or motor without a flyback diode (the voltage spike kills it),
+- a transistor switching a relay coil without a flyback diode (the voltage spike kills it — a power MOSFET can
+  absorb a small spike by breaking down briefly, as the real ones are rated to, but a small one can't),
+- a MOSFET with more voltage across it than it's rated for, or a motor on far too much voltage,
 - a fuse blowing, or a supply short-circuited.
 
 ### Logic and chips
@@ -203,7 +205,7 @@ resistance, supply current, output swing that falls short further under heavier 
 into 10 kΩ, ±13 V into 2 kΩ), the LM358 reaching 0 V but not the top rail, and current limits. The output
 current really comes from the supply pins, and too much supply voltage destroys the chip.
 
-The automatic tests (233 of them) check it against answers worked out by hand — voltage dividers, the diode
+The automatic tests (239 of them) check it against answers worked out by hand — voltage dividers, the diode
 equation, LED current, transistor gain and saturation, Zener regulation, RC and RL curves, a half-wave
 rectifier, 555 astable and monostable timing, op-amp gains, bandwidth, slew rate and bias currents, a
 Schmitt-trigger oscillator, logic truth tables and counters — against the datasheets above, and against

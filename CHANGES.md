@@ -9,6 +9,10 @@
   output swing that depends on the load, separate source/sink limits, and the LM358 swinging to 0 V but not to
   its top rail. Output current is drawn through the supply pins, and too much supply voltage destroys the chip.
 - Diodes ride out short current surges (as real ones do) instead of popping on a nanosecond spike.
+- **MOSFETs break down above their voltage rating** (avalanche, at about 15 % over): a short spike is absorbed up to
+  the part's avalanche energy rating (power MOSFETs survive a relay coil's spike; a 2N7000 doesn't), but a supply
+  above the rating destroys it, with a message saying why.
+- **Motors burn out** on far more than their rated voltage (a 9 V motor on 150 V spins much too fast and overheats).
 - The simulator is about twice as fast on every circuit (and much faster with MOSFETs).
 - The installer clears out the old version's library files when updating.
 - Linux: prefers X11/XWayland and falls back to Wayland; the automatic build now tests both.

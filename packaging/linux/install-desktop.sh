@@ -1,6 +1,6 @@
 #!/bin/bash
 # Adds Wirely to your Linux desktop's app menu and makes .wirely files open in it, with their own icon.
-#   bash packaging/linux/install-desktop.sh /path/to/Wirely-1.0.0-x86_64.AppImage
+#   bash packaging/linux/install-desktop.sh /path/to/Wirely-<version>-x86_64.AppImage
 # (for your user only — nothing needs sudo). Run it again after moving the AppImage.
 set -euo pipefail
 APPIMAGE="$(readlink -f "${1:?give the path to the Wirely AppImage}")"

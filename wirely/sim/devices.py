@@ -669,6 +669,9 @@ class Motor(Device):
 
     def stamp(self, S, x, ctx):
         a, c = self.nodes
+        if self.blown:
+            S.g(a, c, 1 / R_OFF)
+            return
         G = 1.0 / self.R
         S.g(a, c, G)
         S.i(c, a, G * self.k * self.w)          # the back-EMF pushes against the supply
@@ -677,6 +680,13 @@ class Motor(Device):
         a, c = self.nodes
         vd = v(x, a) - v(x, c)
         h = 0.0 if ctx.dc else ctx.h
+        if self.blown:
+            self.w = self.speed = self.rpm = 0.0
+            self.current = vd / R_OFF
+            self.vd = vd
+            self.i_pins = [self.current, -self.current]
+            self.power = 0.0
+            return
         # rotor: J dω/dt = k·i − b·ω − load, with i = (v − kω)/R (solved implicitly: always stable)
         drive = self.k * vd / self.R
         if abs(self.w) < 1e-3 and abs(drive) <= self.TL:
@@ -694,6 +704,11 @@ class Motor(Device):
         self.rpm = self.w * 60 / (2 * math.pi)
         self.warn = "fast" if abs(self.speed) > 1.5 else ("stalled" if self.TL > 0 and self.w == 0 and
                                                            abs(i) > 0.5 * self.I_STALL else None)
+        # too much voltage: it spins far too fast and the brushes and windings overheat
+        if self._overload(abs(vd) > 2.0 * self.V, h, 1.0, abs(vd) > 6.0 * self.V and self._over > 0.05):
+            self.blown = True
+            self.event = (f"{self.comp.ref} burnt out — {abs(vd):.0f} V is far too much for a {self.V:g} V motor: "
+                          "it spun much too fast and overheated.")
 
 
 class Voltmeter(Resistive):
