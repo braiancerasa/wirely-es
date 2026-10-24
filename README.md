@@ -57,17 +57,17 @@ answers.
 Get it from the [**latest release**](https://github.com/richiewillmott/Wirely/releases/latest) — no Python or
 anything else needed:
 
-- **Windows:** `Wirely-Setup-1.0.0.exe` — run it and follow the installer. It adds Wirely to the Start menu and
+- **Windows:** `Wirely-Setup-<version>.exe` — run it and follow the installer. It adds Wirely to the Start menu and
   makes `.wirely` files open in Wirely. Windows SmartScreen may warn the first time because the installer
   isn't code-signed yet: click **More info → Run anyway**.
-- **Mac (Apple Silicon, M1 or newer):** `Wirely-1.0.0-mac-arm64.dmg` — open it and drag Wirely into
+- **Mac (Apple Silicon, M1 or newer):** `Wirely-<version>-mac-arm64.dmg` — open it and drag Wirely into
   Applications. It isn't signed by Apple yet, so the first time: right-click Wirely in Applications →
   **Open** → **Open**.
-- **Linux:** `Wirely-1.0.0-x86_64.AppImage` — make it executable and run it:
-  `chmod +x Wirely-1.0.0-x86_64.AppImage && ./Wirely-1.0.0-x86_64.AppImage`
+- **Linux:** `Wirely-<version>-x86_64.AppImage` — make it executable and run it:
+  `chmod +x Wirely-*-x86_64.AppImage && ./Wirely-*-x86_64.AppImage`
   (or right-click → Properties → "Allow executing as program", then double-click). If it says FUSE is
   missing, run it with `--appimage-extract-and-run`, or install `libfuse2` (Ubuntu: `sudo apt install libfuse2t64`).
-  To add it to your app menu: `bash packaging/linux/install-desktop.sh Wirely-1.0.0-x86_64.AppImage`.
+  To add it to your app menu: `bash packaging/linux/install-desktop.sh Wirely-<version>-x86_64.AppImage`.
 
 <p align="center"><img src="docs/images/splash.png" width="480" alt="Wirely starting up"></p>
 
@@ -182,22 +182,39 @@ op-amps, relays and motors, up to a buck converter.
 ## How accurate is it?
 
 Wirely has its own circuit solver (`wirely/sim`), using the same core method as SPICE: nodal equations,
-Newton–Raphson for diodes, LEDs, transistors and MOSFETs (Shockley, Ebers–Moll and square-law models, with
-SPICE-style limiting), and the trapezoidal rule for capacitors and inductors over time, with automatic
-step-size control. Chips that switch (the 555, logic, square waves) tell the solver exactly when they will
-switch, so it lands a time step on that moment — that keeps timing accurate. Op-amps are a macro-model with the
-real chip's gain, gain-bandwidth, slew rate, output swing and current limit.
+Newton–Raphson for diodes, LEDs, transistors and MOSFETs (with SPICE-style limiting), and integration over time
+with automatic step-size control. Chips that switch (the 555, logic, square waves) tell the solver exactly when
+they will switch, so it lands a time step on that moment — that keeps timing accurate.
 
-The automatic tests (184 of them) check it against answers worked out by hand — voltage dividers, the diode
+**MOSFETs are fitted to their datasheets.** Each type's threshold voltage and on-resistance at the datasheet's
+gate voltages are matched, and each has its body diode, internal gate resistance, and gate–source,
+gate–drain (Miller) and drain–source capacitances that change with voltage as the real ones do. So switching
+takes real time, and the gate shows the Miller plateau:
+
+| | Wirely | Datasheet |
+|---|---|---|
+| AO3400 gate charge (to 4.5 V, 15 V, 5.7 A) | 6.1 nC | 6 nC |
+| FQP27P06 gate charge (to −10 V, −48 V, −27 A) | 32.3 nC | 33 nC |
+| On-resistance at each datasheet test point (12 types) | within 2 % (IRLZ44N: 11 %) | |
+| Drain current at Vgs(th) (12 types) | within 3 % of the test current | |
+
+**Op-amps are fitted to theirs too:** open-loop gain, gain-bandwidth, slew rate, input bias current, input
+resistance, supply current, output swing that falls short further under heavier loads (a 741 on ±15 V: ±14 V
+into 10 kΩ, ±13 V into 2 kΩ), the LM358 reaching 0 V but not the top rail, and current limits. The output
+current really comes from the supply pins, and too much supply voltage destroys the chip.
+
+The automatic tests (233 of them) check it against answers worked out by hand — voltage dividers, the diode
 equation, LED current, transistor gain and saturation, Zener regulation, RC and RL curves, a half-wave
-rectifier, 555 astable and monostable timing, op-amp gains, integrator ramp and slew rate, a Schmitt-trigger
-oscillator, logic truth tables and counters — and against **ngspice** itself. For example, the buck converter:
+rectifier, 555 astable and monostable timing, op-amp gains, bandwidth, slew rate and bias currents, a
+Schmitt-trigger oscillator, logic truth tables and counters — against the datasheets above, and against
+**ngspice** running the same models. For example:
 
 | | Wirely | ngspice |
 |---|---|---|
-| Output voltage | 5.743 V | 5.747 V |
-| Output ripple | 0.390 V | 0.391 V |
-| Inductor ripple current | 0.314 A | 0.314 A |
+| Buck converter output voltage | 5.750 V | 5.759 V |
+| Buck converter output ripple | 0.391 V | 0.391 V |
+| Buck converter inductor ripple current | 0.315 A | 0.315 A |
+| IRF540 switching: turn-on / turn-off delay (100 Ω gate resistor) | 122 / 569 ns | 122 / 566 ns |
 
 Motors have back-EMF, relays have a coil with inductance that pulls in at 75 % and lets go at 30 % of its
 rated current, and switching an inductive load without a flyback diode makes a real voltage spike.
@@ -209,8 +226,8 @@ package or for testing the real thing:
 
 - **No PCB or breadboard layout** — it's for the schematic and the simulation.
 - **No SPICE model import or netlist export yet.** Parts use built-in models of common real parts (you choose
-  from a list); MOSFETs and op-amps are simplified models, good for switching, amplifiers and timing, not for
-  detailed analogue design.
+  from a list), fitted to typical datasheet values. There are no temperature effects, op-amp offset voltage
+  or noise, and op-amps have a single pole (so no ringing with capacitive loads).
 - **No AC (frequency-sweep), noise or Monte-Carlo analysis** — the graph is time-based, like an oscilloscope.
 - **Logic is simple** — gates, the 4017, the 4511 and D flip-flops; no microcontrollers.
 - Fast-switching circuits (like the buck converter at 1 kHz) run **slower than real time** — the time label

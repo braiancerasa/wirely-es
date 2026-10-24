@@ -177,6 +177,20 @@ jobs:
           python -m pip install -r requirements.txt pyinstaller
       - name: Build the AppImage
         run: PYTHON=python bash packaging/linux/build_appimage.sh
+      - name: Check it starts on Wayland (native, and X11 apps through XWayland)
+        continue-on-error: true
+        run: |
+          sudo apt-get install -y weston xwayland
+          export XDG_RUNTIME_DIR="$RUNNER_TEMP/xdg"; mkdir -p "$XDG_RUNTIME_DIR"; chmod 700 "$XDG_RUNTIME_DIR"
+          APP=$(ls dist/*.AppImage)
+          weston --backend=headless-backend.so --socket=wl-ci --xwayland > weston.log 2>&1 &
+          sleep 5
+          env -u DISPLAY WAYLAND_DISPLAY=wl-ci WIRELY_NO_SOUND=1 timeout 90 "$APP" --appimage-extract-and-run \
+            "examples/555 LED flasher.wirely" --snapshot "$PWD/wayland.png"
+          XD=$(grep -o "listening on display :[0-9]*" weston.log | grep -o ":[0-9]*" | head -1)
+          DISPLAY=$XD WAYLAND_DISPLAY=wl-ci WIRELY_NO_SOUND=1 timeout 90 "$APP" --appimage-extract-and-run \
+            "examples/555 LED flasher.wirely" --snapshot "$PWD/xwayland.png"
+          ls -la wayland.png xwayland.png
       - uses: actions/upload-artifact@v4
         with:
           name: wirely-linux

@@ -84,12 +84,13 @@ class Stamper:
         """Conductance G between nodes a and c."""
         A = self.A
         if a >= 0:
-            A[a, a] += G
-        if c >= 0:
-            A[c, c] += G
-        if a >= 0 and c >= 0:
-            A[a, c] -= G
-            A[c, a] -= G
+            A[a][a] += G
+            if c >= 0:
+                A[c][c] += G
+                A[a][c] -= G
+                A[c][a] -= G
+        elif c >= 0:
+            A[c][c] += G
 
     def i(self, a, c, I):
         """Current I flowing out of node a, through the device, into node c."""
@@ -107,11 +108,12 @@ class Stamper:
             if a < 0:
                 continue
             rhs = -I0[k]
+            row = A[a]
             for j in range(n):
                 rhs += J[k][j] * V0[j]
                 c = nodes[j]
                 if c >= 0:
-                    A[a, c] += J[k][j]
+                    row[c] += J[k][j]
             b[a] += rhs
 
 
@@ -435,6 +437,7 @@ class Diode(Device):
         self.nvt = self.n * VT
         self.vcrit = self.nvt * math.log(self.nvt / (math.sqrt(2) * self.Is))
         self.vd_last = self.vd_acc = 0.0
+        self._surge = 0.0
 
     def begin_iter(self):
         self.vd_last = self.vd_acc
@@ -488,7 +491,9 @@ class Diode(Device):
             return
         over = abs(i) > self.imax
         self.warn = "over" if over else None
-        if self._overload(over, ctx.h, 0.03, abs(i) > 3 * self.imax):
+        # real diodes ride out short surges: 3× their rating for a millisecond, about 30× for an instant
+        self._surge = self._surge + ctx.h if abs(i) > 3 * self.imax else 0.0
+        if self._overload(over, ctx.h, 0.03, abs(i) > 30 * self.imax or self._surge > 1e-3):
             self.blown = True
             what = "LED" if self.comp.kind == "led" else "diode"
             hint = " Add a resistor in series to limit the current." if self.comp.kind == "led" else ""

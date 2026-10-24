@@ -1,9 +1,7 @@
 """Tests for the r3 parts: 555 timer, op-amps, MOSFETs, logic gates and chips, signal generator.
-Each is checked against the textbook formula (and the MOSFET against ngspice when it's installed)."""
+Each is checked against the textbook formula (MOSFET and op-amp datasheet checks: test_mosfet.py, test_opamp.py)."""
 import math
 import os
-import re
-import subprocess
 import sys
 
 import pytest
@@ -11,7 +9,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from test_sim import NGSPICE, build, ngspice_op, op, vnet  # noqa: E402
+from test_sim import build, op, vnet  # noqa: E402
 from wirely.sim.engine import Simulator  # noqa: E402
 
 
@@ -109,12 +107,7 @@ def test_opamp_inverting_gain():
     assert vnet(s, comps[4], "out") == pytest.approx(-3.0, rel=2e-3)
 
 
-def test_opamp_comparator_saturates_below_the_rails():
-    for vin, expected in ((1.0, 12 - 1.5), (-1.0, -12 + 1.5)):
-        s, comps = op(dual_supply(("dc_supply", ("in", "0"), {"voltage": vin}),
-                                  ("opamp", ("0", "in", "out", "vp", "vn"), {"model": "741"}),
-                                  ("resistor", ("out", "0"), {"resistance": 10e3})))
-        assert vnet(s, comps[3], "out") == pytest.approx(expected, abs=0.1)
+# (output swing, bias current, supply current, bandwidth against datasheets: see test_opamp.py)
 
 
 def test_opamp_powered_automatically_when_supply_pins_unused():
@@ -159,53 +152,18 @@ def test_opamp_slew_rate_741():
 
 
 # ----------------------------------------------------------------------------------------------- MOSFET
-@pytest.mark.parametrize("vg", [4.0, 6.0, 10.0])
-def test_nmos_switch(vg):
-    s, comps = op([("dc_supply", ("vdd", "0"), {"voltage": 12}), ("dc_supply", ("g", "0"), {"voltage": vg}),
-                   ("resistor", ("vdd", "d"), {"resistance": 100}), ("nmos", ("g", "d", "0"), {"model": "2N7000"})])
-    vd = vnet(s, comps[3], "D")
-    # independent square-law answer
-    from wirely.sim.chips import MOSFETS
-    _p, vt, kp, lam, *_ = MOSFETS["2N7000"]
-    vov = vg - vt
-    lo, hi = 0.0, 12.0
-    for _ in range(200):
-        x = (lo + hi) / 2
-        i = (kp * (vov * x - x * x / 2) if x < vov else kp / 2 * vov * vov) * (1 + lam * x)
-        if 12 - 100 * i > x:
-            lo = x
-        else:
-            hi = x
-    assert vd == pytest.approx(x, abs=0.02)
-
-
+# (on-resistance, threshold, gate charge and switching against datasheets and ngspice: see test_mosfet.py)
 def test_mosfet_off_below_threshold_and_no_gate_current():
     s, comps = op([("dc_supply", ("vdd", "0"), {"voltage": 9}), ("dc_supply", ("g", "0"), {"voltage": 1.0}),
                    ("resistor", ("vdd", "d"), {"resistance": 1000}), ("nmos", ("g", "d", "0"), {})])
     assert vnet(s, comps[3], "D") > 8.99
-    assert abs(s.device(comps[3].id).i_pins[0]) < 1e-9
+    assert abs(s.device(comps[3].id).i_pins[0]) < 2e-9          # only the 1 GΩ gate leakage
 
 
 def test_pmos_high_side_switch():
     s, comps = op([("dc_supply", ("vdd", "0"), {"voltage": 9}), ("dc_supply", ("g", "0"), {"voltage": 0.0}),
                    ("pmos", ("g", "d", "vdd"), {"model": "BS250"}), ("resistor", ("d", "0"), {"resistance": 1000})])
     assert vnet(s, comps[2], "D") > 8.5
-
-
-@pytest.mark.skipif(not NGSPICE, reason="ngspice not installed")
-def test_nmos_against_ngspice():
-    from wirely.sim.chips import MOSFETS
-    _p, vt, kp, lam, *_ = MOSFETS["2N7000"]
-    ref = ngspice_op(f"""
-V1 vdd 0 12
-V2 g 0 5
-R1 vdd d 100
-M1 d g 0 0 MN L=1u W=1u
-.model MN NMOS(LEVEL=1 VTO={vt} KP={kp} LAMBDA={lam})
-""", ["v(d)"])
-    s, comps = op([("dc_supply", ("vdd", "0"), {"voltage": 12}), ("dc_supply", ("g", "0"), {"voltage": 5}),
-                   ("resistor", ("vdd", "d"), {"resistance": 100}), ("nmos", ("g", "d", "0"), {"model": "2N7000"})])
-    assert vnet(s, comps[3], "D") == pytest.approx(ref["v(d)"], rel=5e-3)
 
 
 # ----------------------------------------------------------------------------------------------- logic

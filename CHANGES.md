@@ -1,5 +1,18 @@
 # Changes
 
+## 1.1.0 — more accurate MOSFETs and op-amps
+- **MOSFETs fitted to their datasheets:** threshold voltage and on-resistance at the datasheet's gate voltages,
+  mobility falling at high gate voltage, the body diode, internal gate resistance, and voltage-dependent gate and
+  drain capacitances. Switching now takes real time and shows the Miller plateau; gate charge matches the
+  datasheets (AO3400 6.1 nC vs 6 nC, FQP27P06 32.3 nC vs 33 nC) and switching delays match ngspice.
+- **Op-amps fitted to their datasheets:** open-loop gain, input bias current and resistance, supply current,
+  output swing that depends on the load, separate source/sink limits, and the LM358 swinging to 0 V but not to
+  its top rail. Output current is drawn through the supply pins, and too much supply voltage destroys the chip.
+- Diodes ride out short current surges (as real ones do) instead of popping on a nanosecond spike.
+- The simulator is about twice as fast on every circuit (and much faster with MOSFETs).
+- The installer clears out the old version's library files when updating.
+- Linux: prefers X11/XWayland and falls back to Wayland; the automatic build now tests both.
+
 ## 1.0.0 — first official release
 Everything below, together: the circuit editor (r1), live simulation (r2), chips, logic and the graph (r3),
 sound, relays, motors and sensors (r4), and the Wirely name, icons and downloads (r5).

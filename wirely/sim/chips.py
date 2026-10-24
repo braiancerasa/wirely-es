@@ -55,66 +55,228 @@ def numeric_stamp(S, nodes, V0, f, ctx=None):
 
 
 # ============================================================================================== MOSFET
-MOSFETS = {  # polarity, |Vth|, KP (A/V²), lambda, max Id, max power
-    "2N7000": (1, 2.1, 0.1, 0.01, 0.2, 0.4),
-    "IRF540": (1, 3.0, 2.5, 0.005, 28.0, 2.0),
-    "BS250": (-1, 2.5, 0.01, 0.01, 0.18, 0.83),
-    "IRF9540": (-1, 3.0, 0.7, 0.005, 19.0, 2.0),
-    "BS170": (1, 2.1, 0.12, 0.01, 0.5, 0.83),
-    "IRLZ44N": (1, 1.5, 15.0, 0.005, 47.0, 3.0),        # logic level: fully on from about 4 V
-    "IRF530": (1, 3.0, 1.5, 0.005, 14.0, 2.0),
-    "IRF3205": (1, 3.0, 30.0, 0.003, 110.0, 3.0),
-    "AO3400": (1, 1.05, 5.0, 0.01, 5.7, 1.4),
-    "IRF9530": (-1, 3.0, 0.5, 0.005, 12.0, 2.0),
-    "FQP27P06": (-1, 3.0, 3.0, 0.005, 27.0, 2.0),
-    "IRLML6402": (-1, 0.8, 3.0, 0.01, 3.7, 1.3),
+# Every type is described by its datasheet figures, and the model is fitted to them when Wirely starts.
+# Typical values are used where the datasheet gives them; where it only gives a maximum, about 75–80 % of it.
+#   polarity, Vgs(th) (V) at its test current (A), on-resistance points ((Vgs, Rds(on) Ω), …),
+#   Ciss, Coss, Crss (F) at the datasheet's test Vds (V), max Vds (V), max Id (A), max power without a heatsink (W)
+MOSFET_DATA = {
+    "2N7000":    (1, 2.1, 1e-3, ((10, 1.2), (4.5, 1.8)), 20e-12, 11e-12, 4e-12, 25, 60, 0.2, 0.4),
+    "BS170":     (1, 2.1, 1e-3, ((10, 1.2),), 24e-12, 17e-12, 5e-12, 10, 60, 0.5, 0.83),
+    "IRF540":    (1, 3.0, 250e-6, ((10, 0.060),), 1700e-12, 560e-12, 120e-12, 25, 100, 28.0, 2.0),
+    "IRF530":    (1, 3.0, 250e-6, ((10, 0.12),), 670e-12, 250e-12, 60e-12, 25, 100, 14.0, 2.0),
+    "IRLZ44N":   (1, 1.5, 250e-6, ((10, 0.018), (5, 0.020), (4, 0.028)), 1700e-12, 400e-12, 150e-12, 25, 55,
+                  47.0, 2.0),
+    "IRF3205":   (1, 3.0, 250e-6, ((10, 0.0065),), 3247e-12, 781e-12, 211e-12, 25, 55, 110.0, 2.0),
+    "AO3400":    (1, 1.05, 250e-6, ((10, 0.018), (4.5, 0.019), (2.5, 0.024)), 630e-12, 75e-12, 50e-12, 15, 30,
+                  5.7, 1.4),
+    "BS250":     (-1, 2.25, 1e-3, ((10, 10.0),), 60e-12, 25e-12, 8e-12, 10, 45, 0.23, 0.7),
+    "IRF9540":   (-1, 3.0, 250e-6, ((10, 0.15),), 1400e-12, 590e-12, 140e-12, 25, 100, 19.0, 2.0),
+    "IRF9530":   (-1, 3.0, 250e-6, ((10, 0.22),), 860e-12, 340e-12, 93e-12, 25, 100, 12.0, 2.0),
+    "FQP27P06":  (-1, 3.0, 250e-6, ((10, 0.055),), 1100e-12, 510e-12, 120e-12, 25, 60, 27.0, 2.0),
+    "IRLML6402": (-1, 0.55, 250e-6, ((4.5, 0.050), (2.5, 0.080)), 633e-12, 145e-12, 110e-12, 10, 20, 3.7, 1.3),
 }
-VDS_MAX = {"2N7000": 60, "BS170": 60, "IRLZ44N": 55, "IRF530": 100, "IRF540": 100, "IRF3205": 55, "AO3400": 30,
-           "BS250": 45, "IRF9530": 100, "IRF9540": 100, "FQP27P06": 60, "IRLML6402": 20}
+SUB_S = 2 * 1.5 * VT        # how softly a MOSFET turns on below threshold: about 90 mV per decade of current
+CAP_VJ, CAP_M, CAP_FC = 2.0, 0.8, 0.5   # shape of Cgd and Cds against voltage (fitted to datasheet gate charges)
+
+
+class MosParams:
+    def __init__(self, name):
+        (self.pol, self.vth, self.ith, self.rds, self.ciss, self.coss, self.crss, self.vcap, self.vdss,
+         self.idmax, self.pmax) = MOSFET_DATA[name]
+        self.lam = 0.01 if self.idmax < 1 else 0.003
+        self.vto, self.kp, self.theta, self.rser = fit_mosfet(self.vth, self.ith, self.rds, self.vdss)
+        # body diode: about 0.72 V at a sixth of the rated current
+        self.bd_n = 1.2
+        self.bd_is = (self.idmax / 6) / math.exp(0.72 / (self.bd_n * VT))
+        k = (1 + self.vcap / CAP_VJ) ** CAP_M          # datasheet capacitances are measured at vcap
+        self.rg = 2.0 if self.idmax >= 1 else 10.0      # internal gate resistance (typical datasheet values)
+        self.cgs = self.ciss - self.crss
+        self.cgd0 = self.crss * k
+        self.cds0 = max(self.coss - self.crss, 0.0) * k
+
+
+def fit_mosfet(vth, ith, rds_pts, vdss):
+    """Threshold (VTO), transconductance (KP), mobility reduction (THETA) and drain series resistance that
+    reproduce the datasheet's Vgs(th) at its test current and its Rds(on) at each gate voltage given.
+    The part of Rds(on) that doesn't fall with gate voltage is split between the drift region (in series; a
+    bigger share in higher-voltage parts) and the channel's mobility falling at high gate voltage (THETA)."""
+    drift = 0.5 if vdss >= 100 else 0.25 if vdss >= 45 else 0.15
+    vto = vth - 0.3
+    kp, theta, rd = 1.0, 0.0, 0.0
+    r_top = max(rds_pts)[1]                     # Rds(on) at the highest gate voltage
+    for _ in range(200):
+        vovs = [softplus(vg - vto, SUB_S) for vg, _r in rds_pts]
+        rs = [r for _vg, r in rds_pts]
+        if len(rds_pts) >= 2:                    # least squares in relative error: R = a / vov + const
+            xs = [1 / vv for vv in vovs]
+            ws = [1 / (r * r) for r in rs]
+            sw = sum(ws)
+            mx = sum(w * x for w, x in zip(ws, xs)) / sw
+            my = sum(w * y for w, y in zip(ws, rs)) / sw
+            sxx = sum(w * (x - mx) ** 2 for w, x in zip(ws, xs))
+            a = (sum(w * (x - mx) * (y - my) for w, x, y in zip(ws, xs, rs)) / sxx) if sxx > 0 else rs[0] * vovs[0]
+            const = my - a * mx
+            if a <= 0 or const < drift * r_top:
+                const = drift * r_top
+                a = sum(x * (y - const) for x, y in zip(xs, rs)) / sum(x * x for x in xs)
+        else:
+            const = drift * rs[0]
+            a = (rs[0] - const) * vovs[0]
+        kp = 1.0 / a
+        rd = min(const, drift * r_top)
+        theta = (const - rd) * kp
+        vov_th = math.sqrt(2 * ith / kp)
+        new = vth - SUB_S * math.log(math.expm1(vov_th / SUB_S))
+        if abs(new - vto) < 1e-10:
+            vto = new
+            break
+        vto = new
+    return vto, kp, theta, rd
+
+
+MOSFETS = {name: MosParams(name) for name in MOSFET_DATA}
+VDS_MAX = {name: p.vdss for name, p in MOSFETS.items()}
+
+
+class QCap:
+    """A charge-based capacitor (keeps charge exactly, as SPICE does). With M > 0 it's a junction-style
+    capacitance: C = C0·(1 − vf/VJ)^−M while reverse biased (vf < 0 widens the depletion layer, so C falls),
+    levelling off once it's forward biased past FC·VJ. vf is measured from the "a" node to the "c" node."""
+
+    def __init__(self, C0, M=0.0):
+        self.C0, self.M = C0, M
+        self.vf_lim = CAP_FC * CAP_VJ
+        if M:
+            self.c_lim = C0 * (1 - self.vf_lim / CAP_VJ) ** -M
+            self.q_lim = self._qj(self.vf_lim)
+        self.q_prev = self.i_prev = 0.0
+
+    def _qj(self, vf):
+        return self.C0 * CAP_VJ / (1 - self.M) * (1 - (1 - vf / CAP_VJ) ** (1 - self.M))
+
+    def c(self, vf):
+        if not self.M:
+            return self.C0
+        return self.c_lim if vf >= self.vf_lim else self.C0 * (1 - vf / CAP_VJ) ** -self.M
+
+    def q(self, vf):
+        if not self.M:
+            return self.C0 * vf
+        return self.q_lim + self.c_lim * (vf - self.vf_lim) if vf >= self.vf_lim else self._qj(vf)
+
+    # Always backward Euler: these small device capacitances sit right next to stiff, fast parts (a diode
+    # clamping a node, a gate driver), where the trapezoidal rule rings from step to step. Backward Euler damps
+    # that, at no real cost in accuracy for capacitances this small (the op-amp's pole capacitor does the same).
+    def current(self, vf, ctx):
+        return (self.q(vf) - self.q_prev) / ctx.h
+
+    def stamp(self, S, a, c, vf, ctx):
+        if ctx.dc or self.C0 <= 0:
+            return
+        G = self.c(vf) / ctx.h
+        S.g(a, c, G)
+        S.i(a, c, self.current(vf, ctx) - G * vf)
+
+    def accept(self, vf, ctx):
+        i = 0.0 if (ctx.dc or self.C0 <= 0) else self.current(vf, ctx)
+        self.q_prev, self.i_prev = self.q(vf), i
+        return i
+
+    def settle(self, vf):
+        self.q_prev, self.i_prev = self.q(vf), 0.0
 
 
 class MOSFET(Device):
-    """Square-law (SPICE level 1) MOSFET with a smoothed threshold. Pins G, D, S."""
+    """Power / small-signal MOSFET fitted to its datasheet. Pins G, D, S.
+    Inside: the channel (square law, softened below threshold as real MOSFETs are), the drain's series
+    resistance (internal node), the body diode from source to drain, the gate–source capacitance, and
+    voltage-dependent gate–drain (Miller) and drain–source capacitances — so switching takes real time and
+    shows the Miller plateau."""
     nonlinear = True
+    reactive = True
+    n_internal = 2              # [0] the drain inside its series resistance, [1] the gate inside its resistance
 
     def update_params(self):
         default = "2N7000" if self.comp.kind == "nmos" else "BS250"
-        pol, vt, kp, lam, idmax, pmax = MOSFETS.get(self.prop("model"), MOSFETS[default])
+        self.P = MOSFETS.get(self.prop("model"), MOSFETS[default])
         self.pol = -1 if self.comp.kind == "pmos" else 1
-        self.vt, self.kp, self.lam, self.idmax, self.pmax = vt, kp, lam, idmax, pmax
-        self.vgs_acc = self.vds_acc = 0.0
+        P = self.P
+        self.vt, self.kp, self.lam, self.idmax, self.pmax = P.vto, P.kp, P.lam, P.idmax, P.pmax
+        self.theta = P.theta
+        self.rser = P.rser
+        self.rg = P.rg
+        self.cgs, self.cgd, self.cds = QCap(P.cgs), QCap(P.cgd0, CAP_M), QCap(P.cds0, CAP_M)
+        self.bd_nvt = P.bd_n * VT
+        self.bd_vcrit = self.bd_nvt * math.log(self.bd_nvt / (math.sqrt(2) * P.bd_is))
+        self.vgs_acc = self.vds_acc = self.vbd_acc = 0.0
+        self.vgs_last = self.vds_last = self.vbd_last = 0.0
         self.id = 0.0
 
     def begin_iter(self):
-        self.vgs_last, self.vds_last = self.vgs_acc, self.vds_acc
+        self.vgs_last, self.vds_last, self.vbd_last = self.vgs_acc, self.vds_acc, self.vbd_acc
 
     def ids(self, vgs, vds):
-        """Drain current for an N-channel device (vgs, vds may be anything)."""
+        """Channel current for an N-channel device (vgs, vds may be anything)."""
         if vds < 0:                       # source and drain swap roles
             return -self.ids(vgs - vds, -vds)
-        vov = softplus(vgs - self.vt, 0.02)
+        vov = softplus(vgs - self.vt, SUB_S)
+        kp = self.kp / (1 + self.theta * vov)       # mobility falls at high gate voltage
         if vds < vov:
-            i = self.kp * (vov * vds - 0.5 * vds * vds)
+            i = kp * (vov * vds - 0.5 * vds * vds)
         else:
-            i = 0.5 * self.kp * vov * vov
+            i = 0.5 * kp * vov * vov
         return i * (1 + self.lam * vds)
 
-    def _currents(self, V):
-        vg, vd, vs = V
-        p = self.pol
-        i = p * self.ids(p * (vg - vs), p * (vd - vs))
-        # a 1 GΩ gate-to-source leak: a gate left unconnected settles at the source voltage (off)
-        return [G_GATE * (vg - vs), i, -i - G_GATE * (vg - vs)]
+    def ids_g(self, vgs, vds):
+        """Channel current and its slopes (gm = dI/dVgs, gds = dI/dVds), N-channel convention."""
+        if vds < 0:                       # source and drain swap roles
+            i, gm, gds = self.ids_g(vgs - vds, -vds)
+            return -i, -gm, gm + gds
+        z = (vgs - self.vt) / SUB_S
+        vov = softplus(vgs - self.vt, SUB_S)
+        dvov = 1.0 / (1.0 + math.exp(-z)) if z > -40 else 0.0          # d vov / d vgs
+        den = 1 + self.theta * vov
+        kp = self.kp / den
+        dkp = -self.kp * self.theta / (den * den)                       # d kp / d vov
+        lam = 1 + self.lam * vds
+        if vds < vov:
+            core = vov * vds - 0.5 * vds * vds
+            i0 = kp * core
+            di_dvov = dkp * core + kp * vds
+            di_dvds = kp * (vov - vds)
+        else:
+            core = 0.5 * vov * vov
+            i0 = kp * core
+            di_dvov = dkp * core + kp * vov
+            di_dvds = 0.0
+        return i0 * lam, di_dvov * dvov * lam, di_dvds * lam + i0 * self.lam
+
+    def _bd(self, vf):
+        e = sexp(vf / self.bd_nvt)
+        return self.P.bd_is * (e - 1.0) + GMIN * vf, self.P.bd_is * e / self.bd_nvt + GMIN
+
+    def _cap_nodes(self):
+        """(capacitor, anode node, cathode node) — anode/cathode as for its junction."""
+        _g, d, s = self.nodes
+        g = self.internal[1]
+        if self.pol > 0:
+            return ((self.cgs, g, s), (self.cgd, g, d), (self.cds, s, d))
+        return ((self.cgs, g, s), (self.cgd, d, g), (self.cds, d, s))
 
     def stamp(self, S, x, ctx):
-        g, d, s = self.nodes
+        gx, d, s = self.nodes
+        dp, g = self.internal
+        S.g(gx, g, 1.0 / self.rg)
+        S.g(gx, s, G_GATE)          # a 1 GΩ leak: a gate left unconnected settles at the source voltage (off)
         if self.blown:
             S.g(d, s, 1 / R_OFF)
             S.g(g, s, 1 / R_OFF)
+            S.g(d, dp, 1.0)
             return
         p = self.pol
-        vg, vd, vs = v(x, g), v(x, d), v(x, s)
-        vgs, vds = p * (vg - vs), p * (vd - vs)
+        S.g(d, dp, 1.0 / self.rser)
+        vg, vdp, vs = v(x, g), v(x, dp), v(x, s)
+        vgs, vds = p * (vg - vs), p * (vdp - vs)
         # limit how far one Newton step may move the gate and drain voltages
         lv = [vgs, vds]
         for i, (now, last, lim) in enumerate(((vgs, self.vgs_last, 1.0), (vds, self.vds_last, 4.0))):
@@ -123,22 +285,52 @@ class MOSFET(Device):
                 ctx.limited = True
         self.vgs_last, self.vds_last = lv
         V0 = [vs + p * lv[0], vs + p * lv[1], vs]
-        numeric_stamp(S, [g, d, s], V0, self._currents)
+        i, gm, gds = self.ids_g(lv[0], lv[1])
+        # currents into [gate, drain, source]: the drain takes p·i; slopes against [vg, vd, vs]
+        jd = [gm, gds, -(gm + gds)]
+        S.nonlinear([g, dp, s], [0.0, p * i, -p * i], [[0.0, 0.0, 0.0], jd, [-jd[0], -jd[1], -jd[2]]], V0)
+        # body diode: source → drain for N-channel, drain → source for P-channel
+        an, ca = (s, dp) if p > 0 else (dp, s)
+        vf = v(x, an) - v(x, ca)
+        vl = pnjlim(vf, self.vbd_last, self.bd_nvt, self.bd_vcrit)
+        if abs(vl - vf) > 1e-9:
+            ctx.limited = True
+        self.vbd_last = vl
+        i, gd = self._bd(vl)
+        S.g(an, ca, gd)
+        S.i(an, ca, i - gd * vl)
+        for cap, a, c in self._cap_nodes():
+            cap.stamp(S, a, c, v(x, a) - v(x, c), ctx)
 
     def accept(self, x, ctx):
-        g, d, s = self.nodes
+        gx, d, s = self.nodes
+        dp, g = self.internal
         p = self.pol
-        vg, vd, vs = v(x, g), v(x, d), v(x, s)
+        vgx, vg, vd, vs, vdp = v(x, gx), v(x, g), v(x, d), v(x, s), v(x, dp)
+        ip = [(vgx - vg) / self.rg + G_GATE * (vgx - vs), (vd - vdp) / self.rser, 0.0]
         if self.blown:
-            self.id = 0.0
+            ip[1] = (vd - vs) / R_OFF
+            for cap, a, c in self._cap_nodes():
+                cap.settle(v(x, a) - v(x, c))
         else:
-            self.vgs_acc, self.vds_acc = p * (vg - vs), p * (vd - vs)
-            self.id = p * self.ids(self.vgs_acc, self.vds_acc)
-        self.i_pins = [0.0, self.id, -self.id]
-        self.power = self.id * (vd - vs)
+            self.vgs_acc, self.vds_acc = p * (vg - vs), p * (vdp - vs)
+            an, ca = (s, dp) if p > 0 else (dp, s)
+            self.vbd_acc = v(x, an) - v(x, ca)
+            # the gate pin's current goes through rg and the channel's through rser; Cgd and Cds connect to
+            # the drain pin itself, so their currents add to it
+            for cap, a, c in self._cap_nodes():
+                ic = cap.accept(v(x, a) - v(x, c), ctx)
+                if a == d:
+                    ip[1] += ic
+                elif c == d:
+                    ip[1] -= ic
+        ip[2] = -(ip[0] + ip[1])
+        self.id = ip[1]
+        self.i_pins = ip
+        self.power = vgx * ip[0] + vd * ip[1] + vs * ip[2]
         if self.blown:
             return
-        vmax = VDS_MAX.get(self.prop("model"), 60)
+        vmax = self.P.vdss
         if abs(vd - vs) > 1.5 * vmax:
             self.blown = True
             self.event = spike_message(self.comp.ref, abs(vd - vs), vmax)
@@ -150,33 +342,57 @@ class MOSFET(Device):
             self.event = (f"{self.comp.ref} burnt out — {self.power:.1f} W is too much for a "
                           f"{self.prop('model')} without a heatsink.")
 
+    def after_dc(self):
+        """After the DC answer: the capacitors start charged to the voltages they're at."""
+        for cap, _a, _c in self._cap_nodes():
+            cap.i_prev = 0.0
+
 
 # ============================================================================================== op-amp
-OPAMPS = {  # headroom below V+, headroom above V−, gain-bandwidth (Hz), slew rate (V/s), output current limit (A)
-    "741": (1.5, 1.5, 1e6, 0.5e6, 0.025),
-    "LM358": (1.5, 0.02, 1e6, 0.3e6, 0.03),
-    "Rail-to-rail": (0.02, 0.02, 10e6, 10e6, 0.05),
-    "TL071": (1.5, 1.5, 3e6, 13e6, 0.03),
+class OpAmpData:
+    """One op-amp type's datasheet figures (typical values)."""
+
+    def __init__(self, a0, gbw, sr, ib, rin, iq, hd_hi, hd_lo, r_src, r_sink, i_src, i_sink, vs_max):
+        self.a0, self.gbw, self.sr = a0, gbw, sr            # open-loop gain, gain-bandwidth (Hz), slew rate (V/s)
+        self.ib, self.rin = ib, rin          # input bias current (A, + = into the pins) and input resistance (Ω)
+        self.iq = iq                         # supply current with no load (A)
+        self.hd_hi, self.hd_lo = hd_hi, hd_lo      # how close the output gets to V+ / V− with a light load (V)
+        self.r_src, self.r_sink = r_src, r_sink    # how much closer it falls short per amp of load current (Ω)
+        self.i_src, self.i_sink = i_src, i_sink    # short-circuit output current, sourcing / sinking (A)
+        self.vs_max = vs_max                 # maximum total supply voltage (V)
+
+
+OPAMPS = {
+    # 741: ±14 V into 10 kΩ and ±13 V into 2 kΩ on ±15 V; 80 nA bias current; 2 MΩ input; 1.7 mA supply
+    "741": OpAmpData(2e5, 1e6, 0.5e6, 80e-9, 2e6, 1.7e-3, 0.75, 0.75, 200.0, 200.0, 0.025, 0.025, 36.0),
+    # LM358 (one of the two): output reaches 0 V but only V+ − 1.5 V; PNP inputs, so 20 nA flows OUT of them
+    "LM358": OpAmpData(1e5, 0.7e6, 0.3e6, -20e-9, 10e6, 0.35e-3, 1.4, 0.005, 50.0, 100.0, 0.04, 0.02, 32.0),
+    # TL071: JFET inputs (30 pA); ±13.5 V into 10 kΩ, ±12 V into 2 kΩ on ±15 V
+    "TL071": OpAmpData(2e5, 3e6, 13e6, 30e-12, 1e12, 1.4e-3, 1.05, 1.05, 320.0, 320.0, 0.04, 0.04, 36.0),
+    # a typical CMOS rail-to-rail op-amp
+    "Rail-to-rail": OpAmpData(1e5, 10e6, 10e6, 1e-12, 1e13, 1e-3, 0.01, 0.01, 25.0, 25.0, 0.05, 0.05, 40.0),
 }
 
 
 class OpAmp(Device):
-    """Macro-model: a transconductance stage with one dominant pole (gain 100 000, gain-bandwidth and slew
-    rate as the real chip), then an output stage that can't go past its supply rails and limits its current.
-    Pins: −, +, out, V+, V−."""
+    """Macro-model fitted to each type's datasheet: a transconductance input stage with one dominant pole
+    (open-loop gain, gain-bandwidth and slew rate as the real chip), input bias current and input resistance,
+    then an output stage that stops short of the supply rails — further the more current it delivers — and
+    limits its current. The supply pins carry the chip's own supply current plus whatever the output delivers,
+    as in the real chip. Pins: −, +, out, V+, V−."""
     n_internal = 1
     nonlinear = True
-    A0, GM = 1e5, 1e-3
+    GM = 1e-3
 
     def update_params(self):
-        self.hd_hi, self.hd_lo, gbw, sr, self.ilim = OPAMPS.get(self.prop("model"), OPAMPS["741"])
-        self.C1 = self.GM / (2 * math.pi * gbw)
-        self.Imax = sr * self.C1
-        self.G1 = self.GM / self.A0
-        self.rout = 75.0
+        self.D = D = OPAMPS.get(self.prop("model"), OPAMPS["741"])
+        self.C1 = self.GM / (2 * math.pi * D.gbw)
+        self.Imax = D.sr * self.C1
+        self.G1 = self.GM / D.a0
         self.vm_prev = 0.0
         self.auto_pos = self.auto_neg = False       # set by the engine when V+ / V− are left unconnected
         self.vlogic = 9.0
+        self._dc = False
 
     def rails(self, x):
         vp = self.vlogic if self.auto_pos else v(x, self.nodes[3])
@@ -190,27 +406,50 @@ class OpAmp(Device):
             vp = self.vlogic
         if self.auto_neg:
             vn = 0.0
-        i1 = self.Imax * math.tanh(self.GM * (vpos - vneg) / self.Imax)
-        lim = (vp - vn) / 2 + 1.0
-        iclamp = 1e-3 * (softplus(vm - lim, 0.05) - softplus(-lim - vm, 0.05))
+        D = self.D
+        if self._dc:            # slew rate only limits how fast things change: not in a steady DC answer
+            i1 = self.GM * (vpos - vneg)
+        else:
+            i1 = self.Imax * math.tanh(self.GM * (vpos - vneg) / self.Imax)
         u = (vp + vn) / 2 + vm
-        lo, hi = vn + self.hd_lo, vp - self.hd_hi
+        lo, hi = vn + D.hd_lo, vp - D.hd_hi
         if hi < lo:
             hi = lo = (vp + vn) / 2
+        # once the output is saturated, hold the internal node just past it (as the real chip's internal
+        # stages saturate too) — this also keeps the solver from wandering
+        iclamp = 1e-3 * (softplus(u - (hi + 0.3), 0.05) - softplus((lo - 0.3) - u, 0.05))
         vt = lo + softplus(u - lo, 0.05) - softplus(u - hi, 0.05)
-        iout = self.ilim * math.tanh((vt - vout) / self.rout / self.ilim)
-        return [GMIN * vneg, GMIN * vpos, -iout, 0.0, 0.0, self.G1 * vm + iclamp - i1]
+        # sourcing current to the load (vt > vout) or sinking it, blended smoothly so the solver sees no kink
+        w = 0.5 * (1 + math.tanh((vt - vout) / 0.01))
+        isrc = D.i_src * math.tanh((vt - vout) / D.r_src / D.i_src)
+        isnk = D.i_sink * math.tanh((vt - vout) / D.r_sink / D.i_sink)
+        iout = w * isrc + (1 - w) * isnk
+        powered = math.tanh(max(vp - vn, 0.0))         # the chip only draws its supply current when powered
+        iq = D.iq * powered
+        ib = D.ib * powered
+        i_in = (vneg - vpos) / D.rin
+        i_neg = ib + GMIN * vneg + i_in
+        i_pos = ib + GMIN * vpos - i_in
+        # what flows out of the output comes in at V+ (sourcing) or leaves at V− (sinking); the input bias
+        # currents return through V− (or come from V+ for a PNP input stage, which has ib < 0)
+        pos_part = 0.5 * (iout + math.sqrt(iout * iout + 1e-12))      # smooth max(iout, 0)
+        i_vp = iq + pos_part - (min(ib, 0.0) * 2)
+        i_vn = -iq + (iout - pos_part) - (max(ib, 0.0) * 2)
+        return [i_neg, i_pos, -iout, i_vp, i_vn, self.G1 * vm + iclamp - i1]
 
     def stamp(self, S, x, ctx):
         neg, pos, out, vpn, vnn = self.nodes
         m = self.internal[0]
+        if self.blown:
+            S.g(neg, pos, GMIN)
+            S.g(out, -1, GMIN)
+            S.g(m, -1, 1.0)
+            return
         if not ctx.dc:      # the dominant-pole capacitor (always backward Euler: no ringing)
             G = self.C1 / ctx.h
             S.g(m, -1, G)
             S.i(-1, m, G * self.vm_prev)
-        # supply current (about 1.7 mA) when the supply pins are wired
-        if not (self.auto_pos or self.auto_neg):
-            S.g(vpn, vnn, 1 / 5000.0)
+        self._dc = ctx.dc
         nodes = [neg, pos, out, -1 if self.auto_pos else vpn, -1 if self.auto_neg else vnn, m]
         V0 = [v(x, n) for n in nodes]
         # keep this iteration's guess for the output and the internal node near the supply range
@@ -226,10 +465,23 @@ class OpAmp(Device):
         neg, pos, out, vpn, vnn = self.nodes
         m = self.internal[0]
         V = [v(x, n) for n in (neg, pos, out, vpn, vnn, m)]
+        self._dc = ctx.dc
+        if self.blown:
+            self.i_pins = [0.0] * 5
+            self.vout = V[2]
+            return
         I = self._f(V)
         self.vm_prev = V[5]
-        self.i_pins = [I[0], I[1], I[2], 0.0, 0.0]
+        self.i_pins = [I[0], I[1], I[2], 0.0 if self.auto_pos else I[3], 0.0 if self.auto_neg else I[4]]
         self.vout = V[2]
+        vp, vn = self.rails(x)
+        self.power = sum(V[k] * self.i_pins[k] for k in range(5))
+        over = (vp - vn) > self.D.vs_max
+        self.warn = "over" if over else None
+        if self._overload(over, ctx.h, 0.05, (vp - vn) > 1.3 * self.D.vs_max):
+            self.blown = True
+            self.event = (f"{self.comp.ref} was destroyed — {vp - vn:.0f} V across its supply pins is more than "
+                          f"a {self.prop('model')} can take ({self.D.vs_max:.0f} V maximum).")
 
 
 # ============================================================================================== 555 timer

@@ -9,8 +9,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from test_sim import NGSPICE, build, ngspice_op, op, vnet  # noqa: E402
-from wirely.sim import chips as CH  # noqa: E402
+from test_sim import NGSPICE, build, op, vnet  # noqa: E402
 from wirely.sim import devices as D  # noqa: E402
 from wirely.sim.engine import Simulator  # noqa: E402
 
@@ -328,14 +327,14 @@ def test_buck_output_follows_duty_cycle(duty):
 def test_buck_against_ngspice():
     import re
     import subprocess
-    _, vt, kp, lam, *_ = CH.MOSFETS["IRF9540"]
+    from spice_models import mosfet_subckt
     Is, n, Rs, _ = D.DIODES["1N5819"]
-    net = f"""Sparkbench check
+    net = f"""Wirely check
 * buck converter
+{mosfet_subckt("IRF9540", -1)}
 V1 vin 0 12
 V2 g 0 PULSE(12 0 0.5m 1n 1n 0.5m 1m)
-M1 sw g vin vin MP L=1u W=1u
-.model MP PMOS(LEVEL=1 VTO=-{vt} KP={kp} LAMBDA={lam})
+XM1 sw g vin WIRF9540
 D1 0 sw DS
 .model DS D(IS={Is} N={n} RS={Rs})
 L1 sw out 10m

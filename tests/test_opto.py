@@ -7,7 +7,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from test_sim import NGSPICE, build, ngspice_op, op, vnet  # noqa: E402
+from test_sim import NGSPICE, build, ngspice_op, vnet  # noqa: E402
 
 from wirely.sim import chips as CH  # noqa: E402
 from wirely.sim.engine import Simulator  # noqa: E402

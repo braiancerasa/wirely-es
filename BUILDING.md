@@ -33,7 +33,7 @@ about 15 minutes later.
 
 Double-click **`build_exe.bat`**. It packs Wirely into **`dist\Wirely\Wirely.exe`** (runs on any 64-bit Windows
 PC without Python) and, if [Inno Setup](https://jrsoftware.org/isdl.php) (free) is installed, also builds
-**`dist\Wirely-Setup-1.0.0.exe`** with Start-menu and desktop shortcuts and `.wirely` files opening in Wirely.
+**`dist\Wirely-Setup-<version>.exe`** with Start-menu and desktop shortcuts and `.wirely` files opening in Wirely.
 
 ## Mac and Linux yourself
 

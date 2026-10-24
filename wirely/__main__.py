@@ -148,7 +148,7 @@ def main():
     if snapshot:
         def snap():
             w.grab().save(snapshot)
-            print(f"[Wirely] snapshot saved: {snapshot}", flush=True)
+            print(f"[Wirely] snapshot saved: {snapshot} (display: {app.platformName()})", flush=True)
             w.undo.setClean()
             app.quit()
         QTimer.singleShot(1500, snap)

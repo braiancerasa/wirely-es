@@ -165,13 +165,19 @@ class Simulator:
         for d in self.devices:
             d.begin_iter()
         for it in range(self.MAX_ITER):
-            A = np.zeros((N, N))
-            b = np.zeros(N)
-            A[np.diag_indices(N)] += GSHUNT
+            # the equations are built in plain Python lists (much faster for many small additions than
+            # numpy, element by element), then handed to numpy in one go for the solve
+            A = [[0.0] * N for _ in range(N)]
+            for k in range(N):
+                A[k][k] = GSHUNT
+            b = [0.0] * N
             S = D.Stamper(A, b)
             ctx.limited = False
+            xl = x.tolist()
             for d in self.devices:
-                d.stamp(S, x, ctx)
+                d.stamp(S, xl, ctx)
+            A = np.array(A)
+            b = np.array(b)
             try:
                 xn = np.linalg.solve(A, b)
             except np.linalg.LinAlgError:
