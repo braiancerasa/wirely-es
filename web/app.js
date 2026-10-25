@@ -1328,6 +1328,30 @@ async function shareLink() {
   }
 }
 
+// open the circuit carried in the link (…/#n=name&c=…). Returns true if it did.
+async function openLinkCircuit() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (!h.get("c")) return false;
+  try {
+    const text = await decompress(h.get("c"));
+    const err = app.load(text, h.get("n") || "Shared circuit");
+    if (!err) { app.mark_saved(); Files.handle = null; afterOpen(); return true; }
+    toast(err, "error");
+  } catch (e) {
+    toast("That circuit link looks damaged — it couldn't be opened. Check the whole link was copied.", "error");
+  }
+  return false;
+}
+
+// a new circuit link pasted into a tab that already has Wirely open only changes the part after the #,
+// so the page doesn't reload by itself: open the new circuit here
+window.addEventListener("hashchange", () => {
+  if (!ready || !new URLSearchParams(location.hash.slice(1)).get("c")) return;
+  app.stop();
+  afterRunChange();
+  confirmDiscard(() => openLinkCircuit());
+});
+
 async function openStartCircuit() {
   await loadExampleList();
   if (launchFile) {
@@ -1335,15 +1359,7 @@ async function openStartCircuit() {
     launchFile = null;
     return;
   }
-  const h = new URLSearchParams(location.hash.slice(1));
-  if (h.get("c")) {
-    try {
-      const text = await decompress(h.get("c"));
-      const err = app.load(text, h.get("n") || "Shared circuit");
-      if (!err) { app.mark_saved(); afterOpen(); return; }
-      toast(err, "error");
-    } catch (e) { toast("That circuit link looks damaged — it couldn't be opened.", "error"); }
-  }
+  if (await openLinkCircuit()) return;
   const ex = params.get("example");
   if (ex && examples.includes(ex)) { await openExample(ex); return; }
   afterOpen();

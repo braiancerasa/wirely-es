@@ -51,7 +51,7 @@ button, select, input, textarea { font: inherit; color: inherit; }
 .stretch { flex: 1; min-width: 8px; }
 .sep { width: 1px; align-self: stretch; margin: 6px 5px; background: var(--BORDER); flex: none; }
 #speed { margin-left: 6px; border: 1px solid var(--BORDER); border-radius: 5px; padding: 4px 6px; background: var(--INPUT); }
-#timeLabel { margin: 0 6px; min-width: 70px; color: var(--TEXT_MUTED); white-space: nowrap; font-variant-numeric: tabular-nums; }
+#timeLabel { margin: 0 6px; width: 150px; flex: none; overflow: hidden; color: var(--TEXT_MUTED); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 /* ---- middle */
 #main { flex: 1; display: flex; min-height: 0; }
