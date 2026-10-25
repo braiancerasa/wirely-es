@@ -6,6 +6,7 @@ action is finished `edited` is emitted so the window can record an undo step.
 from __future__ import annotations
 
 import json
+import re
 
 from PySide6.QtCore import QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QPen
@@ -55,6 +56,8 @@ class CircuitScene(QGraphicsScene):
         self.sim = None             # SimController while running / paused
         self.show_volts = True
         self.show_flow = True
+        self.show_readings = False
+        self.pinned = set()         # wires and parts whose reading is shown while running (clicked)
         self.anim_t = 0.0
         self.sliders = []
         self._held = None           # push switch being held down
@@ -89,6 +92,7 @@ class CircuitScene(QGraphicsScene):
 
     def set_circuit(self, circuit: Circuit):
         self.cancel()
+        self.pinned = set()
         self.circuit = circuit
         self.rebuild()
 
@@ -246,7 +250,9 @@ class CircuitScene(QGraphicsScene):
             if not info or "v" not in info:
                 return None
             lines = [f"Voltage across: {fmt(abs(info['v']), 'V')}", f"Current: {fmt(abs(info['i']), 'A')}"]
-            if abs(info.get("p", 0)) > 1e-6 and item.comp.kind not in ("cell", "battery", "dc_supply", "ac_supply",
+            if self.power_only(item.comp):
+                lines = [f"Power: {fmt(abs(info.get('p', 0.0)), 'W')}"]
+            elif abs(info.get("p", 0)) > 1e-6 and item.comp.kind not in ("cell", "battery", "dc_supply", "ac_supply",
                                                                           "rail_pos", "signal_gen"):
                 lines.append(f"Power: {fmt(abs(info['p']), 'W')}")
             if "rpm" in info:
@@ -280,11 +286,16 @@ class CircuitScene(QGraphicsScene):
             if c.kind in TOGGLES:
                 key = TOGGLES[c.kind]
                 self.sim_set_value(c.id, key, not c.value(key))
-            elif c.kind == "spdt":
+            elif c.kind in ("spdt", "dpdt"):
                 self.sim_set_value(c.id, "position", "B" if c.value("position") == "A" else "A")
             else:
                 self.sim_set_value(c.id, "pressed", True)
                 self._held = c.id
+        elif isinstance(item, (ComponentItem, WireItem)) and e.button() == Qt.LeftButton:
+            # click a wire or part to pin its reading on the sheet (click again to take it off)
+            key = item.comp.id if isinstance(item, ComponentItem) else item.wire.id
+            self.pinned.symmetric_difference_update({key})
+            self.update()
         e.accept()
 
     def _sim_release(self, e):
@@ -304,9 +315,13 @@ class CircuitScene(QGraphicsScene):
         self.update_hover(pos)
         text = self._probe_text(pos)
         if clickable:
-            what = {"reed_switch": "click to move the magnet", "tilt_switch": "click to tilt it"}.get(
+            what = {"reed_switch": "click to move the magnet", "hall": "click to move the magnet",
+                    "tilt_switch": "click to tilt it"}.get(
                 item.comp.kind, "hold down to press" if item.comp.kind.startswith("push") else "click to switch")
             text = f"{text}   ·   {what}" if text else what.capitalize()
+        elif isinstance(item, (ComponentItem, WireItem)) and text:
+            key = item.comp.id if isinstance(item, ComponentItem) else item.wire.id
+            text += "   ·   click to " + ("unpin its reading" if key in self.pinned else "pin its reading")
         self.status.emit(text or "Running — click switches, drag sliders, hover over wires to read voltages.")
 
     # ================================================================== modes
@@ -880,6 +895,134 @@ class CircuitScene(QGraphicsScene):
                 p.drawEllipse(QPointF(x1 + ux * d, y1 + uy * d), r, r)
                 d += spacing
 
+    # readings: what a multimeter would show, written on the sheet
+    NO_READING = {"ground", "note", "scope_probe", "logic_probe", "voltmeter", "ammeter"}
+    SOURCES = {"cell", "battery", "dc_supply", "ac_supply", "rail_pos", "signal_gen"}
+
+    def _tag(self, p, x, y, text, pinned, anchor):
+        """A small reading label at (x, y): anchor "above" sits it above the point, "right" beside it."""
+        from PySide6.QtGui import QFont, QFontMetricsF
+        f = QFont()
+        f.setPixelSize(8)
+        p.setFont(f)
+        w = QFontMetricsF(f).horizontalAdvance(text) + 8
+        h = 12
+        if anchor == "above":
+            r = QRectF(x - w / 2, y - h - 4, w, h)
+        elif anchor == "below":
+            r = QRectF(x - w / 2, y + 3, w, h)
+        elif anchor == "under":                  # left-aligned, just under (x, y)
+            r = QRectF(x, y + 1, w, h)
+        else:
+            r = QRectF(x + 5, y - h / 2, w, h)
+        bg = QColor(theme.PANEL)
+        bg.setAlpha(232)
+        p.setPen(QPen(QColor(theme.ACCENT if pinned else theme.BORDER), 1.0 if pinned else 0.8))
+        p.setBrush(bg)
+        p.drawRoundedRect(r, 3, 3)
+        p.setPen(QColor(theme.TEXT))
+        p.drawText(r, Qt.AlignCenter, text)
+
+    @staticmethod
+    def power_only(comp) -> bool:
+        """Chips (and parts with several separate legs): a voltage and current between their first two pins would
+        mean nothing, so only their power is shown."""
+        return comp.part.category == "Integrated circuits" or comp.kind in ("led_rgb", "led_bi3", "dpdt")
+
+    def readings_text(self) -> str:
+        """Every part's voltage, current and power as a table (tab-separated, so it pastes into a spreadsheet as
+        columns). Empty when nothing is running."""
+        if not self.sim_active():
+            return ""
+        live = self.sim.live
+        if live is None:
+            return ""
+
+        def num(x, floor):
+            x = abs(x)
+            return f"{x:.4g}" if x >= floor else "0"
+
+        def ref_key(c):
+            m = re.match(r"([A-Za-z]*)(\d*)", c.ref or "")
+            return (m.group(1), int(m.group(2) or 0), c.ref)
+
+        rows = []
+        for comp in sorted((it.comp for it in self.comp_items.values()), key=ref_key):
+            if comp.kind in self.NO_READING:
+                continue
+            info = live.parts.get(comp.id)
+            if not info or "v" not in info:
+                continue
+            power = num(info.get("p", 0.0), 1e-6) if comp.kind not in self.SOURCES else ""
+            name = comp.part.short or comp.part.name
+            if self.power_only(comp):
+                rows.append("\t".join((comp.ref, name, "", "", power)))
+            else:
+                rows.append("\t".join((comp.ref, name, num(info["v"], 1e-3), num(info["i"], 1e-6), power)))
+        t = getattr(self.sim, "sim", None)
+        when = f"Readings at {t.t:.3g} s" if t is not None else "Readings"
+        return "\n".join([when, "Part\tWhat\tVoltage (V)\tCurrent (A)\tPower (W)"] + rows) + "\n"
+
+    def _draw_readings(self, p, live):
+        from ..model.units import fmt
+        show_all = self.show_readings
+        net_of = {wid: net.name for net in self.sim.sim.nets for wid in net.wires} if self.sim else {}
+        labelled = set()
+        # wires carrying current first (they always get a label), then one voltage label per remaining net
+        order = []
+        for wid, it in self.wire_items.items():
+            pinned = wid in self.pinned
+            if not (show_all or pinned) or wid not in live.wire_v:
+                continue
+            w = it.wire
+            a, b = max(w.segments(), key=lambda s: abs(s[1][0] - s[0][0]) + abs(s[1][1] - s[0][1]))
+            mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+            amps, arrow = self._wire_current(w, QPointF(mx, my))
+            length = abs(b[0] - a[0]) + abs(b[1] - a[1])
+            order.append((amps < 1e-6, -length, wid, pinned, a, b, mx, my, amps, arrow))
+        order.sort(key=lambda t: (t[0], t[1]))
+        for idle, _l, wid, pinned, a, b, mx, my, amps, arrow in order:
+            net = net_of.get(wid)
+            if idle and not pinned and net in labelled:
+                continue                         # same voltage is already shown on this net
+            labelled.add(net)
+            vv = live.wire_v[wid]
+            text = fmt(vv if abs(vv) >= 1e-3 else 0.0, "V")
+            if amps >= 1e-6:
+                text += f"   {fmt(amps, 'A')} {arrow}"
+            self._tag(p, mx, my, text, pinned, "above" if a[1] == b[1] else "right")
+        for cid, it in self.comp_items.items():
+            pinned = cid in self.pinned
+            kind = it.comp.kind
+            if not (pinned or (show_all and kind not in self.NO_READING)):
+                continue
+            info = live.parts.get(cid)
+            if not info or "v" not in info:
+                continue
+            def tidy(x, floor):          # leakage (pA, nV) reads as 0, like a real meter
+                x = abs(x)
+                return x if x >= floor else 0.0
+            if self.power_only(it.comp):
+                bits = [fmt(tidy(info.get("p", 0.0), 1e-6), "W")]
+            else:
+                bits = [fmt(tidy(info["v"], 1e-3), "V"), fmt(tidy(info["i"], 1e-6), "A")]
+                if abs(info.get("p", 0)) > 1e-6 and kind not in self.SOURCES:
+                    bits.append(fmt(tidy(info["p"], 1e-6), "W"))
+            # next to the part's own label (its name and value), so it's clear which part it belongs to
+            lab, lines, align = it._label
+            if lines:
+                r = lab.translated(it.pos())
+                if align == Qt.AlignLeft:            # label beside a standing part: reading underneath it
+                    self._tag(p, r.left(), r.bottom(), "  ".join(bits), pinned, "under")
+                else:                                # label above a part lying flat: reading underneath it
+                    sym = it._sym.translated(it.pos())
+                    self._tag(p, sym.center().x(), sym.bottom() + (22 if "reading" in info else 0),
+                              "  ".join(bits), pinned, "below")
+            else:
+                sym = it._sym.translated(it.pos())
+                y = sym.bottom() + (22 if "reading" in info else 0)
+                self._tag(p, sym.center().x(), y, "  ".join(bits), pinned, "below")
+
     def drawForeground(self, p, rect: QRectF):
         from PySide6.QtGui import QPainter
         p.setRenderHint(QPainter.Antialiasing)
@@ -895,6 +1038,8 @@ class CircuitScene(QGraphicsScene):
             return
         if live is not None and self.show_flow:
             self._draw_flow(p, live, rect)
+        if live is not None and (self.show_readings or self.pinned):
+            self._draw_readings(p, live)
         if self.sim_active():
             return
         # pins with nothing attached: small open circles so you can see where to connect

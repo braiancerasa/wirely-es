@@ -1,5 +1,28 @@
 # Changes
 
+## 1.4.0 — Readings, and 16 new parts
+- **Readings:** a new toolbar button shows the voltage and current on every wire, and the voltage, current and
+  power of every part, while the circuit runs. Click any wire or part while it runs to pin just its reading.
+  **Simulate → Copy readings** copies every part's readings as a table to paste into a spreadsheet.
+- **Bi-colour LEDs** (2-leg and 3-leg) and an **RGB LED** that mixes its colours.
+- **Bridge rectifier**, and a **transformer** (set its turns ratio; warns if you give it DC).
+- **Thyristor (SCR):** C106D, 2N5060, TIC106D and BT151 — latches on from a gate pulse and stays on until the
+  current drops below its holding current.
+- **Voltage regulators:** 7805, 7809, 7812, LM1117-3.3 and the adjustable LM317, with dropout, current limit and
+  thermal shutdown (fit a heatsink in its properties).
+- **Comparators:** LM393 and LM311 (open-collector outputs).
+- **L293D motor driver:** four half-H drivers with built-in spike diodes — drive a motor both ways from logic
+  pins, or set its speed with PWM on the enable pin. It shuts down if it gets too hot.
+- **4026** decade counter with 7-segment outputs, and the **4060** counter with its own oscillator.
+- **DPDT switch**, **DPDT relay** (two changeover contacts), **Hall effect sensor** (click to bring the
+  magnet near) and a **solenoid** that clicks.
+- New examples: *Thyristor alarm (latching)*, *5 V power supply (7805)*, *RGB colour mixer*,
+  *Counter (555 + 4026)*, *Reversing a motor (DPDT)*, *Motor driver (L293D)* and *Relay reversing a motor
+  (DPDT)*.
+- Voltage regulators now have a proper dropout (about 1.2 V at light load, 2 V at 1 A for a 78xx), and no
+  longer get stuck when a battery sags under load.
+- The website counts visits with GoatCounter (no cookies, no personal data).
+
 ## 1.3.0 — parts requested by users, and Wirely in your web browser
 - **Wirely Web:** the whole app runs in a web browser, so it works on **Chromebooks** and school computers with
   nothing to install — at https://richiewillmott.github.io/Wirely/. It's the desktop app's own Python code

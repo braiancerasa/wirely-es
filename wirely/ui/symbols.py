@@ -540,7 +540,7 @@ def _gate_body(c, kind):
         p.drawPath(hp)
 
 
-def _box_ic(c, x0, y0, x1, y1, title, labels=None, numbers=None, clock=None):
+def _box_ic(c, x0, y0, x1, y1, title, labels=None, numbers=None, clock=None, title_y=None):
     """A chip drawn as a box with labelled pins (leads from each pin to the box edge)."""
     part = P.get(c.kind)
     for name, px, py in part.pins:
@@ -569,7 +569,8 @@ def _box_ic(c, x0, y0, x1, y1, title, labels=None, numbers=None, clock=None):
     if clock:
         cx, cy = x0, clock
         c.poly([(cx, cy - 4), (cx + 6, cy), (cx, cy + 4)], None, 1.2, closed=False)
-    c.upright((x0 + x1) / 2, (y0 + y1) / 2 + (8 if c.kind == "timer555" else 0), title, 11)
+    ty = title_y if title_y is not None else (y0 + y1) / 2 + (8 if c.kind == "timer555" else 0)
+    c.upright((x0 + x1) / 2, ty, title, 11)
 
 
 def _timer555(c):
@@ -708,6 +709,28 @@ def _relay(c):
     c.p.drawLine(QPointF(-12, 0), QPointF(17 if not on else 23, 0))
     c.upright(5, -24, "NC", 6.5, False)
     c.upright(37, -22, "NO", 6.5, False)
+
+
+def _relay_dpdt(c):
+    # coil
+    c.line(-40, -30, -40, -15)
+    c.line(-40, 15, -40, 30)
+    c.rect(-48, -15, 16, 30, c.paper)
+    c.line(-48, 15, -32, -15, 1.4)
+    on = bool(c.props.get("_on"))
+    for oy in (-20, 20):
+        c.line(0, oy, 12, oy)
+        c.line(28, oy - 10, 40, oy - 10)
+        c.line(28, oy + 10, 40, oy + 10)
+        c.line(14, oy, 27, oy + (8 if on else -8))
+        for x, y in ((12, oy), (28, oy - 10), (28, oy + 10)):
+            c.circle(x, y, 2.2, c.paper, 1.4)
+        c.upright(36, oy - 15, "NC", 6, False)
+        c.upright(36, oy + 5, "NO", 6, False)
+    c.p.setPen(c.pen(1.2, style=Qt.DashLine))
+    yb = 4 if on else -4
+    c.p.drawLine(QPointF(-32, 0), QPointF(20, 0))
+    c.p.drawLine(QPointF(20, -20 + yb), QPointF(20, 20 + yb))
 
 
 def _reed_switch(c):
@@ -884,6 +907,216 @@ def _sr597(c):
     _box_ic(c, -40, -70, 40, 70, "597", labels={"PL": _lo("PL"), "MR": _lo("MR")}, clock=30)
 
 
+# ------------------------------------------------------------------------------------------ 1.4.0 parts
+LED_MIX_RGB = {"Red": "#ff3b30", "Green": "#2fd158", "Blue": "#2f7bff"}
+
+
+def _mini_diode(c, x0, x1, y, fill, w=8):
+    """A small diode pointing from x0 to x1 (either way) at height y, with a filled body."""
+    c.poly([(x0, y - w), (x0, y + w), (x1, y)], fill)
+    c.line(x1, y - w, x1, y + w, 2.0)
+
+
+def _lit(c, colour, k):
+    col = QColor(LED_MIX_RGB[colour])
+    col.setAlphaF(0.3 + 0.7 * k)
+    return col
+
+
+def _led_bi2(c):
+    g = list(c.props.get("_glows") or [0.0, 0.0])
+    c.line(-30, 0, -14, 0)
+    c.line(14, 0, 30, 0)
+    c.line(-14, -9, -14, 9)
+    c.line(14, -9, 14, 9)
+    for y, xa, xb, col, k in ((-9, -6, 6, "Red", g[0]), (9, 6, -6, "Green", g[1])):
+        c.line(-14, y, min(xa, xb), y)
+        c.line(max(xa, xb), y, 14, y)
+        _mini_diode(c, xa, xb, y, _lit(c, col, k), 6)
+    c.arrow(0, -18, 7, -26, 4, 1.4)
+    c.arrow(7, -16, 14, -24, 4, 1.4)
+
+
+def _led_multi(c, colours):
+    g = list(c.props.get("_glows") or [0.0] * len(colours))
+    ys = [-20, 0, 20] if len(colours) == 3 else [-10, 10]
+    for (col, y, k) in zip(colours, ys, g):
+        c.line(-30, y, -8, y)
+        _mini_diode(c, -8, 6, y, _lit(c, col, k), 7)
+        c.line(6, y, 14, y)
+        c.upright(-22, y - 6, col[0], 7, False)
+    c.line(14, ys[0], 14, ys[-1])
+    c.line(14, 0, 30, 0)
+    top = ys[0]
+    c.arrow(-2, top - 10, 5, top - 18, 4, 1.4)
+    c.arrow(5, top - 8, 12, top - 16, 4, 1.4)
+
+
+def _bridge(c):
+    """Bridge rectifier: four diodes round a diamond, all pointing towards +."""
+    c.line(0, -40, 0, -30)
+    c.line(0, 30, 0, 40)
+    c.line(30, 0, 40, 0)
+    c.line(-40, 0, -30, 0)
+    p = c.p
+    for (xa, ya), (xb, yb) in (((-30, 0), (0, -30)), ((0, -30), (30, 0)), ((-30, 0), (0, 30)), ((0, 30), (30, 0))):
+        c.line(xa, ya, xb, yb, 1.8)
+        mx, my = (xa + xb) / 2, (ya + yb) / 2
+        ang = math.degrees(math.atan2(yb - ya, xb - xa))
+        p.save()
+        p.translate(mx, my)
+        p.rotate(ang)
+        c.poly([(-5, -5), (-5, 5), (4, 0)], c.ink, 1.2)
+        c.line(4, -5, 4, 5, 1.8)
+        p.restore()
+    c.upright(9, -32, "~", 10, False)
+    c.upright(9, 32, "~", 10, False)
+    c.upright(34, -8, "+", 9, True)
+    c.upright(-34, -8, "−", 9, True)
+
+
+def _scr(c):
+    _diode_body(c, c.ink)
+    c.line(9, 6, 10, 16)
+    c.line(10, 16, 10, 30)
+    if c.props.get("_on"):
+        p = c.p
+        p.setPen(Qt.NoPen)
+        lit = QColor(theme_accent())
+        lit.setAlphaF(0.35)
+        p.setBrush(lit)
+        p.drawRoundedRect(QRectF(-14, -14, 28, 28), 6, 6)
+
+
+def theme_accent():
+    from . import theme
+    return theme.ACCENT
+
+
+def _reg_fixed(c):
+    model = str(c.props.get("model", "7805")).replace("LM", "")
+    _box_ic(c, -40, -20, 40, 20, model, labels={"IN": "IN", "OUT": "OUT", "GND": "GND"}, title_y=-9)
+
+
+def _reg_adj(c):
+    _box_ic(c, -40, -20, 40, 20, "LM317", labels={"IN": "IN", "OUT": "OUT", "ADJ": "ADJ"}, title_y=-9)
+
+
+def _coil_v(c, x, y0, y1, bulge):
+    """A coil drawn down the page from y0 to y1, its loops bulging left (-1) or right (+1)."""
+    path = QPainterPath()
+    path.moveTo(x, y0)
+    n = 4
+    hgt = (y1 - y0) / n
+    for k in range(n):
+        yy = y0 + hgt * k
+        if bulge < 0:
+            path.arcTo(QRectF(x - hgt / 2, yy, hgt, hgt), 90, 180)
+        else:
+            path.arcTo(QRectF(x - hgt / 2, yy, hgt, hgt), 90, -180)
+    c.p.setPen(c.pen())
+    c.p.setBrush(Qt.NoBrush)
+    c.p.drawPath(path)
+
+
+def _transformer(c):
+    c.line(-40, -30, -12, -30)
+    c.line(-12, -30, -12, -24)
+    c.line(-40, 30, -12, 30)
+    c.line(-12, 30, -12, 24)
+    c.line(40, -30, 12, -30)
+    c.line(12, -30, 12, -24)
+    c.line(40, 30, 12, 30)
+    c.line(12, 30, 12, 24)
+    _coil_v(c, -12, -24, 24, 1)
+    _coil_v(c, 12, -24, 24, -1)
+    c.line(-2, -26, -2, 26, 1.6)
+    c.line(2, -26, 2, 26, 1.6)
+
+
+def _dpdt(c):
+    a = c.props.get("position", "A") == "A"
+    for oy in (-20, 20):
+        c.line(-30, oy, -14, oy)
+        c.line(14, oy - 10, 30, oy - 10)
+        c.line(14, oy + 10, 30, oy + 10)
+        c.line(-12, oy, 12, oy + (-8 if a else 8))
+        _contact(c, -14, oy)
+        _contact(c, 14, oy - 10)
+        _contact(c, 14, oy + 10)
+    c.p.setPen(c.pen(1.2, style=Qt.DashLine))
+    c.p.drawLine(QPointF(0, -20 + (-4 if a else 4)), QPointF(0, 20 + (-4 if a else 4)))
+    c.upright(22, -37, "A", 8, False)
+    c.upright(22, -3, "B", 8, False)
+
+
+def _hall(c):
+    c.line(0, -30, 0, -18)
+    c.line(0, 18, 0, 30)
+    c.line(18, 0, 30, 0)
+    c.rect(-18, -18, 36, 36, c.paper)
+    c.upright(0, 1, "H", 13)
+    c.upright(-8, -25, "+V", 6.5, False)
+    c.upright(-8, 25, "0V", 6.5, False)
+    c.upright(25, -6, "OUT", 6, False)
+    if c.props.get("magnet"):         # the magnet, drawn beside it
+        p = c.p
+        p.setPen(Qt.NoPen)
+        p.setBrush(QColor("#e03131"))
+        p.drawRect(QRectF(-30, -10, 7, 10))
+        p.setBrush(QColor("#1971c2"))
+        p.drawRect(QRectF(-30, 0, 7, 10))
+
+
+def _solenoid(c):
+    c.line(-30, 0, -18, 0)
+    c.line(18, 0, 30, 0)
+    path = QPainterPath()
+    path.moveTo(-18, 0)
+    for k in range(4):
+        path.arcTo(QRectF(-18 + 9 * k, -5, 9, 10), 180, -180)
+    c.p.setPen(c.pen())
+    c.p.setBrush(Qt.NoBrush)
+    c.p.drawPath(path)
+    x = -14 if c.props.get("_on") else -4         # the plunger: pulled in while energised
+    c.rect(x, 8, 28, 5, c.ink, 1.0)
+    c.line(x + 28, 10.5, x + 34, 10.5, 1.6)
+
+
+def _comparator(c):
+    c.line(-40, -10, -30, -10)
+    c.line(-40, 10, -30, 10)
+    c.line(30, 0, 40, 0)
+    c.poly([(-30, -30), (-30, 30), (30, 0)], c.paper)
+    c.line(-25, -10, -19, -10, 1.5)              # + at the top
+    c.line(-22, -13, -22, -7, 1.5)
+    c.line(-25, 10, -19, 10, 1.5)                # − at the bottom
+    # open-collector output mark
+    c.line(4, -4, 12, -4, 1.2)
+    c.line(8, -4, 8, 4, 1.2)
+    c.line(5, 4, 11, 4, 1.2)
+
+
+def _ic4026(c):
+    _box_ic(c, -40, -40, 40, 60, "4026", labels={"CLK": ""}, clock=-30)
+
+
+def _l293d(c):
+    _box_ic(c, -40, -60, 40, 50, "L293D", labels={"EN12": "EN1,2", "EN34": "EN3,4"})
+
+
+def _ic4060(c):
+    _box_ic(c, -40, -60, 40, 50, "4060", labels={"PI": "RS", "PO": "RTC", "POn": "CTC"})
+
+
+DRAW.update({
+    "led_bi2": _led_bi2, "led_bi3": lambda c: _led_multi(c, ("Red", "Green")),
+    "led_rgb": lambda c: _led_multi(c, ("Red", "Green", "Blue")), "bridge": _bridge, "scr": _scr,
+    "reg_fixed": _reg_fixed, "reg_adj": _reg_adj, "transformer": _transformer, "dpdt": _dpdt, "hall": _hall,
+    "solenoid": _solenoid, "comparator": _comparator, "ic4026": _ic4026, "ic4060": _ic4060, "l293d": _l293d,
+})
+
+
 def note_lines(props):
     return (str(props.get("text", "")) or " ").split("\n")
 
@@ -899,7 +1132,7 @@ def _note(c):
 
 
 DRAW.update({
-    "inductor": _inductor, "relay": _relay, "reed_switch": _reed_switch, "tilt_switch": _tilt_switch,
+    "inductor": _inductor, "relay": _relay, "relay_dpdt": _relay_dpdt, "reed_switch": _reed_switch, "tilt_switch": _tilt_switch,
     "moisture": _moisture, "phototransistor": _phototransistor, "optocoupler": _optocoupler, "note": _note,
     "shunt_ref": _shunt_ref, "ssr": _ssr, "mux4051": _mux4051, "sr164": _sr164, "sr595": _sr595,
     "sr165": _sr165, "sr597": _sr597,

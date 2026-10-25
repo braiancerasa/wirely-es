@@ -223,6 +223,8 @@ SHORTCUTS = [
     ("Run / pause / stop", "F5  /  F6  /  Shift+F5 (or the buttons in the middle of the toolbar)"),
     ("While running", "Click switches, hold push switches, drag the sliders, hover to read voltages"),
     ("Graph (oscilloscope)", "Put graph probes (A–D) on wires, press Play; Ctrl+G shows / hides the graph"),
+    ("Readings", "While running, the Readings button shows the voltage and current on every wire and part — "
+                 "or click any wire or part to pin just its reading (click again to unpin)"),
     ("Logic probe", "Touch it on a wire: H = high, L = low"),
     ("Sound", "Buzzers, speakers, motors and relays make sound while running — the speaker button turns it off"),
     ("Right-click", "A menu for whatever's under the mouse (rotate, delete, properties …)"),

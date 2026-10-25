@@ -5,7 +5,7 @@ import math
 from functools import lru_cache
 
 from PySide6.QtCore import QPointF, QRectF, Qt
-from PySide6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap, QPolygonF
+from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPainterPath, QPen, QPixmap, QPolygonF
 
 from . import theme
 
@@ -304,6 +304,19 @@ def draw(name: str, p: QPainter):
             path.lineTo(x, 16 - 6 * math.sin(i / 20 * 2 * math.pi * 1.5))
         p.setPen(_pen(QColor("#e0a800"), 2))
         p.drawPath(path)
+    elif name == "readings":
+        p.setPen(_pen(ink, 2.2))
+        p.drawLine(QPointF(4, 26), QPointF(28, 26))
+        p.drawLine(QPointF(16, 26), QPointF(16, 20))
+        p.setPen(_pen(QColor(theme.ACCENT), 1.8))
+        p.setBrush(Qt.NoBrush)
+        p.drawRoundedRect(QRectF(3, 5, 26, 15), 3.5, 3.5)
+        f = QFont()
+        f.setPixelSize(9)
+        f.setBold(True)
+        p.setFont(f)
+        p.setPen(ink)
+        p.drawText(QRectF(3, 5, 26, 15), Qt.AlignCenter, "V·A")
     elif name == "flow":
         p.setPen(_pen(ink, 2.2))
         p.drawLine(QPointF(4, 16), QPointF(28, 16))

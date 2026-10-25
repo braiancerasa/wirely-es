@@ -1,0 +1,224 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Thyristor alarm (latching)",
+ "components": [
+  {
+   "id": "5bafa51c",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "d09ae7d7",
+   "kind": "push_break",
+   "ref": "S1",
+   "x": 100,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "pressed": false
+   }
+  },
+  {
+   "id": "24372990",
+   "kind": "buzzer",
+   "ref": "BZ1",
+   "x": 400,
+   "y": 80,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "04bbdfd2",
+   "kind": "scr",
+   "ref": "SCR1",
+   "x": 400,
+   "y": 170,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "model": "C106D"
+   }
+  },
+  {
+   "id": "75193834",
+   "kind": "push_make",
+   "ref": "S2",
+   "x": 200,
+   "y": 90,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "pressed": false
+   }
+  },
+  {
+   "id": "cffebb2b",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 280,
+   "y": 180,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 4700,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "0f41c1ab",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 300,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "1d397055",
+   "kind": "note",
+   "ref": "T1",
+   "x": 230,
+   "y": -60,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Press S2 (the trigger, like a door switch): the alarm keeps sounding\nafter you let go — the thyristor latches. Press S1 to reset it."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "989dc0eb",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     70,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "e3f3c43c",
+   "points": [
+    [
+     130,
+     0
+    ],
+    [
+     400,
+     0
+    ],
+    [
+     400,
+     50
+    ]
+   ]
+  },
+  {
+   "id": "9593a3a4",
+   "points": [
+    [
+     400,
+     110
+    ],
+    [
+     400,
+     140
+    ]
+   ]
+  },
+  {
+   "id": "a6459787",
+   "points": [
+    [
+     200,
+     60
+    ],
+    [
+     200,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "822f16e7",
+   "points": [
+    [
+     200,
+     120
+    ],
+    [
+     200,
+     180
+    ],
+    [
+     250,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "05ebe5ee",
+   "points": [
+    [
+     310,
+     180
+    ],
+    [
+     370,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "f3af142b",
+   "points": [
+    [
+     400,
+     200
+    ],
+    [
+     400,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "5127b460",
+   "points": [
+    [
+     0,
+     180
+    ],
+    [
+     0,
+     300
+    ],
+    [
+     400,
+     300
+    ]
+   ]
+  }
+ ]
+}

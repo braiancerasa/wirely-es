@@ -49,9 +49,10 @@ def test_every_symbol_draws_without_qt():
                     S.draw(p, k, props, "#1f2328", rot, flip, QColor("#ffffff"))
                     assert p.ops, k
                     n += 1
-        print(n)
+        print(n, len(P.PARTS))
     """)
-    assert int(out.split()[-1]) == 62 * 8
+    n, parts = map(int, out.split()[-2:])
+    assert n == parts * 8 and parts >= 76
 
 
 @pytest.mark.parametrize("lite", [False, True], ids=["numpy", "fallback-maths"])

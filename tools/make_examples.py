@@ -532,13 +532,208 @@ def shift_register_595():
     return c
 
 
-def main():
+# ------------------------------------------------------------------------------------------- 1.4.0 examples
+def thyristor_alarm():
+    """A latching alarm: press the trigger and it keeps sounding until you press reset."""
+    c = Circuit()
+    c.title = "Thyristor alarm (latching)"
+    b = c.add("battery", 0, 150, rot=1, props={"voltage": 9})                 # + (0,120) - (0,180)
+    reset = c.add("push_break", 100, 0)                                       # (70,0)-(130,0)
+    bz = c.add("buzzer", 400, 80, rot=1, props={"voltage": 9})                # + (400,50) - (400,110)
+    scr = c.add("scr", 400, 170, rot=1, props={"model": "C106D"})             # A (400,140) K (400,200) G (370,180)
+    trig = c.add("push_make", 200, 90, rot=1)                                 # (200,60)-(200,120)
+    rg = c.add("resistor", 285, 180, props={"resistance": 4700})              # (255,180)-(315,180)
+    assert pin(c, scr, "G") == (370, 180) and pin(c, bz, "+") == (400, 50)
+    wire(c, pin(c, b, "+"), (0, 0), pin(c, reset, "1"))
+    wire(c, pin(c, reset, "2"), (400, 0), pin(c, bz, "+"))
+    wire(c, pin(c, bz, "-"), pin(c, scr, "A"))
+    wire(c, pin(c, trig, "1"), (200, 0))
+    wire(c, pin(c, trig, "2"), (200, 180), pin(c, rg, "1"))
+    wire(c, pin(c, rg, "2"), pin(c, scr, "G"))
+    wire(c, pin(c, scr, "K"), (400, 300))
+    wire(c, pin(c, b, "-"), (0, 300), (400, 300))
+    c.add("ground", 0, 300)
+    reset.ref, trig.ref = "S1", "S2"
+    c.add("note", 230, -60, props={"text": "Press S2 (the trigger, like a door switch): the alarm keeps sounding\n"
+                                            "after you let go — the thyristor latches. Press S1 to reset it."})
+    return c
+
+
+def power_supply_5v():
+    """Mains to 5 V: transformer, bridge rectifier, smoothing capacitor and a 7805 regulator."""
+    c = Circuit()
+    c.title = "5 V power supply (7805)"
+    ac = c.add("ac_supply", 0, 150, rot=1, props={"voltage": 325, "frequency": 50})   # 1 (0,120) 2 (0,180)
+    t = c.add("transformer", 120, 150, props={"ratio": 20, "rating": 5})              # P1 (80,120) P2 (80,180) S1 (160,120) S2 (160,180)
+    br = c.add("bridge", 260, 160)                                                     # AC1 (260,120) AC2 (260,200) + (300,160) - (220,160)
+    c1 = c.add("electrolytic", 340, 230, rot=1, props={"capacitance": 1000e-6, "max_voltage": 25})  # + (340,210) - (340,250)
+    reg = c.add("reg_fixed", 450, 160, props={"model": "7805"})                       # IN (400,160) GND (450,190) OUT (500,160)
+    r = c.add("resistor", 570, 160, props={"resistance": 220})                        # (540,160)-(600,160)
+    led = c.add("led", 640, 230, rot=1, props={"colour": "Green"})                    # A (640,200) K (640,260)
+    vm = c.add("voltmeter", 720, 230, rot=1)                                           # + (720,200) - (720,260)
+    assert pin(c, ac, "1") == (0, 120) and pin(c, t, "S2") == (160, 180) and pin(c, br, "AC2") == (260, 200)
+    assert pin(c, reg, "IN") == (400, 160) and pin(c, reg, "GND") == (450, 190)
+    wire(c, pin(c, ac, "1"), pin(c, t, "P1"))
+    wire(c, pin(c, ac, "2"), pin(c, t, "P2"))
+    wire(c, pin(c, t, "S1"), pin(c, br, "AC1"))
+    wire(c, pin(c, t, "S2"), (160, 220), (260, 220), pin(c, br, "AC2"))
+    wire(c, pin(c, br, "+"), (340, 160), pin(c, c1, "+"))
+    wire(c, (340, 160), pin(c, reg, "IN"))
+    wire(c, pin(c, reg, "OUT"), pin(c, r, "1"))
+    wire(c, pin(c, r, "2"), (640, 160), pin(c, led, "A"))
+    wire(c, (640, 160), (720, 160), pin(c, vm, "+"))
+    for p_ in (pin(c, br, "-"), pin(c, c1, "-"), pin(c, reg, "GND"), pin(c, led, "K"), pin(c, vm, "-")):
+        wire(c, p_, (p_[0], 300))
+    wire(c, (220, 300), (720, 300))
+    c.add("ground", 220, 300)
+    c.add("scope_probe", 320, 160, props={"channel": "A"})
+    c.add("scope_probe", 520, 160, props={"channel": "B"})
+    c.add("note", 360, 40, props={"text": "Mains (simulated!) → the transformer steps it down → the bridge rectifies it →\n"
+                                           "C1 smooths it → the 7805 gives a steady 5 V. The graph shows A and B."})
+    return c
+
+
+def rgb_mixer():
+    c = Circuit()
+    c.title = "RGB colour mixer"
+    b = c.add("battery", 0, 150, rot=1, props={"voltage": 9})                  # + (0,120) - (0,180)
+    led = c.add("led_rgb", 400, 260)                                            # R (370,240) G (370,260) B (370,280) K (430,260)
+    sws = []
+    for x, ya, colour in ((100, 240, "R"), (170, 260, "G"), (240, 280, "B")):
+        sw = c.add("switch", x, 70, rot=1, props={"closed": colour != "B"})    # (x,40)-(x,100)
+        r = c.add("resistor", x, 160, rot=1, props={"resistance": 470})       # (x,130)-(x,190)
+        wire(c, pin(c, sw, "1"), (x, 0))
+        wire(c, pin(c, sw, "2"), pin(c, r, "1"))
+        wire(c, pin(c, r, "2"), (x, ya), pin(c, led, colour))
+        sws.append(sw)
+    wire(c, pin(c, b, "+"), (0, 0), (240, 0))
+    wire(c, pin(c, led, "K"), (430, 340))
+    wire(c, pin(c, b, "-"), (0, 340), (430, 340))
+    c.add("ground", 0, 340)
+    for sw, ref in zip(sws, ("S1", "S2", "S3")):
+        sw.ref = ref
+    c.add("note", 620, 140, props={"text": "Click S1 (red), S2 (green) and S3 (blue) while it runs\n"
+                                            "to mix colours: red + green = yellow, all three = white."})
+    return c
+
+
+def counter_4026():
+    c = Circuit()
+    c.title = "Counter (555 + 4026)"
+    b = c.add("battery", 0, 200, rot=1, props={"voltage": 9})                 # + (0,170) - (0,230)
+    ic = timer_555(c, R1=10e3, R2=68e3, C=4.7e-6)                              # OUT (360,200)
+    cnt = c.add("ic4026", 520, 200)                                            # CLK (460,170) INH (460,190) RST (460,210)
+    disp = c.add("sevenseg", 700, 200)
+    wire(c, pin(c, b, "+"), (0, 60), (320, 60))
+    wire(c, pin(c, ic, "OUT"), (420, 200), (420, 170), pin(c, cnt, "CLK"))
+    wire(c, pin(c, cnt, "INH"), (440, 190), (440, 360))
+    wire(c, pin(c, cnt, "RST"), (450, 210), (450, 360))
+    for s_ in "abcdefg":
+        wire(c, pin(c, cnt, s_), pin(c, disp, s_))
+    wire(c, pin(c, disp, "COM"), (700, 360))
+    wire(c, pin(c, b, "-"), (0, 360), (700, 360))
+    c.add("ground", 0, 360)
+    c.add("note", 560, 60, props={"text": "The 555 makes clock pulses; the 4026 counts them\n"
+                                           "and drives the display directly — no decoder needed."})
+    return c
+
+
+def motor_reversing():
+    c = Circuit()
+    c.title = "Reversing a motor (DPDT)"
+    b = c.add("battery", 0, 100, rot=1, props={"voltage": 6})                  # + (0,70) - (0,130)
+    sw = c.add("dpdt", 150, 100)              # com1 (120,80) a1 (180,70) b1 (180,90) com2 (120,120) a2 (180,110) b2 (180,130)
+    m = c.add("motor", 400, 100, rot=1, props={"voltage": 6})                  # 1 (400,70) 2 (400,130)
+    assert pin(c, sw, "b2") == (180, 130) and pin(c, m, "1") == (400, 70)
+    wire(c, pin(c, b, "+"), (0, 40), (100, 40), (100, 80), pin(c, sw, "com1"))
+    wire(c, pin(c, b, "-"), (0, 160), (100, 160), (100, 120), pin(c, sw, "com2"))
+    wire(c, pin(c, sw, "a1"), pin(c, m, "1"))
+    wire(c, pin(c, sw, "b2"), (240, 130), (240, 30), (400, 30), pin(c, m, "1"))
+    wire(c, pin(c, sw, "b1"), (300, 90), (300, 130), pin(c, m, "2"))
+    wire(c, pin(c, sw, "a2"), (320, 110), (320, 150), (400, 150), pin(c, m, "2"))
+    c.add("ground", 0, 160)
+    c.add("note", 200, 210, props={"text": "Click S1 while it runs: the switch swaps the motor's\n"
+                                            "connections over, so it spins the other way."})
+    return c
+
+
+def l293d_motor():
+    """An L293D drives a motor forwards or backwards from two logic inputs; a 7805 makes its 5 V logic supply."""
+    c = Circuit()
+    c.title = "Motor driver (L293D)"
+    b = c.add("battery", 0, 200, rot=1, props={"voltage": 9})                  # + (0,170) - (0,230)
+    reg = c.add("reg_fixed", 150, 60, props={"model": "7805"})                 # IN (100,60) GND (150,90) OUT (200,60)
+    ic = c.add("l293d", 400, 220)
+    s1 = c.add("switch", 290, 130, rot=1)                                      # (290,100)-(290,160)
+    s2 = c.add("switch", 250, 130, rot=1)                                      # (250,100)-(250,160)
+    m = c.add("motor", 540, 200, rot=1, props={"voltage": 6})                  # 1 (540,170) 2 (540,230)
+    assert pin(c, ic, "EN12") == (340, 180) and pin(c, ic, "VCC2") == (420, 140) and pin(c, ic, "GND") == (400, 290)
+    assert pin(c, s1, "1") == (290, 100) and pin(c, m, "1") == (540, 170)
+    wire(c, pin(c, b, "+"), (0, 0), (420, 0), pin(c, ic, "VCC2"))
+    wire(c, (100, 0), pin(c, reg, "IN"))
+    wire(c, pin(c, reg, "OUT"), (380, 60), pin(c, ic, "VCC1"))
+    wire(c, pin(c, ic, "EN12"), (320, 180), (320, 60))
+    wire(c, pin(c, s1, "1"), (290, 60))
+    wire(c, pin(c, s2, "1"), (250, 60))
+    wire(c, pin(c, s1, "2"), (290, 190), pin(c, ic, "1A"))
+    wire(c, pin(c, s2, "2"), (250, 200), pin(c, ic, "2A"))
+    wire(c, pin(c, ic, "1Y"), (500, 190), (500, 140), (540, 140), pin(c, m, "1"))
+    wire(c, pin(c, ic, "2Y"), (480, 200), (480, 260), (540, 260), pin(c, m, "2"))
+    wire(c, pin(c, ic, "EN34"), (330, 230), (330, 330))
+    wire(c, pin(c, ic, "GND"), (400, 330))
+    wire(c, pin(c, reg, "GND"), (150, 330))
+    wire(c, pin(c, b, "-"), (0, 330), (400, 330))
+    c.add("ground", 0, 330)
+    s1.ref, s2.ref = "S1", "S2"
+    c.add("note", 260, 400, props={"text": "Close S1 and the motor turns one way; close S2 instead and it turns the other way.\n"
+                                            "Both or neither: it stops. The 7805 makes the 5 V the chip's logic needs."})
+    return c
+
+
+def relay_reversing():
+    """A DPDT relay swaps a motor's connections over when its coil is switched on."""
+    c = Circuit()
+    c.title = "Relay reversing a motor (DPDT)"
+    b = c.add("battery", 0, 150, rot=1, props={"voltage": 9})                  # + (0,120) - (0,180)
+    s1 = c.add("switch", 100, 50, rot=1)                                       # (100,20)-(100,80)
+    rl = c.add("relay_dpdt", 200, 150, props={"voltage": 9})
+    d = c.add("diode", 130, 150, rot=3, props={"model": "1N4001"})
+    m = c.add("motor", 460, 150, rot=1, props={"voltage": 9})                  # 1 (460,120) 2 (460,180)
+    assert pin(c, rl, "C1") == (160, 120) and pin(c, rl, "COM1") == (200, 130) and pin(c, rl, "NO2") == (240, 180)
+    assert pin(c, d, "K")[1] < pin(c, d, "A")[1], (pin(c, d, "K"), pin(c, d, "A"))
+    dk, da = pin(c, d, "K"), pin(c, d, "A")
+    wire(c, pin(c, b, "+"), (0, 0), (380, 0))
+    wire(c, pin(c, s1, "1"), (100, 0))
+    wire(c, pin(c, s1, "2"), (100, 90), (160, 90), pin(c, rl, "C1"))
+    wire(c, dk, (dk[0], 90))
+    wire(c, da, (da[0], 300))
+    wire(c, pin(c, rl, "C2"), (160, 300))
+    wire(c, pin(c, rl, "NO2"), (380, 180), (380, 0))
+    wire(c, pin(c, rl, "NC1"), (380, 120))
+    wire(c, pin(c, rl, "NO1"), (320, 140), (320, 300))
+    wire(c, pin(c, rl, "NC2"), (320, 160))
+    wire(c, pin(c, rl, "COM1"), (200, 60), (460, 60), pin(c, m, "1"))
+    wire(c, pin(c, rl, "COM2"), (200, 240), (460, 240), pin(c, m, "2"))
+    wire(c, pin(c, b, "-"), (0, 300), (320, 300))
+    c.add("ground", 0, 300)
+    s1.ref = "S1"
+    c.add("note", 240, 370, props={"text": "Click S1 while it runs: the relay clicks over and both of its switches swap\n"
+                                            "the motor's connections, so it spins the other way. D1 catches the coil's spike."})
+    return c
+
+
+NEW_14 = (thyristor_alarm, power_supply_5v, rgb_mixer, counter_4026, motor_reversing, l293d_motor, relay_reversing)
+
+
+def main(only=None):
     os.makedirs(OUT, exist_ok=True)
     for fn in (led_and_resistor, voltage_divider, night_light, two_way_switch, capacitor_charging,
                buzzer_and_motor, flasher_555, led_chaser, opamp_light_sensor, logic_gates, mosfet_motor,
                rc_filter_graph, binary_display, relay_lamp, motor_load, doorbell_555, burglar_alarm,
                rain_alarm, buck_converter, optoisolator, tl431_reference,
-               shift_register_595):
+               shift_register_595) + NEW_14:
+        if only and fn not in only:
+            continue
         c = fn()
         path = os.path.join(OUT, c.title + ".wirely")
         c.save(path)

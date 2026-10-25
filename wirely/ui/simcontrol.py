@@ -15,8 +15,8 @@ from ..sim.flow import FlowNetwork
 FRAME_MS = 33
 SPEEDS = [("10× faster", 10.0), ("2× faster", 2.0), ("Real time", 1.0), ("½ speed", 0.5), ("⅕ speed", 0.2),
           ("1/10 speed", 0.1), ("1/100 speed", 0.01), ("1/1000 speed", 0.001)]
-INTERACTIVE = {"switch", "push_make", "push_break", "spdt", "reed_switch", "tilt_switch"}
-TOGGLES = {"switch": "closed", "reed_switch": "magnet", "tilt_switch": "tilted"}
+INTERACTIVE = {"switch", "push_make", "push_break", "spdt", "dpdt", "reed_switch", "tilt_switch", "hall"}
+TOGGLES = {"switch": "closed", "reed_switch": "magnet", "tilt_switch": "tilted", "hall": "magnet"}
 ADJUSTABLE = {"ldr": "light", "thermistor": "temperature", "var_resistor": "setting", "potentiometer": "setting",
               "moisture": "moisture", "phototransistor": "light"}
 
@@ -136,6 +136,9 @@ class SimController(QObject):
         for d in sim.devices:
             info = {"blown": d.blown, "warn": d.warn}
             k = d.comp.kind
+            extra = getattr(d, "live_extra", None)
+            if extra is not None:            # parts that report their own look (RGB LEDs, solenoids …)
+                info.update(extra())
             if k in ("led", "lamp"):
                 info["_glow"] = d.glow()
             elif k == "motor":
@@ -144,7 +147,7 @@ class SimController(QObject):
                 info["angle"] = self._angle[d.cid]
                 info["speed"] = d.speed
                 info["rpm"] = d.rpm
-            elif k == "relay":
+            elif k in ("relay", "relay_dpdt"):
                 info["_on"] = d.on
             elif k == "optocoupler":
                 info["_ir"] = d.glow()

@@ -154,9 +154,14 @@ def _live_key(live, kind, anim_t):
     """The parts of a part's live readings that change how it looks (so unchanged drawings are reused)."""
     if not live:
         return None
-    k = (live.get("blown"), bool(live.get("warn")), _r(live.get("_glow", 0.0)),
-         tuple(_r(s) for s in (live.get("_segs") or ())), live.get("_on"), _r(live.get("_ir", 0.0)),
-         live.get("_level"), live.get("reading"))
+    k = (live.get("blown"), bool(live.get("warn")), live.get("reading"))
+    for name in sorted(n for n in live if n.startswith("_")):
+        val = live[name]
+        if isinstance(val, (list, tuple)):
+            val = tuple(_r(x) if isinstance(x, (int, float)) else x for x in val)
+        elif isinstance(val, float):
+            val = _r(val)
+        k += ((name, val),)
     if kind == "motor":
         k += (round(live.get("angle", 0.0) / 3),)
     if kind == "buzzer" and live.get("level", 0) > 0:
@@ -469,6 +474,10 @@ class App:
             sc.show_volts = not sc.show_volts
         elif name == "flow":
             sc.show_flow = not sc.show_flow
+        elif name == "readings":
+            sc.show_readings = not sc.show_readings
+        elif name == "copy_readings":
+            return sc.readings_text()
         elif name == "sound":
             self.sound_on = not self.sound_on
         elif name == "graph":
@@ -500,7 +509,7 @@ class App:
             "sim": self.simc.state, "mode": sc.mode, "place": sc._place_kind if sc.mode == "place" else None,
             "sel": bool(comps or wires), "comps": len(comps), "running": running,
             "undo": self.hi > 0 and not running, "redo": self.hi < len(self.history) - 1 and not running,
-            "paste": bool(self.clip) and not running, "volts": sc.show_volts, "flow": sc.show_flow,
+            "paste": bool(self.clip) and not running, "volts": sc.show_volts, "flow": sc.show_flow, "readings": sc.show_readings,
             "sound": self.sound_on, "graph": self.graph_on, "grid": sc.show_grid, "dark": theme.MODE == "dark",
             "dirty": self.is_dirty(), "name": self.name, "empty": self.circuit.is_empty(),
             "counts": f"{n} part{'s' * (n != 1)} · {w} wire{'s' * (w != 1)}",

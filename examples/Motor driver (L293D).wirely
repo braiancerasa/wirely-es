@@ -1,0 +1,341 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Motor driver (L293D)",
+ "components": [
+  {
+   "id": "929c8732",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 200,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "4d6186b9",
+   "kind": "reg_fixed",
+   "ref": "IC1",
+   "x": 150,
+   "y": 60,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "model": "7805",
+    "heatsink": false
+   }
+  },
+  {
+   "id": "ba50a805",
+   "kind": "l293d",
+   "ref": "IC2",
+   "x": 400,
+   "y": 220,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "c12e3a9f",
+   "kind": "switch",
+   "ref": "S1",
+   "x": 290,
+   "y": 130,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "7fdb5538",
+   "kind": "switch",
+   "ref": "S2",
+   "x": 250,
+   "y": 130,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "0af95a3b",
+   "kind": "motor",
+   "ref": "M1",
+   "x": 540,
+   "y": 200,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 6,
+    "load": "None"
+   }
+  },
+  {
+   "id": "a9fe8e9d",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 330,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "f877bb3a",
+   "kind": "note",
+   "ref": "T1",
+   "x": 260,
+   "y": 400,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Close S1 and the motor turns one way; close S2 instead and it turns the other way.\nBoth or neither: it stops. The 7805 makes the 5 V the chip's logic needs."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "9a2f3e40",
+   "points": [
+    [
+     0,
+     170
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     420,
+     0
+    ],
+    [
+     420,
+     140
+    ]
+   ]
+  },
+  {
+   "id": "a89bad2a",
+   "points": [
+    [
+     100,
+     0
+    ],
+    [
+     100,
+     60
+    ]
+   ]
+  },
+  {
+   "id": "b3f11e24",
+   "points": [
+    [
+     200,
+     60
+    ],
+    [
+     380,
+     60
+    ],
+    [
+     380,
+     140
+    ]
+   ]
+  },
+  {
+   "id": "0235cf30",
+   "points": [
+    [
+     340,
+     180
+    ],
+    [
+     320,
+     180
+    ],
+    [
+     320,
+     60
+    ]
+   ]
+  },
+  {
+   "id": "eb9727d3",
+   "points": [
+    [
+     290,
+     100
+    ],
+    [
+     290,
+     60
+    ]
+   ]
+  },
+  {
+   "id": "09768170",
+   "points": [
+    [
+     250,
+     100
+    ],
+    [
+     250,
+     60
+    ]
+   ]
+  },
+  {
+   "id": "718b4c55",
+   "points": [
+    [
+     290,
+     160
+    ],
+    [
+     290,
+     190
+    ],
+    [
+     340,
+     190
+    ]
+   ]
+  },
+  {
+   "id": "b6b31562",
+   "points": [
+    [
+     250,
+     160
+    ],
+    [
+     250,
+     200
+    ],
+    [
+     340,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "7e6bd0c8",
+   "points": [
+    [
+     460,
+     190
+    ],
+    [
+     500,
+     190
+    ],
+    [
+     500,
+     140
+    ],
+    [
+     540,
+     140
+    ],
+    [
+     540,
+     170
+    ]
+   ]
+  },
+  {
+   "id": "0f78e478",
+   "points": [
+    [
+     460,
+     200
+    ],
+    [
+     480,
+     200
+    ],
+    [
+     480,
+     260
+    ],
+    [
+     540,
+     260
+    ],
+    [
+     540,
+     230
+    ]
+   ]
+  },
+  {
+   "id": "af94ab13",
+   "points": [
+    [
+     340,
+     230
+    ],
+    [
+     330,
+     230
+    ],
+    [
+     330,
+     330
+    ]
+   ]
+  },
+  {
+   "id": "b894f6f8",
+   "points": [
+    [
+     400,
+     290
+    ],
+    [
+     400,
+     330
+    ]
+   ]
+  },
+  {
+   "id": "3c97a611",
+   "points": [
+    [
+     150,
+     90
+    ],
+    [
+     150,
+     330
+    ]
+   ]
+  },
+  {
+   "id": "f822f529",
+   "points": [
+    [
+     0,
+     230
+    ],
+    [
+     0,
+     330
+    ],
+    [
+     400,
+     330
+    ]
+   ]
+  }
+ ]
+}

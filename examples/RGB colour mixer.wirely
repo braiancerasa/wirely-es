@@ -1,0 +1,306 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "RGB colour mixer",
+ "components": [
+  {
+   "id": "7b4bb82b",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "539a1e49",
+   "kind": "led_rgb",
+   "ref": "LED1",
+   "x": 400,
+   "y": 260,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "060e9028",
+   "kind": "switch",
+   "ref": "S1",
+   "x": 100,
+   "y": 70,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "closed": true
+   }
+  },
+  {
+   "id": "dea8b7b8",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 100,
+   "y": 160,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "d4f876c7",
+   "kind": "switch",
+   "ref": "S2",
+   "x": 170,
+   "y": 70,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "closed": true
+   }
+  },
+  {
+   "id": "0ddd05a2",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 170,
+   "y": 160,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "566e124a",
+   "kind": "switch",
+   "ref": "S3",
+   "x": 240,
+   "y": 70,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "45a91dc6",
+   "kind": "resistor",
+   "ref": "R3",
+   "x": 240,
+   "y": 160,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "7d0dd728",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 340,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "8dced9b2",
+   "kind": "note",
+   "ref": "T1",
+   "x": 620,
+   "y": 140,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Click S1 (red), S2 (green) and S3 (blue) while it runs\nto mix colours: red + green = yellow, all three = white."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "d0c5f4b4",
+   "points": [
+    [
+     100,
+     40
+    ],
+    [
+     100,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "8779b49a",
+   "points": [
+    [
+     100,
+     100
+    ],
+    [
+     100,
+     130
+    ]
+   ]
+  },
+  {
+   "id": "51a16620",
+   "points": [
+    [
+     100,
+     190
+    ],
+    [
+     100,
+     240
+    ],
+    [
+     370,
+     240
+    ]
+   ]
+  },
+  {
+   "id": "b2956338",
+   "points": [
+    [
+     170,
+     40
+    ],
+    [
+     170,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "51e770dd",
+   "points": [
+    [
+     170,
+     100
+    ],
+    [
+     170,
+     130
+    ]
+   ]
+  },
+  {
+   "id": "8f43ef76",
+   "points": [
+    [
+     170,
+     190
+    ],
+    [
+     170,
+     260
+    ],
+    [
+     370,
+     260
+    ]
+   ]
+  },
+  {
+   "id": "018a5720",
+   "points": [
+    [
+     240,
+     40
+    ],
+    [
+     240,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "af731a46",
+   "points": [
+    [
+     240,
+     100
+    ],
+    [
+     240,
+     130
+    ]
+   ]
+  },
+  {
+   "id": "91d0ba51",
+   "points": [
+    [
+     240,
+     190
+    ],
+    [
+     240,
+     280
+    ],
+    [
+     370,
+     280
+    ]
+   ]
+  },
+  {
+   "id": "f01e2367",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     240,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "754a8063",
+   "points": [
+    [
+     430,
+     260
+    ],
+    [
+     430,
+     340
+    ]
+   ]
+  },
+  {
+   "id": "ff9785b3",
+   "points": [
+    [
+     0,
+     180
+    ],
+    [
+     0,
+     340
+    ],
+    [
+     430,
+     340
+    ]
+   ]
+  }
+ ]
+}

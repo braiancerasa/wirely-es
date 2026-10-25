@@ -370,6 +370,117 @@ _PARTS += [
             "PL low copies them into the shift register, and each rising SHCP shifts them out of Q7. MR low "
             "clears the shift register. 74HC: for 2–6 V circuits." + LOGIC_NOTE + SR_NOTE,
             "74hc597 597 shift register piso latch", short="74HC597"),
+    # ---------------------------------------------------------------- 1.4.0
+    PartDef("led_bi2", "Bi-colour LED (2 legs)", "Diodes & LEDs", "LED", (("A", -30, 0), ("B", 30, 0)),
+            (_p("max_current", "Maximum current", 0.03, "A", min=0),),
+            (-30, -24, 60, 44), "A red and a green LED back to back in one package: current from A to B lights "
+            "it red, from B to A green. Swap the direction quickly (or use AC) and it looks yellow. Needs a "
+            "resistor in series.", "bicolour bicolor two colour dual red green led", short="Bi-colour LED"),
+    PartDef("led_bi3", "Bi-colour LED (3 legs)", "Diodes & LEDs", "LED",
+            (("R", -30, -10), ("G", -30, 10), ("K", 30, 0)),
+            (_p("max_current", "Maximum current", 0.03, "A", min=0),),
+            (-30, -24, 60, 48), "A red and a green LED sharing one cathode (K): R lights red, G lights green, "
+            "both together look yellow. Each anode needs its own resistor.",
+            "bicolour bicolor dual three leg common cathode red green led", short="Bi-colour LED (3)"),
+    PartDef("led_rgb", "RGB LED", "Diodes & LEDs", "LED",
+            (("R", -30, -20), ("G", -30, 0), ("B", -30, 20), ("K", 30, 0)),
+            (_p("max_current", "Maximum current", 0.03, "A", min=0),),
+            (-30, -28, 60, 56), "Red, green and blue LEDs sharing one cathode (K). Mix them to make other "
+            "colours: red + green = yellow, all three = white. Each anode needs its own resistor; use PWM "
+            "(a signal generator) for in-between brightness.", "rgb colour mixing common cathode led",
+            short="RGB LED"),
+    PartDef("bridge", "Bridge rectifier", "Diodes & LEDs", "BR",
+            (("AC1", 0, -40), ("AC2", 0, 40), ("+", 40, 0), ("-", -40, 0)),
+            (_p("rating", "Current rating", 1.0, "A", on_label=True, min=0.01),),
+            (-30, -30, 60, 60), "Four diodes in one package: turns AC into DC (full-wave), so + is always "
+            "positive whichever way round the AC is. Add a big capacitor across + and − to smooth it.",
+            "rectifier diode bridge full wave ac dc w01 db107", short="Bridge rectifier"),
+    PartDef("scr", "Thyristor (SCR)", "Transistors", "SCR", (("A", -30, 0), ("K", 30, 0), ("G", 10, 30)),
+            (_p("model", "Type", "C106D", kind="choice", choices=("C106D", "2N5060", "TIC106D", "BT151")),),
+            (-30, -20, 60, 50), "A switch that latches: a small current into the gate (G) turns it on, and it "
+            "stays on — even when the gate current stops — until the current through it (A → K) stops. The "
+            "classic alarm that keeps sounding after the trigger has gone: reset it by breaking the circuit.",
+            "thyristor scr latch c106 2n5060 tic106 bt151 alarm", short="Thyristor"),
+    PartDef("reg_fixed", "Voltage regulator (78xx)", "Power supplies", "IC",
+            (("IN", -50, 0), ("GND", 0, 30), ("OUT", 50, 0)),
+            (_p("model", "Type", "7805", kind="choice", choices=("7805", "7809", "7812", "LM1117-3.3"),
+                on_label=True),
+             _p("heatsink", "On a heatsink", False, kind="bool",
+                help="Without a heatsink it can only get rid of about 1.5 W before it overheats")),
+            (-40, -20, 80, 40), "Gives a steady output voltage (5 V for a 7805) from a higher, rougher input. "
+            "The input must be about 2 V above the output. The extra voltage is turned into heat, so it "
+            "shuts down if it gets too hot.", "regulator 7805 7809 7812 lm7805 1117 ldo 5v power supply",
+            short="78xx regulator"),
+    PartDef("reg_adj", "Adjustable regulator (LM317)", "Power supplies", "IC",
+            (("IN", -50, 0), ("ADJ", 0, 30), ("OUT", 50, 0)),
+            (_p("heatsink", "On a heatsink", False, kind="bool",
+                help="Without a heatsink it can only get rid of about 1.5 W before it overheats"),),
+            (-40, -20, 80, 40), "A regulator you set with two resistors: it holds OUT 1.25 V above ADJ, so with "
+            "R1 from OUT to ADJ and R2 from ADJ to 0 V, Vout = 1.25 V × (1 + R2 / R1). Typically R1 = 240 Ω.",
+            "regulator lm317 adjustable variable power supply", short="LM317"),
+    PartDef("transformer", "Transformer", "Power supplies", "T",
+            (("P1", -40, -30), ("P2", -40, 30), ("S1", 40, -30), ("S2", 40, 30)),
+            (_p("ratio", "Turns ratio (primary ÷ secondary)", 10.0, "", on_label=True, min=0.01, max=1000,
+                help="10 means the secondary gives a tenth of the primary voltage"),
+             _p("rating", "Power rating", 5.0, "W", min=0.01)),
+            (-30, -30, 60, 60), "Two coils on one core: AC on the primary (P1–P2) makes AC on the secondary "
+            "(S1–S2), stepped down (or up) by the turns ratio. The two sides aren't connected. Only works with AC.",
+            "transformer step down step up mains coil isolation", short="Transformer"),
+    PartDef("dpdt", "Double changeover switch (DPDT)", "Switches", "S",
+            (("com1", -30, -20), ("a1", 30, -30), ("b1", 30, -10),
+             ("com2", -30, 20), ("a2", 30, 10), ("b2", 30, 30)),
+            (_p("position", "Position", "A", kind="choice", choices=("A", "B")),),
+            (-30, -38, 60, 76), "Two changeover switches worked together: both commons go to A, or both to B. "
+            "Used to reverse a motor. Click it while running.", "dpdt double pole reversing motor two way",
+            short="DPDT switch"),
+    PartDef("relay_dpdt", "DPDT relay", "Switches", "RL",
+            (("C1", -40, -30), ("C2", -40, 30), ("COM1", 0, -20), ("NC1", 40, -30), ("NO1", 40, -10),
+             ("COM2", 0, 20), ("NC2", 40, 10), ("NO2", 40, 30)),
+            (_p("voltage", "Coil voltage", 6.0, "V", on_label=True, min=0.5),),
+            (-50, -38, 100, 76), "A relay with two changeover switches: current in the coil (C1–C2) flips both "
+            "COMs from NC to NO together. Used to reverse a motor or switch two circuits at once. Put a diode "
+            "across the coil!", "relay double pole dpdt reversing motor electromagnet two changeover",
+            short="DPDT relay"),
+    PartDef("hall", "Hall effect sensor", "Input sensors", "U",
+            (("VCC", 0, -30), ("GND", 0, 30), ("OUT", 30, 0)),
+            (_p("magnet", "Magnet nearby", False, kind="bool"),),
+            (-25, -30, 55, 60), "Senses a magnet (A3144 type). Its output is an open collector: it pulls OUT down "
+            "to 0 V when a magnet is near, so use a pull-up resistor from OUT to +. Needs 4.5–24 V on VCC. Click "
+            "it while running to bring the magnet close.", "hall effect magnet sensor a3144 switch",
+            short="Hall sensor"),
+    PartDef("solenoid", "Solenoid", "Output devices", "SOL", TWO,
+            (_p("voltage", "Rated voltage", 12.0, "V", on_label=True, min=0.5),),
+            (-30, -16, 60, 32), "An electromagnet that pulls a metal plunger in — for door locks and valves. "
+            "Like a relay coil, it makes a big voltage spike when switched off: put a diode across it.",
+            "solenoid plunger actuator lock valve coil electromagnet"),
+    PartDef("comparator", "Comparator", "Integrated circuits", "IC",
+            (("+", -40, -10), ("-", -40, 10), ("OUT", 40, 0)),
+            (_p("model", "Type", "LM393", kind="choice", choices=("LM393", "LM311"), on_label=True),),
+            (-30, -30, 70, 60), "Compares two voltages: when + is lower than −, OUT is pulled to 0 V; when + is "
+            "higher, OUT is switched off (open collector), so add a pull-up resistor from OUT to +. Switches more "
+            "cleanly than an op-amp." + LOGIC_NOTE, "comparator lm393 lm311 lm339 compare threshold",
+            short="Comparator"),
+    PartDef("ic4026", "Counter and display driver (4026)", "Integrated circuits", "IC",
+            (("CLK", -60, -30), ("INH", -60, -10), ("RST", -60, 10))
+            + tuple((s_, 60, -30 + 10 * i) for i, s_ in enumerate("abcdefg")) + (("CO", 60, 50),), (),
+            (-40, -40, 80, 100), "Counts rising clock pulses 0–9 and drives a 7-segment display directly. CO "
+            "goes high after 9, to clock the next 4026 for tens. RST high resets it to 0; INH high pauses it."
+            + LOGIC_NOTE, "4026 counter decade seven segment display driver", short="4026 counter"),
+    PartDef("l293d", "Motor driver (L293D)", "Integrated circuits", "IC",
+            (("EN12", -60, -40), ("1A", -60, -30), ("2A", -60, -20), ("EN34", -60, 10), ("3A", -60, 20),
+             ("4A", -60, 30), ("1Y", 60, -30), ("2Y", 60, -20), ("3Y", 60, 20), ("4Y", 60, 30),
+             ("VCC1", -20, -80), ("VCC2", 20, -80), ("GND", 0, 70)), (),
+            (-40, -60, 80, 110), "Four half-H drivers: each output Y follows its input A while its enable (EN) is "
+            "high, so 1Y and 2Y together drive a motor forwards, backwards or stopped. VCC1 is the logic supply "
+            "(5 V); VCC2 powers the motor (up to 36 V). About 0.6 A per output, with spike-catching diodes "
+            "built in.", "l293d l293 h bridge h-bridge motor driver reverse stepper", short="L293D"),
+    PartDef("ic4060", "Counter and oscillator (4060)", "Integrated circuits", "IC",
+            (("PI", -60, -40), ("PO", -60, -20), ("POn", -60, 0), ("MR", -60, 30))
+            + tuple((f"Q{n}", 60, -50 + 10 * i) for i, n in enumerate((4, 5, 6, 7, 8, 9, 10, 12, 13, 14))), (),
+            (-40, -60, 80, 110), "A 14-stage counter with its own oscillator — for long, accurate timers. Connect "
+            "a capacitor C from CTC to a point X, a resistor R from RTC to X, and about 10 × R from X to RS: it "
+            "oscillates at about 1 ÷ (2.3 R C), and Q4 … Q14 divide that by 16 … 16384. MR high resets it."
+            + LOGIC_NOTE, "4060 counter oscillator timer divider binary", short="4060 counter"),
     PartDef("note", "Text note", "Labels", "T", (),
             (_p("text", "Text", "Note", kind="text"),),
             (-40, -10, 80, 20), "A note on the diagram — for reports, documentation or worksheets. Double-click to change the text.",

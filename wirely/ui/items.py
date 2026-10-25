@@ -168,7 +168,10 @@ class ComponentItem(QGraphicsItem):
         g = live.get("_glow", 0.0)
         if g <= 0.02 or live.get("blown"):
             return
-        if self.comp.kind == "led":
+        if "_rgb" in live:                  # bi-colour and RGB LEDs: the colours they're mixing
+            col = QColor(live["_rgb"])
+            radius = 16 + 14 * g
+        elif self.comp.kind == "led":
             col = QColor(S.LED_RGB.get(self.comp.value("colour"), "#ff3b30"))
             radius = 16 + 14 * g
         else:

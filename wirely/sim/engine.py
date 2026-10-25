@@ -22,8 +22,10 @@ import numpy as np
 from ..model.circuit import Circuit
 from . import chips as CH
 from . import devices as D
+from . import extra as EX
 
 D.FACTORY.update(CH.FACTORY)
+D.FACTORY.update(EX.FACTORY)
 
 GSHUNT = 1e-12
 
@@ -263,6 +265,7 @@ class Simulator:
                     self.struggling = True
                     # give up on accuracy for this step rather than freezing
                     x = self.x
+                    dv = 0.0
                     break
                 h *= 0.25
         self.x = x

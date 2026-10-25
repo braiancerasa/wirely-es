@@ -228,7 +228,7 @@ def test_open_examples_have_no_loose_pins(win):
         win.open_file(os.path.join(EXAMPLES, n))
         assert not win.circuit.is_empty()
         loose = [(cid, pin) for cid, pin, _pos in win.circuit.unconnected_pins()
-                 if win.circuit.components[cid].kind not in ("counter4017", "relay")]   # unused outputs are fine
+                 if win.circuit.components[cid].kind not in ("counter4017", "relay", "ic4026", "l293d")]   # unused outputs are fine
         assert loose == [], n
 
 

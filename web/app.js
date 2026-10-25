@@ -15,7 +15,7 @@ const ZOOM_MIN = 0.2, ZOOM_MAX = 8.0;
 const QT_SHIFT = 0x2000000, QT_CTRL = 0x4000000;
 const GRID = 10;
 const TOOL_ICONS = ["new", "open", "save", "undo", "redo", "select", "wire", "rotate", "rotate_ccw", "flip", "delete",
-  "play", "pause", "stop", "volts", "flow", "sound", "graph", "zoom_in", "zoom_out", "zoom_fit", "export", "bom", "grid",
+  "play", "pause", "stop", "volts", "flow", "readings", "sound", "graph", "zoom_in", "zoom_out", "zoom_fit", "export", "bom", "grid",
   "theme"];
 const ICON_FOR = { dark: "theme" };
 
@@ -674,6 +674,11 @@ const ACTIONS = {
   dark: () => setTheme(ui.dark ? "light" : "dark"),
   props: () => { const cid = app.action("props"); if (cid) editPart(cid); },
   copy: () => { const t = app.action("copy"); if (t) clipboardWrite(t); },
+  copy_readings: () => {
+    const t = app.action("copy_readings");
+    if (t) { clipboardWrite(t); toast("Readings copied — paste them into a spreadsheet or document.", "ok", null, 3000); }
+    else toast("Press Run first — then copy the readings.", "info");
+  },
   cut: () => { const t = app.action("cut"); if (t) clipboardWrite(t); },
   paste: () => pasteFromClipboard(),
   play: () => { Sound.unlock(); const err = app.run(); if (err) console.warn(err); afterRunChange(); },
@@ -764,7 +769,7 @@ function refreshUI() {
   en("play", ui.sim !== "running"); en("pause", ui.sim === "running"); en("stop", !stopped);
   tb.play.title = ui.sim === "paused" ? "Resume  (F5)" : "Run the circuit — watch it work  (F5)";
   tb.play.querySelector(".label").textContent = ui.sim === "paused" ? "Resume" : "Run";
-  chk("volts", ui.volts); chk("flow", ui.flow); chk("sound", ui.sound); chk("graph", ui.graph); chk("dark", ui.dark);
+  chk("volts", ui.volts); chk("flow", ui.flow); chk("readings", ui.readings); chk("sound", ui.sound); chk("graph", ui.graph); chk("dark", ui.dark);
   $("gallery").classList.toggle("disabled", !stopped);
   $("hint").textContent = ui.status;
   $("counts").textContent = ui.counts;
@@ -814,6 +819,7 @@ const MENUS = {
     [ui.sim === "paused" ? "Resume" : "Run", "play", "F5", ui.sim !== "running"], ["Pause", "pause", "F6", ui.sim === "running"],
     ["Stop", "stop", "F7", ui.sim !== "stopped"], null,
     [check(ui.volts) + "Voltage colours", "volts", ""], [check(ui.flow) + "Current flow", "flow", ""],
+    [check(ui.readings) + "Readings", "readings", ""], ["Copy readings", "copy_readings", "", ui.sim !== "stopped"],
     [check(ui.graph) + "Graph", "graph", "Ctrl+G"], [check(ui.sound) + "Sound", "sound", ""],
   ],
   view: () => [

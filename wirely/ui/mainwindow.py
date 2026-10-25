@@ -83,6 +83,7 @@ class MainWindow(QMainWindow):
         self.scene.attach_sim(self.simc)
         self.scene.show_volts = self.a_volts.isChecked()
         self.scene.show_flow = self.a_flow.isChecked()
+        self.scene.show_readings = self.a_readings.isChecked()
         self.simc.stateChanged.connect(self._on_sim_state)
         self.simc.frame.connect(self._on_sim_frame)
         self.simc.message.connect(self._on_sim_message)
@@ -195,6 +196,13 @@ class MainWindow(QMainWindow):
         self.a_stop = A("Stop", self.sim_stop, ["Shift+F5", "F7"], "stop", "Stop and go back to editing")
         self.a_volts = A("Voltage colours", self._toggle_volts, None, "volts",
                          "Colour the wires by voltage while running", checkable=True)
+        self.a_readings = A("Readings", self._toggle_readings, None, "readings",
+                            "Show the voltage and current on every wire and part while running — or click one "
+                            "wire or part to pin just its reading", checkable=True)
+        self.a_copy_readings = A("Copy readings", self.copy_readings, None, None,
+                                 "Copy every part's voltage, current and power as a table — paste it into a "
+                                 "spreadsheet or your write-up")
+        self.a_copy_readings.setEnabled(False)
         self.a_flow = A("Current flow", self._toggle_flow, None, "flow",
                         "Show current flowing along the wires while running", checkable=True)
         self.a_sound = A("Sound", self._toggle_sound, None, "sound", "Buzzers, speakers, motors and relays make "
@@ -204,6 +212,7 @@ class MainWindow(QMainWindow):
                          "Show the graph of the voltages at the graph probes", checkable=True)
         self.a_volts.setChecked(self.settings.value("volts", "true") == "true")
         self.a_flow.setChecked(self.settings.value("flow", "true") == "true")
+        self.a_readings.setChecked(self.settings.value("readings", "false") == "true")
 
     def _tool(self, action, text_beside=False):
         b = QToolButton()
@@ -243,8 +252,8 @@ class MainWindow(QMainWindow):
             ("Edit", [self.a_undo, self.a_redo, None, self.a_cut, self.a_copy, self.a_paste, self.a_dup,
                       self.a_delete, self.a_select_all, None, self.a_rotate, self.a_rotate_ccw, self.a_flip,
                       None, self.a_props]),
-            ("Simulate", [self.a_play, self.a_pause, self.a_stop, None, self.a_volts, self.a_flow, self.a_graph,
-                          self.a_sound]),
+            ("Simulate", [self.a_play, self.a_pause, self.a_stop, None, self.a_volts, self.a_flow, self.a_readings, self.a_copy_readings,
+                          self.a_graph, self.a_sound]),
             ("View", [self.a_zoom_in, self.a_zoom_out, self.a_fit, None, self.a_grid, self.a_dark]),
             ("Help", [self.a_help, self.a_about]),
         ):
@@ -319,6 +328,7 @@ class MainWindow(QMainWindow):
         sh.addWidget(self._sep())
         sh.addWidget(T(self.a_volts))
         sh.addWidget(T(self.a_flow))
+        sh.addWidget(T(self.a_readings))
         sh.addWidget(T(self.a_graph))
         sh.addWidget(T(self.a_sound))
         h.addWidget(sim)
@@ -661,7 +671,8 @@ class MainWindow(QMainWindow):
 
     def _on_sim_state(self, state):
         running = state == "running"
-        noisy = any(c.kind in ("buzzer", "speaker", "motor", "relay") for c in self.circuit.components.values())
+        noisy = any(c.kind in ("buzzer", "speaker", "motor", "relay", "relay_dpdt", "solenoid")
+                    for c in self.circuit.components.values())
         if running and noisy:
             self.sound.start()
         elif state == "stopped":
@@ -670,6 +681,7 @@ class MainWindow(QMainWindow):
         self.a_play.setToolTip("Resume  (F5)" if state == "paused" else "Run the circuit — watch it work  (F5)")
         self.a_pause.setEnabled(running)
         self.a_stop.setEnabled(state != "stopped")
+        self.a_copy_readings.setEnabled(state != "stopped")
         self.gallery.setEnabled(state == "stopped")
         self._update_actions()
         if state == "stopped":
@@ -729,6 +741,17 @@ class MainWindow(QMainWindow):
         if not ok:
             self.a_sound.setEnabled(False)
             self.a_sound.setToolTip("No working sound output was found on this computer")
+
+    def copy_readings(self):
+        text = self.scene.readings_text()
+        if text:
+            QApplication.clipboard().setText(text)
+            self.statusBar().showMessage("Readings copied — paste them into a spreadsheet or document", 4000)
+
+    def _toggle_readings(self):
+        self.scene.show_readings = self.a_readings.isChecked()
+        self.settings.setValue("readings", "true" if self.scene.show_readings else "false")
+        self.scene.update()
 
     def _toggle_flow(self):
         self.scene.show_flow = self.a_flow.isChecked()

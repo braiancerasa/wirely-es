@@ -85,6 +85,26 @@ TYPE_INFO = {
     "CD4051B": "8-channel analogue switch (4000 series): runs on 3–18 V, about 470 Ω on at 5 V and 125 Ω at 15 V.",
     "74HC4051": "8-channel analogue switch (74HC): faster and lower resistance (about 100 Ω at 5 V) but only for "
                 "2–10 V supplies.",
+
+    # ---------------------------------------------------------------- thyristors (1.4.0)
+    "C106D": "Small, sensitive thyristor: 4 A, 400 V, triggers from about 0.2 mA of gate current. The usual "
+             "choice for latching alarms and school projects.",
+    "2N5060": "Tiny sensitive thyristor (TO-92): 0.8 A, 30 V, triggers from 0.2 mA. For low-power latches.",
+    "TIC106D": "Like the C106D in a bigger package: 5 A, 400 V, sensitive gate.",
+    "BT151": "Power thyristor: 12 A, 500 V, but it needs a few mA into its gate and more current to stay on.",
+
+    # ---------------------------------------------------------------- regulators
+    "7805": "Fixed 5 V regulator, up to 1.5 A. Needs at least about 7 V in. The classic for powering logic "
+            "and microcontrollers from a 9–12 V supply.",
+    "7809": "Fixed 9 V regulator, up to 1.5 A. Needs at least about 11 V in.",
+    "7812": "Fixed 12 V regulator, up to 1.5 A. Needs at least about 14 V in.",
+    "LM1117-3.3": "Low-dropout 3.3 V regulator, up to 0.8 A: works from as little as about 4.4 V in — for 3.3 V "
+                  "microcontrollers running from 5 V. Maximum 15 V in.",
+
+    # ---------------------------------------------------------------- comparators
+    "LM393": "Dual comparator for single supplies (2–36 V): inputs work down to 0 V, open-collector output "
+             "that can sink about 16 mA.",
+    "LM311": "Faster comparator with a stronger output: sinks up to 50 mA, enough for a relay or a small lamp.",
 }
 
 

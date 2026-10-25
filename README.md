@@ -34,7 +34,7 @@ answers.
 
 ## What it does
 
-- **Schematic editor** — a parts gallery of 62 parts with British/IEC symbols, drag-and-drop, wiring by
+- **Schematic editor** — a parts gallery of 78 parts with British/IEC symbols, drag-and-drop, wiring by
   dragging pin to pin, junctions, rotate and flip, undo/redo, copy/paste, text notes, autosave and crash
   recovery.
 - **Live simulation** — glowing LEDs and lamps, motors with back-EMF that slow under load, relays that click,
@@ -44,11 +44,17 @@ answers.
   sensors: click and drag them while the circuit runs.
 - **Things break, like the real thing** — LEDs without a resistor, overloaded resistors, reversed
   electrolytics, transistors killed by a coil's voltage spike: they pop and tell you why.
+- **Readings** — one button shows the voltage and current on every wire and the voltage, current and power of
+  every part while it runs; click any wire or part to pin just its reading; or **Copy readings** to paste
+  them all into a spreadsheet.
 - **Graph and logic probe** — up to four probes, frequency read-outs, adjustable time and volts per division.
-- **Chips** — 555 timer, op-amps, logic gates, 4017 counter, 4511 decoder, 7-segment display,
+- **Chips** — 555 timer, op-amps, comparators (LM393, LM311), the L293D motor driver, logic gates, 4017, 4026 and 4060 counters,
+  4511 decoder, 7-segment display, 7805/7809/7812/LM1117 and LM317 voltage regulators,
   74HC164/165/595/597 shift registers, the 4051 analogue switch, TL431/TLV431 references,
   optoisolators (PC817, 4N25, 4N35, TLP521, 6N139), solid-state relays (TLP3122A), MOSFETs,
-  transistors, relays, signal generator with PWM.
+  transistors, thyristors (SCRs), relays, signal generator with PWM.
+- **More parts** — bi-colour and RGB LEDs, bridge rectifier, transformer, DPDT switch and relay, Hall effect sensor
+  and solenoid.
 - **Every part type explained** — double-click a part and choose its type: a line underneath says what it's
   good for (e.g. why you'd pick an AO3400 over a 2N7002).
 - **Export** — PNG, SVG and PDF (always on white paper), and a parts list you can copy or save as CSV.
@@ -83,7 +89,8 @@ anything else needed:
 Open **[richiewillmott.github.io/Wirely](https://richiewillmott.github.io/Wirely/)** in Chrome, Edge, Firefox or
 Safari — nothing to install and no account. It's the same Wirely: the same parts, symbols, examples and
 simulator, running inside the browser (the desktop app's own Python code, run by
-[Pyodide](https://pyodide.org)). Your circuits stay on your computer — nothing is uploaded.
+[Pyodide](https://pyodide.org)). Your circuits stay on your computer — nothing is uploaded. (The website counts
+visits with [GoatCounter](https://www.goatcounter.com): no cookies and no personal data.)
 
 - **Save** gives you a `.wirely` file, which opens in the browser version and the desktop app alike.
 - **File → Copy a link to this circuit** makes a link with the circuit inside it — paste it into Google
@@ -144,6 +151,7 @@ scale is in the corner) and dots flow along them to show the current. While it r
 - **click** switches, and **hold** push switches,
 - **drag the sliders** that appear under potentiometers, variable resistors and sensors (or use the mouse wheel),
 - **hover over any wire or part** to read its voltage, current (with direction) and power,
+- press **Readings** to show them all at once, or **click** a wire or part to pin its reading on the sheet,
 - change the **speed** — from 10× faster down to 1/1000 speed, for slow motion.
 
 **Stop** (Shift+F5) goes back to editing, and anything that popped is mended.
@@ -230,7 +238,7 @@ resistance, supply current, output swing that falls short further under heavier 
 into 10 kΩ, ±13 V into 2 kΩ), the LM358 reaching 0 V but not the top rail, and current limits. The output
 current really comes from the supply pins, and too much supply voltage destroys the chip.
 
-The automatic tests (271 of them) check it against answers worked out by hand — voltage dividers, the diode
+The automatic tests (328 of them) check it against answers worked out by hand — voltage dividers, the diode
 equation, LED current, transistor gain and saturation, Zener regulation, RC and RL curves, a half-wave
 rectifier, 555 astable and monostable timing, op-amp gains, bandwidth, slew rate and bias currents, a
 Schmitt-trigger oscillator, logic truth tables and counters — against the datasheets above, and against

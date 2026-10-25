@@ -166,7 +166,7 @@ def update_from_sim(synth: Synth, sim, watches: dict, motor_hum=True):
             f = abs(d.rpm) / 60 * 2                # commutator buzz: two pulses per turn
             synth.set(key, max(30.0, f), 0.06 * min(1.0, abs(d.speed)), 2.0)
             seen.add(key)
-        elif k == "relay":
+        elif k in ("relay", "relay_dpdt", "solenoid"):
             last = getattr(d, "_clicks_heard", 0)
             if d.clicks > last:
                 for _ in range(min(3, d.clicks - last)):

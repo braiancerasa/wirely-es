@@ -500,7 +500,8 @@ class Diode(Device):
         self.warn = "over" if over else None
         # real diodes ride out short surges: 3× their rating for a millisecond, about 30× for an instant
         self._surge = self._surge + ctx.h if abs(i) > 3 * self.imax else 0.0
-        if self._overload(over, ctx.h, 0.03, abs(i) > 30 * self.imax or self._surge > 1e-3):
+        if self._overload(over, ctx.h, 0.03, abs(i) > 30 * self.imax or
+                          self._surge > getattr(self, "surge_time", 1e-3)):
             self.blown = True
             what = "LED" if self.comp.kind == "led" else "diode"
             hint = " Add a resistor in series to limit the current." if self.comp.kind == "led" else ""
