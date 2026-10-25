@@ -811,6 +811,79 @@ def _optocoupler(c):
     c.arrow(12 + 14 * 0.35, 5 + 9 * 0.35, 24.5, 13, 5.5, 0.1)
 
 
+def _shunt_ref(c):
+    """TL431: like a Zener (cathode at the top, anode at the bottom) with the REF lead touching the triangle."""
+    c.line(0, -30, 0, -9)
+    c.line(0, 10, 0, 30)
+    c.poly([(-10, 10), (10, 10), (0, -9)], c.paper)
+    c.poly([(-13, -5), (-10, -9), (10, -9), (13, -13)], None, 2.2, closed=False)
+    c.line(-30, 0, -5, 0)
+    c.label_at(4, -24, "K", Qt.AlignLeft | Qt.AlignVCenter, 6.5)
+    c.label_at(4, 24, "A", Qt.AlignLeft | Qt.AlignVCenter, 6.5)
+    c.label_at(-27, -6, "REF", Qt.AlignLeft | Qt.AlignVCenter, 6)
+
+
+def _ssr(c):
+    """Solid-state relay: the optoisolator's LED on the left, a switch (two MOSFETs) on the right."""
+    c.rect(-30, -32, 60, 64, None, 1.2)
+    c.line(-40, -20, -18, -20)
+    c.line(-18, -20, -18, -8)
+    c.poly([(-27, -8), (-9, -8), (-18, 6)], c.paper)
+    c.line(-27, 6, -9, 6, 2.2)
+    c.line(-18, 6, -18, 20)
+    c.line(-18, 20, -40, 20)
+    ir = c.props.get("_ir", 0.0)
+    on = c.props.get("_on", False)
+    if ir > 0.02:
+        old = c.ink
+        c.ink = QColor(255, 170, 30)
+        c.arrow(-6, -5, 4, -5, 4.5, 1.6)
+        c.arrow(-6, 3, 4, 3, 4.5, 1.6)
+        c.ink = old
+    else:
+        c.arrow(-6, -5, 4, -5, 4.5, 1.5)
+        c.arrow(-6, 3, 4, 3, 4.5, 1.5)
+    # output switch: O1 at the top right, O2 at the bottom right
+    c.line(40, -20, 20, -20)
+    c.line(20, -20, 20, -10)
+    c.line(40, 20, 20, 20)
+    c.line(20, 20, 20, 10)
+    if on:
+        c.line(20, 10, 20, -10, 2.0)
+    else:
+        c.line(20, 10, 12, -8, 2.0)
+    c.circle(20, -10, 1.8, c.ink, 1)
+    c.circle(20, 10, 1.8, c.ink, 1)
+
+
+OVERBAR = "\u0305"
+
+
+def _lo(name):
+    """Pin label with a bar over it (active-low)."""
+    return "".join(ch + OVERBAR for ch in name)
+
+
+def _mux4051(c):
+    _box_ic(c, -40, -50, 40, 40, "4051", labels={"INH": "INH"})
+
+
+def _sr164(c):
+    _box_ic(c, -40, -50, 40, 40, "164", labels={"MR": _lo("MR"), "CP": "CP"}, clock=10)
+
+
+def _sr595(c):
+    _box_ic(c, -40, -50, 40, 50, "595", labels={"MR": _lo("MR"), "OE": _lo("OE")}, clock=-20)
+
+
+def _sr165(c):
+    _box_ic(c, -40, -70, 40, 60, "165", labels={"CE": _lo("CE"), "PL": _lo("PL"), "Q7N": _lo("Q7")}, clock=30)
+
+
+def _sr597(c):
+    _box_ic(c, -40, -70, 40, 70, "597", labels={"PL": _lo("PL"), "MR": _lo("MR")}, clock=30)
+
+
 def note_lines(props):
     return (str(props.get("text", "")) or " ").split("\n")
 
@@ -828,6 +901,8 @@ def _note(c):
 DRAW.update({
     "inductor": _inductor, "relay": _relay, "reed_switch": _reed_switch, "tilt_switch": _tilt_switch,
     "moisture": _moisture, "phototransistor": _phototransistor, "optocoupler": _optocoupler, "note": _note,
+    "shunt_ref": _shunt_ref, "ssr": _ssr, "mux4051": _mux4051, "sr164": _sr164, "sr595": _sr595,
+    "sr165": _sr165, "sr597": _sr597,
 })
 
 

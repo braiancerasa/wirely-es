@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wirely — circuit simulator</title>
+<meta name="description" content="Wirely: draw a circuit, press play, watch it work. A free circuit simulator for D&amp;T and GCSE electronics that runs in your browser — no install needed.">
+<meta name="theme-color" content="#1f6fd1">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/wirely-64.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/wirely-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" class="loading">
+
+  <!-- top bar: logo, file name, menus -->
+  <header id="topbar">
+    <div id="logo"><canvas id="logoMark" width="26" height="26"></canvas><span>wirely</span></div>
+    <nav id="menus">
+      <button class="menuBtn" data-menu="file">File</button>
+      <button class="menuBtn" data-menu="edit">Edit</button>
+      <button class="menuBtn" data-menu="simulate">Simulate</button>
+      <button class="menuBtn" data-menu="view">View</button>
+      <button class="menuBtn" data-menu="help">Help</button>
+    </nav>
+    <div id="docname" title="The name of this circuit">Untitled</div>
+    <div class="spacer"></div>
+    <a id="getDesktop" href="https://github.com/richiewillmott/Wirely/releases/latest" target="_blank" rel="noopener"
+       title="Wirely also comes as a free app for Windows, Mac and Linux">Desktop app</a>
+  </header>
+
+  <!-- toolbar -->
+  <div id="toolbar" role="toolbar">
+    <button class="tool" data-act="new" title="New circuit"></button>
+    <button class="tool" data-act="open" title="Open a circuit from your computer  (Ctrl+O)"></button>
+    <button class="tool" data-act="save" title="Save the circuit to your computer  (Ctrl+S)"></button>
+    <span class="sep"></span>
+    <button class="tool" data-act="undo" title="Undo  (Ctrl+Z)"></button>
+    <button class="tool" data-act="redo" title="Redo  (Ctrl+Y)"></button>
+    <span class="sep"></span>
+    <button class="tool" data-act="select" data-check="1" title="Select and move  (Esc)"></button>
+    <button class="tool" data-act="wire" data-check="1" title="Wire: draw wires — also branch off existing wires  (W)"></button>
+    <span class="sep"></span>
+    <button class="tool" data-act="rotate" title="Rotate clockwise  (R)"></button>
+    <button class="tool" data-act="flip" title="Flip left-to-right  (F)"></button>
+    <button class="tool" data-act="delete" title="Delete  (Delete)"></button>
+    <span class="stretch"></span>
+    <button class="tool play" data-act="play" title="Run the circuit — watch it work  (F5)"><span class="label">Run</span></button>
+    <button class="tool" data-act="pause" title="Pause the simulation  (F6)"></button>
+    <button class="tool" data-act="stop" title="Stop and go back to editing  (F7)"></button>
+    <select id="speed" title="Simulation speed"></select>
+    <span id="timeLabel" title="Simulated time since you pressed Run"></span>
+    <span class="sep"></span>
+    <button class="tool" data-act="volts" data-check="1" title="Voltage colours: colour the wires by voltage while running"></button>
+    <button class="tool" data-act="flow" data-check="1" title="Current flow: show current flowing along the wires while running"></button>
+    <button class="tool" data-act="graph" data-check="1" title="Graph: show the voltages at the graph probes  (Ctrl+G)"></button>
+    <button class="tool" data-act="sound" data-check="1" title="Sound: buzzers, speakers, motors and relays make sound while running"></button>
+    <span class="stretch"></span>
+    <button class="tool" data-act="zoom_out" title="Zoom out  (−)"></button>
+    <button class="tool" data-act="zoom_in" title="Zoom in  (+)"></button>
+    <button class="tool" data-act="zoom_fit" title="Zoom to fit: show the whole circuit  (Ctrl+0)"></button>
+    <span class="sep"></span>
+    <button class="tool" data-act="bom" title="Bill of materials: parts list for this circuit"></button>
+    <button class="tool" data-act="export" title="Save a picture of the diagram (PNG)  (Ctrl+E)"></button>
+    <button class="tool" data-act="dark" title="Switch between light and dark"></button>
+  </div>
+
+  <div id="main">
+    <!-- parts gallery -->
+    <aside id="gallery">
+      <div class="sectionHeader">Parts <button id="galleryToggle" title="Hide the parts list">‹</button></div>
+      <input id="filter" type="search" placeholder="Search parts…" autocomplete="off" spellcheck="false">
+      <div id="galleryList"></div>
+    </aside>
+
+    <section id="centre">
+      <div id="sheetWrap">
+        <canvas id="sheet" tabindex="0" aria-label="Circuit sheet"></canvas>
+        <div id="emptyHint" hidden>
+          <b>Your circuit sheet is empty</b>
+          <span>Drag parts here from the gallery on the left,<br>then drag from pin to pin to wire them up.<br>
+          Or open an example from the File menu.</span>
+        </div>
+        <div id="legend" hidden><div id="legendBar"></div><div class="legendText"><span>0 V</span><span id="legendMid"></span><span id="legendMax"></span></div></div>
+        <div id="bubble" hidden></div>
+        <div id="toasts"></div>
+        <button id="showGallery" title="Show the parts list" hidden>Parts ›</button>
+      </div>
+      <div id="graphPanel" hidden>
+        <div class="graphTop">
+          <span class="sectionHeader">Graph</span>
+          <span id="chips" class="muted">Put a graph probe (Meters &amp; probes) on a wire, then press Run.</span>
+          <label>Time <select id="tbox" title="Time per square across"></select></label>
+          <label>Volts <select id="vbox" title="Volts per square up"></select></label>
+          <button id="graphClear">Clear</button>
+          <button id="graphPic" title="Save the graph as a picture">Save picture</button>
+          <button id="graphCsv" title="Save the readings as a spreadsheet (CSV)">Save data</button>
+          <button id="graphClose" title="Hide the graph">✕</button>
+        </div>
+        <canvas id="plot"></canvas>
+      </div>
+    </section>
+  </div>
+
+  <footer id="statusbar"><span id="hint"></span><span class="spacer"></span><span id="counts"></span><span id="zoomLabel"></span></footer>
+
+  <!-- loading screen -->
+  <div id="splash">
+    <canvas id="splashMark" width="96" height="96"></canvas>
+    <h1>Wirely</h1>
+    <p>Draw a circuit, press play, watch it work.</p>
+    <div id="progress"><div id="progressBar"></div></div>
+    <p id="loadText">Loading…</p>
+  </div>
+</div>
+
+<div id="menuPopup" class="popup" hidden></div>
+<div id="modal" hidden><div id="dialog" role="dialog" aria-modal="true"></div></div>
+<input id="fileInput" type="file" accept=".wirely,.spark,application/json" hidden>
+
+<script src="app.js"></script>
+</body>
+</html>

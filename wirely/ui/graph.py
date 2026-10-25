@@ -227,6 +227,7 @@ class GraphPanel(QWidget):
             return area.bottom() - (val - v0) / (v1 - v0) * area.height()
         p.save()
         p.setClipRect(area.adjusted(-1, -2, 1, 2))
+        p.setBrush(Qt.NoBrush)          # outline only: a filled trace would hide the grid and the other traces
         cols = max(1, int(area.width()))
         for ch in sorted(self.traces):
             ts, vs = self.traces[ch].window(t0, t1)

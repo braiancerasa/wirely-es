@@ -4,7 +4,7 @@
  "title": "Two-way light switch",
  "components": [
   {
-   "id": "e5e7783c",
+   "id": "f197937b",
    "kind": "battery",
    "ref": "B1",
    "x": 0,
@@ -16,7 +16,7 @@
    }
   },
   {
-   "id": "bb3ea94d",
+   "id": "1a674e13",
    "kind": "spdt",
    "ref": "S1",
    "x": 90,
@@ -28,7 +28,7 @@
    }
   },
   {
-   "id": "e9cde9c1",
+   "id": "0b3a1e84",
    "kind": "spdt",
    "ref": "S2",
    "x": 230,
@@ -40,7 +40,7 @@
    }
   },
   {
-   "id": "77731fce",
+   "id": "c65631d4",
    "kind": "lamp",
    "ref": "L1",
    "x": 320,
@@ -55,7 +55,7 @@
  ],
  "wires": [
   {
-   "id": "16b8f5a5",
+   "id": "cd564bea",
    "points": [
     [
      0,
@@ -72,7 +72,7 @@
    ]
   },
   {
-   "id": "563e0d20",
+   "id": "d2fb9ae4",
    "points": [
     [
      120,
@@ -85,7 +85,7 @@
    ]
   },
   {
-   "id": "3cc8eee2",
+   "id": "8ab833d6",
    "points": [
     [
      120,
@@ -98,7 +98,7 @@
    ]
   },
   {
-   "id": "645e40b6",
+   "id": "2cc19fab",
    "points": [
     [
      260,
@@ -115,7 +115,7 @@
    ]
   },
   {
-   "id": "f1012259",
+   "id": "c6b9bde8",
    "points": [
     [
      320,

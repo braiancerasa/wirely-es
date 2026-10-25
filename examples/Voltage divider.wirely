@@ -4,7 +4,7 @@
  "title": "Voltage divider",
  "components": [
   {
-   "id": "b35d46ec",
+   "id": "f8a72f92",
    "kind": "battery",
    "ref": "B1",
    "x": 0,
@@ -16,7 +16,7 @@
    }
   },
   {
-   "id": "973ad0f1",
+   "id": "180969dd",
    "kind": "resistor",
    "ref": "R1",
    "x": 120,
@@ -29,7 +29,7 @@
    }
   },
   {
-   "id": "60842ce0",
+   "id": "d4a2654d",
    "kind": "resistor",
    "ref": "R2",
    "x": 120,
@@ -42,7 +42,7 @@
    }
   },
   {
-   "id": "4fc4077e",
+   "id": "9f568b94",
    "kind": "voltmeter",
    "ref": "VM1",
    "x": 220,
@@ -52,7 +52,7 @@
    "props": {}
   },
   {
-   "id": "fc193c3e",
+   "id": "32eb1dfb",
    "kind": "ground",
    "ref": "GND1",
    "x": 120,
@@ -64,7 +64,7 @@
  ],
  "wires": [
   {
-   "id": "307c1118",
+   "id": "927df48d",
    "points": [
     [
      0,
@@ -85,7 +85,7 @@
    ]
   },
   {
-   "id": "e77ff6cc",
+   "id": "e2a7e1ee",
    "points": [
     [
      120,
@@ -98,7 +98,7 @@
    ]
   },
   {
-   "id": "7740ce8e",
+   "id": "a7dfabe7",
    "points": [
     [
      120,
@@ -115,7 +115,7 @@
    ]
   },
   {
-   "id": "d3f898ba",
+   "id": "9cb4b1bf",
    "points": [
     [
      120,
@@ -128,7 +128,7 @@
    ]
   },
   {
-   "id": "a83c2560",
+   "id": "ee2a9c9b",
    "points": [
     [
      220,
@@ -145,7 +145,7 @@
    ]
   },
   {
-   "id": "a41181f0",
+   "id": "bacb481c",
    "points": [
     [
      0,

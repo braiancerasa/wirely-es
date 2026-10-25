@@ -148,6 +148,9 @@ class SimController(QObject):
                 info["_on"] = d.on
             elif k == "optocoupler":
                 info["_ir"] = d.glow()
+            elif k == "ssr":
+                info["_ir"] = d.glow()
+                info["_on"] = d.drive > 0.5
             elif k == "buzzer":
                 info["level"] = d.level()
             elif k == "sevenseg":

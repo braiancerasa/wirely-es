@@ -472,12 +472,73 @@ def optoisolator():
     return c
 
 
+def tl431_reference():
+    c = Circuit()
+    c.title = "TL431 adjustable reference"
+    b = c.add("dc_supply", 0, 150, rot=1, props={"voltage": 12})           # + (0,120) - (0,180)
+    rs = c.add("resistor", 110, 0, props={"resistance": 470})              # (80,0)-(140,0)
+    u = c.add("shunt_ref", 220, 150, props={"model": "TL431"})             # K (220,120) A (220,180) REF (190,150)
+    r1 = c.add("resistor", 140, 90, rot=1, props={"resistance": 10e3})     # (140,60)-(140,120)
+    r2 = c.add("resistor", 140, 210, rot=1, props={"resistance": 10e3})    # (140,180)-(140,240)
+    vm = c.add("voltmeter", 330, 150, rot=1)                               # + (330,120) - (330,180)
+    assert pin(c, u, "REF") == (190, 150) and pin(c, r1, "1") == (140, 60)
+    wire(c, pin(c, b, "+"), (0, 0), pin(c, rs, "1"))
+    wire(c, pin(c, rs, "2"), (220, 0), pin(c, u, "K"))
+    wire(c, (140, 0), pin(c, r1, "1"))
+    wire(c, pin(c, r1, "2"), (140, 150), pin(c, u, "REF"))
+    wire(c, (140, 150), pin(c, r2, "1"))
+    wire(c, (220, 0), (330, 0), pin(c, vm, "+"))
+    wire(c, pin(c, b, "-"), (0, 300), (330, 300), pin(c, vm, "-"))
+    wire(c, pin(c, u, "A"), (220, 300))
+    wire(c, pin(c, r2, "2"), (140, 300))
+    c.add("ground", 0, 300)
+    c.add("note", 170, -60, props={"text": "The TL431 sinks just enough current to hold REF at 2.495 V,\n"
+                                           "so Vout = 2.495 × (1 + R1 / R2) = 5 V here. Change R1 or R2!"})
+    return c
+
+
+def shift_register_595():
+    c = Circuit()
+    c.title = "Shift register (74HC595)"
+    b = c.add("dc_supply", 0, 150, rot=1, props={"voltage": 5})            # + (0,120) - (0,180)
+    u = c.add("sr595", 300, 150)        # DS (240,110) SHCP (240,130) STCP (240,150) MR (240,170) OE (240,190)
+    assert pin(c, u, "DS") == (240, 110) and pin(c, u, "Q0") == (360, 110) and pin(c, u, "Q7S") == (360, 190)
+    s_data = c.add("switch", 210, 80, rot=1)                               # (210,50)-(210,110)
+    s_clk = c.add("push_make", 170, 80, rot=1)                             # (170,50)-(170,110)
+    s_lat = c.add("push_make", 130, 80, rot=1)                             # (130,50)-(130,110)
+    for sw in (s_data, s_clk, s_lat):
+        wire(c, pin(c, sw, "1"), (sw.x, 40))
+    wire(c, pin(c, b, "+"), (0, 40), (210, 40))
+    wire(c, pin(c, s_data, "2"), pin(c, u, "DS"))
+    wire(c, pin(c, s_clk, "2"), (170, 130), pin(c, u, "SHCP"))
+    wire(c, pin(c, s_lat, "2"), (130, 150), pin(c, u, "STCP"))
+    wire(c, pin(c, u, "MR"), (110, 170), (110, 40))          # MR to + (not clearing)
+    wire(c, pin(c, u, "OE"), (230, 190), (230, 400))         # OE to 0 V (outputs on)
+    xmax = 420 + 70 * 7
+    wire(c, pin(c, b, "-"), (0, 400), (xmax, 400))
+    for i in range(8):
+        x = 420 + 70 * (7 - i)              # Q7 on the left … Q0 on the right: read it as a binary number
+        led = c.add("led", x, 260, rot=1, props={"colour": "Red"})        # A (x,230) K (x,290)
+        r = c.add("resistor", x, 330, rot=1, props={"resistance": 330})   # (x,300)-(x,360)
+        wire(c, pin(c, u, f"Q{i}"), (x, 110 + 10 * i), pin(c, led, "A"))
+        wire(c, pin(c, led, "K"), pin(c, r, "1"))
+        wire(c, pin(c, r, "2"), (x, 400))
+    c.add("logic_probe", 380, 260)
+    wire(c, pin(c, u, "Q7S"), (380, 190), (380, 260))
+    c.add("ground", 0, 400)
+    c.add("note", 660, 30, props={"text": "Set DATA (S1), press CLOCK (S2) to shift it in — eight times.\n"
+                                           "Then press LATCH (S3): the LEDs show the byte all at once."})
+    s_data.ref, s_clk.ref, s_lat.ref = "S1", "S2", "S3"
+    return c
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     for fn in (led_and_resistor, voltage_divider, night_light, two_way_switch, capacitor_charging,
                buzzer_and_motor, flasher_555, led_chaser, opamp_light_sensor, logic_gates, mosfet_motor,
                rc_filter_graph, binary_display, relay_lamp, motor_load, doorbell_555, burglar_alarm,
-               rain_alarm, buck_converter, optoisolator):
+               rain_alarm, buck_converter, optoisolator, tl431_reference,
+               shift_register_595):
         c = fn()
         path = os.path.join(OUT, c.title + ".wirely")
         c.save(path)

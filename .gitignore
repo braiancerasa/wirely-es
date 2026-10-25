@@ -5,3 +5,6 @@ __pycache__/
 build/
 dist/
 selftest.txt
+_site/
+web-smoke/
+pyodide-dl/

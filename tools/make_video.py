@@ -536,7 +536,7 @@ card(card_image([("Wirely", 110, "#f5f7fa", True),
                  ("Free and open source (GPL-3)", 48, "#aabac6", False),
                  ("Windows  ·  Mac  ·  Linux", 48, "#aabac6", False),
                  ("github.com/richiewillmott/Wirely", 50, "#ffc83c", True)],
-                sub="55 parts  ·  20 example circuits  ·  no account, runs on your own computer"),
+                sub="62 parts  ·  22 example circuits  ·  no account, runs on your own computer"),
      4.5)
 
 w.undo.setClean()

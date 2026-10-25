@@ -62,6 +62,7 @@ def numeric_stamp(S, nodes, V0, f, ctx=None):
 MOSFET_DATA = {
     "2N7000":    (1, 2.1, 1e-3, ((10, 1.2), (4.5, 1.8)), 20e-12, 11e-12, 4e-12, 25, 60, 0.2, 0.4),
     "BS170":     (1, 2.1, 1e-3, ((10, 1.2),), 24e-12, 17e-12, 5e-12, 10, 60, 0.5, 0.83),
+    "2N7002":    (1, 1.75, 250e-6, ((10, 0.86), (4.5, 1.1)), 26.7e-12, 4.6e-12, 2.9e-12, 25, 60, 0.26, 0.3),
     "IRF540":    (1, 3.0, 250e-6, ((10, 0.060),), 1700e-12, 560e-12, 120e-12, 25, 100, 28.0, 2.0),
     "IRF530":    (1, 3.0, 250e-6, ((10, 0.12),), 670e-12, 250e-12, 60e-12, 25, 100, 14.0, 2.0),
     "IRLZ44N":   (1, 1.5, 250e-6, ((10, 0.018), (5, 0.020), (4, 0.028)), 1700e-12, 400e-12, 150e-12, 25, 55,
@@ -605,13 +606,15 @@ class Digital(Device):
     hysteresis), outputs drive 0 V or the logic supply through ROUT_LOGIC."""
     inputs: tuple = ()
     outputs: tuple = ()
+    pullups: tuple = ()          # active-low control inputs: left unconnected, they read high (not active)
     schmitt = False
+    vmax = None                  # highest logic supply the chip family is made for (74HC: 6 V)
 
     def update_params(self):
         names = [n for n, _x, _y in self.comp.part.pins]
         self.in_idx = [names.index(n) for n in self.inputs]
         self.out_idx = [names.index(n) for n in self.outputs]
-        self.level = {n: False for n in self.inputs}
+        self.level = {n: n in self.pullups for n in self.inputs}
         self.out = {n: False for n in self.outputs}
         self.vlogic = 9.0
         self.changed = False
@@ -633,11 +636,16 @@ class Digital(Device):
         """Called with the inputs that just went high (edge-triggered chips)."""
 
     def stamp(self, S, x, ctx):
-        for i in self.in_idx:
+        for name, i in zip(self.inputs, self.in_idx):
             S.g(self.nodes[i], -1, 1 / R_PULLDOWN)
+            if name in self.pullups:
+                S.i(-1, self.nodes[i], self.vlogic / R_PULLDOWN)
         G = 1 / ROUT_LOGIC
         for name, i in zip(self.outputs, self.out_idx):
             n = self.nodes[i]
+            if self.out[name] is None:          # switched off (high impedance)
+                S.g(n, -1, 1 / R_PULLDOWN)
+                continue
             S.g(n, -1, G)
             if self.out[name]:
                 S.i(-1, n, self.vlogic * G)
@@ -669,11 +677,22 @@ class Digital(Device):
             self.changed = True
         G = 1 / ROUT_LOGIC
         pins = [0.0] * len(self.nodes)
-        for i in self.in_idx:
-            pins[i] = v(x, self.nodes[i]) / R_PULLDOWN
+        for name, i in zip(self.inputs, self.in_idx):
+            pins[i] = (v(x, self.nodes[i]) - (self.vlogic if name in self.pullups else 0.0)) / R_PULLDOWN
         for name, i in zip(self.outputs, self.out_idx):
-            pins[i] = (v(x, self.nodes[i]) - (self.vlogic if self.out[name] else 0.0)) * G
+            if self.out[name] is None:
+                pins[i] = v(x, self.nodes[i]) / R_PULLDOWN
+            else:
+                pins[i] = (v(x, self.nodes[i]) - (self.vlogic if self.out[name] else 0.0)) * G
         self.i_pins = pins
+        if (self.vmax and self.vlogic > self.vmax + 1.0 and not ctx.dc and ctx.t > 0
+                and not getattr(self, "_told", False)):
+            self._told = True
+            self.warn = "over"
+            name = self.prop("model") if self.comp.part.prop("model") else self.comp.part.short or self.comp.part.name
+            self.event = (f"{self.comp.ref}: a {name} is made for up to {self.vmax:g} V, but this circuit's logic "
+                          f"supply is {self.vlogic:.0f} V — a real one would be damaged. Use a lower supply "
+                          "(4000-series chips run on up to 15 V).")
 
 
 class Gate(Digital):
@@ -744,6 +763,419 @@ class Decoder4511(Digital):
 
     def value(self):
         return sum(1 << i for i, k in enumerate("ABCD") if self.level[k])
+
+
+# ============================================================================================== shift registers
+class ShiftReg164(Digital):
+    """74HC164: serial in (DSA AND DSB), parallel out Q0–Q7; MR low clears it."""
+    inputs = ("DSA", "DSB", "CP", "MR")
+    outputs = tuple(f"Q{i}" for i in range(8))
+    pullups = ("MR",)
+    vmax = 6.0
+
+    def reset_state(self):
+        self.reg = 0
+
+    def clock(self, rising):
+        if not self.level["MR"]:
+            self.reg = 0
+        elif rising.get("CP"):
+            bit = 1 if (self.level["DSA"] and self.level["DSB"]) else 0
+            self.reg = ((self.reg << 1) | bit) & 0xFF
+
+    def compute(self):
+        return {f"Q{i}": bool(self.reg >> i & 1) for i in range(8)}
+
+    def value(self):
+        return self.reg
+
+
+class ShiftReg595(Digital):
+    """74HC595: shift register (clocked by SHCP, data in DS) plus an output latch (STCP copies it across).
+    OE high switches Q0–Q7 off (high impedance); Q7S is the shift register's last bit, for chaining."""
+    inputs = ("DS", "SHCP", "STCP", "MR", "OE")
+    outputs = tuple(f"Q{i}" for i in range(8)) + ("Q7S",)
+    pullups = ("MR", "OE")
+    vmax = 6.0
+
+    def reset_state(self):
+        self.reg = 0
+        self.latch = 0
+
+    def clock(self, rising):
+        old = self.reg
+        if not self.level["MR"]:
+            self.reg = 0
+        elif rising.get("SHCP"):
+            self.reg = ((self.reg << 1) | (1 if self.level["DS"] else 0)) & 0xFF
+        if rising.get("STCP"):
+            # the latch takes the shift register as it was before any shift at the same moment (as when the
+            # two clocks are tied together: the latch is then one clock behind)
+            self.latch = old if rising.get("SHCP") else self.reg
+
+    def compute(self):
+        on = not self.level["OE"]
+        out = {f"Q{i}": (bool(self.latch >> i & 1) if on else None) for i in range(8)}
+        out["Q7S"] = bool(self.reg >> 7 & 1)
+        return out
+
+    def value(self):
+        return self.latch
+
+
+class ShiftReg165(Digital):
+    """74HC165: PL low loads D0–D7 (at once, without a clock); then each rising CP (with CE low) shifts the
+    bits towards Q7, with DS coming in behind. Q7N is the inverse of Q7."""
+    inputs = tuple(f"D{i}" for i in range(8)) + ("DS", "CP", "CE", "PL")
+    outputs = ("Q7", "Q7N")
+    pullups = ("CE", "PL")
+    vmax = 6.0
+
+    def reset_state(self):
+        self.reg = 0
+
+    def _parallel(self):
+        return sum(1 << i for i in range(8) if self.level[f"D{i}"])
+
+    def clock(self, rising):
+        if not self.level["PL"]:
+            self.reg = self._parallel()
+        elif rising.get("CP") and not self.level["CE"]:
+            self.reg = ((self.reg << 1) | (1 if self.level["DS"] else 0)) & 0xFF
+
+    def compute(self):
+        if not self.level["PL"]:
+            self.reg = self._parallel()
+        q7 = bool(self.reg >> 7 & 1)
+        return {"Q7": q7, "Q7N": not q7}
+
+    def value(self):
+        return self.reg
+
+
+class ShiftReg597(Digital):
+    """74HC597: a rising STCP stores D0–D7 in the input latch; PL low copies the latch into the shift register;
+    each rising SHCP shifts towards Q7 with DS coming in behind; MR low clears the shift register."""
+    inputs = tuple(f"D{i}" for i in range(8)) + ("DS", "SHCP", "STCP", "PL", "MR")
+    outputs = ("Q7",)
+    pullups = ("PL", "MR")
+    vmax = 6.0
+
+    def reset_state(self):
+        self.reg = 0
+        self.latch = 0
+
+    def clock(self, rising):
+        if rising.get("STCP"):
+            self.latch = sum(1 << i for i in range(8) if self.level[f"D{i}"])
+        if not self.level["MR"]:
+            self.reg = 0
+        elif not self.level["PL"]:
+            self.reg = self.latch
+        elif rising.get("SHCP"):
+            self.reg = ((self.reg << 1) | (1 if self.level["DS"] else 0)) & 0xFF
+
+    def compute(self):
+        return {"Q7": bool(self.reg >> 7 & 1)}
+
+    def value(self):
+        return self.reg
+
+
+# ============================================================================================== analogue switch
+MUX_DATA = {  # on-resistance (Ω) at supply voltages: [(V, Ω), …] typical; max switch current (A); supply range (V)
+    "CD4051B": ([(5, 470.0), (10, 180.0), (15, 125.0)], 0.010, (3.0, 18.0)),
+    "74HC4051": ([(4.5, 100.0), (6, 90.0), (9, 70.0)], 0.025, (2.0, 10.0)),
+}
+
+
+class Mux4051(Digital):
+    """4051 analogue multiplexer: COM is connected to the channel picked by C B A (0–7) through the switch's
+    on-resistance (which depends on the supply voltage, as on the datasheet); INH high turns them all off.
+    The switches pass current either way, so it works as a demultiplexer too."""
+    inputs = ("A", "B", "C", "INH")
+    outputs = ()
+
+    def update_params(self):
+        super().update_params()
+        self.D = MUX_DATA.get(self.prop("model"), MUX_DATA["CD4051B"])
+        names = [n for n, _x, _y in self.comp.part.pins]
+        self.com_idx = names.index("COM")
+        self.ch_idx = [names.index(f"Y{i}") for i in range(8)]
+        self.vmax = self.D[2][1]
+
+    def ron(self):
+        pts = self.D[0]
+        vv = max(self.vlogic, 1.0)
+        if vv <= pts[0][0]:
+            (v0, r0), (v1, r1) = pts[0], pts[1]
+        elif vv >= pts[-1][0]:
+            (v0, r0), (v1, r1) = pts[-2], pts[-1]
+        else:
+            k = next(i for i in range(len(pts) - 1) if pts[i][0] <= vv <= pts[i + 1][0])
+            (v0, r0), (v1, r1) = pts[k], pts[k + 1]
+        # resistance falls roughly as a power of the supply voltage: interpolate on a log–log scale
+        e = math.log(r1 / r0) / math.log(v1 / v0)
+        return r0 * (vv / v0) ** e
+
+    def selected(self):
+        if self.level["INH"]:
+            return None
+        return (1 if self.level["A"] else 0) | (2 if self.level["B"] else 0) | (4 if self.level["C"] else 0)
+
+    def stamp(self, S, x, ctx):
+        super().stamp(S, x, ctx)
+        com = self.nodes[self.com_idx]
+        sel = None if self.blown else self.selected()
+        self._sel_used = sel            # the currents in accept() must use the switch the solution was found with
+        g_on = 1.0 / self.ron()
+        for k, i in enumerate(self.ch_idx):
+            S.g(com, self.nodes[i], g_on if k == sel else 1 / R_OFF)
+
+    def accept(self, x, ctx):
+        before = self.selected()
+        super().accept(x, ctx)
+        if self.selected() != before:
+            self.changed = True
+        com = self.nodes[self.com_idx]
+        sel = getattr(self, "_sel_used", None)
+        g_on = 1.0 / self.ron()
+        pins = list(self.i_pins)
+        i_com = 0.0
+        self.i_sw = 0.0
+        for k, i in enumerate(self.ch_idx):
+            g = g_on if k == sel else 1 / R_OFF
+            ii = (v(x, self.nodes[i]) - v(x, com)) * g        # into the channel pin, out at COM
+            pins[i] += ii
+            i_com -= ii
+            if k == sel:
+                self.i_sw = ii
+        pins[self.com_idx] += i_com
+        self.i_pins = pins
+        if self.blown:
+            return
+        imax = self.D[1]
+        if self._overload(abs(self.i_sw) > imax, ctx.h, 0.1, abs(self.i_sw) > 4 * imax):
+            self.blown = True
+            self.event = (f"{self.comp.ref} burnt out — {abs(self.i_sw) * 1000:.0f} mA through its switch is more "
+                          f"than a {self.prop('model')} can take ({imax * 1000:.0f} mA). Its switches are for "
+                          "signals, not for driving loads.")
+
+
+# ============================================================================================== shunt regulator
+# type: (reference voltage, max cathode current (A), max cathode voltage (V), dynamic impedance (Ω),
+#        REF input current (A), lowest cathode voltage it can pull down to (V))
+SHUNT_REFS = {
+    "TL431": (2.495, 0.100, 36.0, 0.2, 2e-6, 2.0),
+    "TLV431": (1.24, 0.015, 6.0, 0.25, 0.1e-6, 1.0),
+}
+
+
+class ShuntRef(Device):
+    """TL431-style adjustable shunt regulator: an error amplifier compares REF (relative to A) with its built-in
+    reference and makes the cathode sink current to match — so with REF tied to K it's a 2.495 V reference, and
+    with a divider from K it regulates at Vref × (1 + R1/R2). It can only sink current (never source it), can't
+    pull its cathode below about Vref, and conducts like a diode if A is taken above K. Pins K, A, REF."""
+    nonlinear = True
+
+    def update_params(self):
+        (self.vref, self.imax, self.vkmax, zka, self.iref, self.vsat) = SHUNT_REFS.get(
+            self.prop("model"), SHUNT_REFS["TL431"])
+        self.gm = 1.0 / zka
+        self.v_last = [0.0, 0.0, 0.0]
+
+    def _f(self, V):
+        vk, va, vr = V
+        vka = vk - va
+        # error amplifier: sinks gm × (excess REF voltage), never negative (softly, so the solver sees no kink)
+        i = softplus(self.gm * (vr - va - self.vref), 1e-6)
+        # the output transistor runs out of room as the cathode gets down near its lowest voltage
+        room = softplus(vka - self.vsat, 0.02)
+        i *= 1.0 - math.exp(-room / 0.05)
+        # A above K: the substrate diode conducts
+        e = sexp(-vka / (1.0 * VT))
+        i_d = 1e-12 * (e - 1.0)
+        iref = self.iref * math.tanh(max(vr - va, 0.0) / 0.1)
+        return [i - i_d + GMIN * vka, -i + i_d - GMIN * vka - iref, iref]
+
+    def stamp(self, S, x, ctx):
+        k, a, r = self.nodes
+        if self.blown:
+            S.g(k, a, 1 / R_OFF)
+            return
+        V0 = [v(x, k), v(x, a), v(x, r)]
+        # keep the diode junction from jumping too far in one Newton step
+        vka = V0[0] - V0[1]
+        lim = pnjlim(-vka, -(self.v_last[0] - self.v_last[1]), VT, 0.6)
+        if abs(-lim - vka) > 1e-9:
+            ctx.limited = True
+            V0[0] = V0[1] - lim
+        self.v_last = V0
+        numeric_stamp(S, [k, a, r], V0, self._f)
+
+    def accept(self, x, ctx):
+        k, a, r = self.nodes
+        V = [v(x, k), v(x, a), v(x, r)]
+        self.v_last = V
+        if self.blown:
+            i = (V[0] - V[1]) / R_OFF
+            self.i_pins = [i, -i, 0.0]
+            return
+        self.i_pins = self._f(V)
+        self.current = self.i_pins[0]
+        self.vd = V[0] - V[1]
+        self.power = self.vd * self.current
+        model = self.prop("model")
+        if self.vd > 1.1 * self.vkmax:
+            self.blown = True
+            self.event = (f"{self.comp.ref} was destroyed — {self.vd:.0f} V across it is more than a {model} can "
+                          f"take ({self.vkmax:g} V).")
+            return
+        bad = self.current > self.imax
+        self.warn = "over" if bad else None
+        if self._overload(bad, ctx.h, 0.1, self.current > 4 * self.imax):
+            self.blown = True
+            self.event = (f"{self.comp.ref} burnt out — {self.current * 1000:.0f} mA is more than a {model} can sink "
+                          f"({self.imax * 1000:.0f} mA). Use a bigger resistor in series with its cathode.")
+
+
+# ============================================================================================== solid-state relay
+# type: (LED current for fully on (A), on-resistance (Ω), max load current (A), max off-state voltage (V),
+#        turn-on time (s), turn-off time (s), max LED current (A))
+SSRS = {
+    "TLP3122A": (1.5e-3, 0.15, 1.4, 60.0, 1.0e-3, 0.3e-3, 0.03),
+}
+
+
+class SolidStateRelay(Device):
+    """Photo-MOSFET solid-state relay: an infrared LED (A–K) lights a stack of photocells that charge the gates
+    of two MOSFETs back to back between O1 and O2 — so it switches AC or DC, isolated from the LED side. The
+    photocells only give microamps, so it turns on over about a millisecond and off a bit faster.
+    Internal node: the LED junction."""
+    nonlinear = True
+    reactive = True
+    n_internal = 1
+    pin_groups = ((0, 1), (2, 3))
+
+    def update_params(self):
+        (self.if_on, self.ron, self.imax, self.voff, self.t_on, self.t_off, self.if_max) = SSRS.get(
+            self.prop("model"), SSRS["TLP3122A"])
+        self.nvt = OPTO_N * VT
+        self.vcrit = self.nvt * math.log(self.nvt / (math.sqrt(2) * OPTO_IS))
+        self.vd_last = self.vd_acc = 0.0
+        if not hasattr(self, "drive"):
+            self.q = 0.0                 # charge on the output MOSFETs' gates, 0 … 1 (1 = fully charged)
+            self.drive = 0.0             # how far the output MOSFETs are turned on, 0 … 1
+            self.i_led = 0.0
+        self.tau_leak = 3e-3             # the gates leak away slowly while the LED is on …
+        self.tau_off = 0.1e-3            # … and are discharged quickly once it's off
+
+    def begin_iter(self):
+        self.vd_last = self.vd_acc
+
+    @staticmethod
+    def led(vd):
+        e = sexp(vd / (OPTO_N * VT))
+        return OPTO_IS * (e - 1.0) + GMIN * vd, OPTO_IS * e / (OPTO_N * VT) + GMIN
+
+    def g_out(self):
+        return self.drive / self.ron + 1 / R_OFF
+
+    # The photocells give a current proportional to the LED current, charging the MOSFET gates: with the LED at
+    # 5 mA they reach full charge in about t_on. The MOSFETs only start to conduct half-way up (their threshold).
+    def rate(self, i_led):
+        return (i_led / 5e-3) / self.t_on
+
+    def q_steady(self, i_led):
+        if i_led < 1e-5:
+            return 0.0
+        return min(1.0, self.rate(i_led) * self.tau_leak)
+
+    def q_step(self, q, i_led, h):
+        if i_led < 1e-5:
+            return q * math.exp(-h / self.tau_off)
+        qe = self.rate(i_led) * self.tau_leak
+        q = qe + (q - qe) * math.exp(-h / self.tau_leak)
+        return min(q, 1.0)
+
+    @staticmethod
+    def drive_of(q):
+        f = max(0.0, min(1.0, (q - 0.45) / 0.45))
+        return f * f * (3 - 2 * f)
+
+    def stamp(self, S, x, ctx):
+        a, k, o1, o2 = self.nodes
+        j = self.internal[0]
+        if self.blown:
+            S.g(a, k, 1 / R_OFF)
+            S.g(a, j, 1.0)
+            S.g(o1, o2, 1 / R_OFF)
+            return
+        S.g(a, j, 1.0 / OPTO_RS)
+        vd = v(x, j) - v(x, k)
+        vl = pnjlim(vd, self.vd_last, self.nvt, self.vcrit)
+        if abs(vl - vd) > 1e-9:
+            ctx.limited = True
+        self.vd_last = vl
+        i, g = self.led(vl)
+        S.g(j, k, g)
+        S.i(j, k, i - g * vl)
+        if ctx.dc:          # a steady answer: the output is as far on as the LED current makes it
+            self.drive = self.drive_of(self.q_steady(max(i, 0.0)))
+        S.g(o1, o2, self.g_out())
+
+    def accept(self, x, ctx):
+        a, k, o1, o2 = self.nodes
+        j = self.internal[0]
+        if self.blown:
+            self.i_led = (v(x, a) - v(x, k)) / R_OFF
+            i_o = (v(x, o1) - v(x, o2)) / R_OFF
+        else:
+            vd = v(x, j) - v(x, k)
+            self.i_led = self.led(vd)[0]
+            self.vd_last = self.vd_acc = vd
+            i_o = (v(x, o1) - v(x, o2)) * self.g_out()
+            if ctx.dc:
+                self.q = self.q_steady(max(self.i_led, 0.0))
+            else:
+                old = self.drive
+                self.q = self.q_step(self.q, max(self.i_led, 0.0), ctx.h)
+                self.drive = self.drive_of(self.q)
+                if (old < 0.5) != (self.drive < 0.5):
+                    self.changed = True
+            self.drive = self.drive_of(self.q)
+        self.i_pins = [self.i_led, -self.i_led, i_o, -i_o]
+        self.vd = v(x, a) - v(x, k)
+        self.current = self.i_led
+        self.power = self.vd * self.i_led + i_o * (v(x, o1) - v(x, o2))
+        if self.blown:
+            return
+        model = self.prop("model")
+        v_out = abs(v(x, o1) - v(x, o2))
+        if v_out > 1.3 * self.voff and self.drive < 0.5:
+            self.blown = True
+            self.event = (f"{self.comp.ref} was destroyed — {v_out:.0f} V across its output is more than a {model} "
+                          f"can block ({self.voff:g} V).")
+            return
+        led_bad = self.i_led > self.if_max
+        out_bad = abs(i_o) > self.imax
+        self.warn = "over" if (led_bad or out_bad) else None
+        if self._overload(led_bad or out_bad, ctx.h, 0.1, self.i_led > 3 * self.if_max or abs(i_o) > 4 * self.imax):
+            self.blown = True
+            if led_bad:
+                self.event = (f"{self.comp.ref} popped! {self.i_led * 1000:.0f} mA is too much for the LED inside a "
+                              f"{model} (max {self.if_max * 1000:.0f} mA). Add a resistor in series with A–K.")
+            else:
+                self.event = (f"{self.comp.ref} burnt out — {abs(i_o):.1f} A through its output is more than a "
+                              f"{model} can switch ({self.imax:g} A).")
+
+    def glow(self):
+        if self.blown:
+            return 0.0
+        return max(0.0, min(1.0, (self.i_led - 1e-4) / 0.005)) ** 0.6
+
+    def after_dc(self):
+        pass
 
 
 # ============================================================================================== displays & probes
@@ -1133,5 +1565,7 @@ FACTORY = {
     "nmos": MOSFET, "pmos": MOSFET, "opamp": OpAmp, "timer555": Timer555,
     "not": Gate, "and": Gate, "or": Gate, "nand": Gate, "nor": Gate, "xor": Gate, "schmitt_not": Gate,
     "dff": DFF, "counter4017": Counter4017, "decoder4511": Decoder4511,
+    "shunt_ref": ShuntRef, "ssr": SolidStateRelay,
+    "sr164": ShiftReg164, "sr595": ShiftReg595, "sr165": ShiftReg165, "sr597": ShiftReg597, "mux4051": Mux4051,
     "sevenseg": SevenSeg, "signal_gen": SignalGen, "scope_probe": Probe, "logic_probe": Probe,
 }

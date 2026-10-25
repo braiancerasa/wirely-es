@@ -1,0 +1,18 @@
+{
+  "name": "Wirely — circuit simulator",
+  "short_name": "Wirely",
+  "description": "Draw a circuit, press play, watch it work.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f6fd1",
+  "icons": [
+    { "src": "icons/wirely-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/wirely-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/wirely-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "file_handlers": [
+    { "action": "./", "accept": { "application/json": [".wirely"] } }
+  ]
+}

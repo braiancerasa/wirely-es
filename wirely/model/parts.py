@@ -204,6 +204,7 @@ _PARTS = [
 GATE2 = (("A", -40, -10), ("B", -40, 10), ("Y", 40, 0))
 GATE1 = (("A", -40, 0), ("Y", 40, 0))
 LOGIC_NOTE = " Logic chips are powered automatically from the circuit's supply."
+SR_NOTE = " Unconnected active-low control pins (MR, OE, PL, CE) count as not active."
 
 _PARTS += [
     PartDef("signal_gen", "Signal generator", "Power supplies", "SG", TWO_POL,
@@ -218,7 +219,7 @@ _PARTS += [
             "function generator clock pulse square wave", short="Signal generator"),
 
     PartDef("nmos", "N-channel MOSFET", "Transistors", "Q", (("G", -30, 0), ("D", 10, -30), ("S", 10, 30)),
-            (_p("model", "Type", "2N7000", kind="choice", choices=("2N7000", "BS170", "IRLZ44N", "IRF530", "IRF540", "IRF3205", "AO3400")),),
+            (_p("model", "Type", "2N7000", kind="choice", choices=("2N7000", "2N7002", "BS170", "AO3400", "IRLZ44N", "IRF530", "IRF540", "IRF3205")),),
             (-30, -30, 50, 60), "Switched on by voltage at the gate — almost no gate current.",
             "mosfet fet 2n7000 irf540", short="N-MOSFET"),
     PartDef("pmos", "P-channel MOSFET", "Transistors", "Q", (("G", -30, 0), ("D", 10, 30), ("S", 10, -30)),
@@ -319,6 +320,56 @@ _PARTS += [
             "switches C–E on, with no electrical connection between the two sides. Needs a resistor in series "
             "with the LED.", "optocoupler opto isolator coupler pc817 4n25 4n35 tlp521 6n139 isolation",
             short="Optoisolator"),
+    # ---------------------------------------------------------------- requested by users (1.3.0)
+    PartDef("shunt_ref", "Shunt regulator (TL431)", "Diodes & LEDs", "U",
+            (("K", 0, -30), ("A", 0, 30), ("REF", -30, 0)),
+            (_p("model", "Type", "TL431", kind="choice", choices=("TL431", "TLV431"), on_label=True),),
+            (-30, -30, 50, 60), "An adjustable precision reference: it sinks current at its cathode (K) to hold "
+            "its REF pin at 2.495 V (TL431) or 1.24 V (TLV431). Feed it through a resistor, set the output with "
+            "two resistors: Vout = Vref × (1 + R1 / R2).",
+            "tl431 tlv431 reference zener regulator shunt adjustable", short="TL431"),
+    PartDef("ssr", "Solid-state relay", "Switches", "K",
+            (("A", -40, -20), ("K", -40, 20), ("O1", 40, -20), ("O2", 40, 20)),
+            (_p("model", "Type", "TLP3122A", kind="choice", choices=("TLP3122A",), on_label=True),),
+            (-40, -32, 80, 64), "A relay with no moving parts: a small current through its LED (A–K) turns on "
+            "MOSFETs between O1 and O2 — AC or DC, silent, and isolated from the LED side. Needs a resistor in "
+            "series with the LED.", "ssr photomos photorelay tlp3122a solid state relay", short="SSR"),
+    PartDef("mux4051", "8-channel analogue switch (4051)", "Integrated circuits", "IC",
+            (("COM", -60, -40), ("A", -60, 0), ("B", -60, 10), ("C", -60, 20), ("INH", -60, 30))
+            + tuple((f"Y{i}", 60, -40 + 10 * i) for i in range(8)),
+            (_p("model", "Type", "CD4051B", kind="choice", choices=("CD4051B", "74HC4051"), on_label=True),),
+            (-40, -50, 80, 90), "Connects COM to one of Y0–Y7, picked by the binary number on C B A — an "
+            "analogue switch, so signals can go either way. INH high turns all the switches off."
+            + LOGIC_NOTE, "mux multiplexer demultiplexer 4051 cd4051 74hc4051 analog switch", short="4051 mux"),
+    PartDef("sr164", "Shift register (74HC164)", "Integrated circuits", "IC",
+            (("DSA", -60, -30), ("DSB", -60, -10), ("CP", -60, 10), ("MR", -60, 30))
+            + tuple((f"Q{i}", 60, -40 + 10 * i) for i in range(8)), (),
+            (-40, -50, 80, 90), "Serial in, parallel out: on each rising clock (CP) the bits move along Q0 → Q7 "
+            "and Q0 takes DSA AND DSB. MR low clears it. 74HC: for 2–6 V circuits." + LOGIC_NOTE
+            + SR_NOTE, "74hc164 164 shift register sipo serial", short="74HC164"),
+    PartDef("sr595", "Shift register with latch (74HC595)", "Integrated circuits", "IC",
+            (("DS", -60, -40), ("SHCP", -60, -20), ("STCP", -60, 0), ("MR", -60, 20), ("OE", -60, 40))
+            + tuple((f"Q{i}", 60, -40 + 10 * i) for i in range(8)) + (("Q7S", 60, 40),), (),
+            (-40, -50, 80, 100), "Serial in, parallel out, with a latch: clock bits in with SHCP, then a rising "
+            "STCP copies them to Q0–Q7 all at once. Q7S passes the data on to the next chip. OE high switches "
+            "the outputs off; MR low clears the shift register. 74HC: for 2–6 V circuits."
+            + LOGIC_NOTE + SR_NOTE, "74hc595 595 shift register latch sipo", short="74HC595"),
+    PartDef("sr165", "Shift register (74HC165)", "Integrated circuits", "IC",
+            tuple((f"D{i}", -60, -60 + 10 * i) for i in range(8))
+            + (("DS", -60, 20), ("CP", -60, 30), ("CE", -60, 40), ("PL", -60, 50))
+            + (("Q7", 60, -10), ("Q7N", 60, 10)), (),
+            (-40, -70, 80, 130), "Parallel in, serial out: PL low loads D0–D7, then each rising clock (CP, with "
+            "CE low) shifts the bits out of Q7, with DS coming in behind. For reading lots of buttons with few "
+            "pins. 74HC: for 2–6 V circuits." + LOGIC_NOTE + SR_NOTE,
+            "74hc165 165 shift register piso parallel load", short="74HC165"),
+    PartDef("sr597", "Shift register with input latch (74HC597)", "Integrated circuits", "IC",
+            tuple((f"D{i}", -60, -60 + 10 * i) for i in range(8))
+            + (("DS", -60, 20), ("SHCP", -60, 30), ("STCP", -60, 40), ("PL", -60, 50), ("MR", -60, 60))
+            + (("Q7", 60, 0),), (),
+            (-40, -70, 80, 140), "Parallel in, serial out, with an input latch: a rising STCP captures D0–D7, "
+            "PL low copies them into the shift register, and each rising SHCP shifts them out of Q7. MR low "
+            "clears the shift register. 74HC: for 2–6 V circuits." + LOGIC_NOTE + SR_NOTE,
+            "74hc597 597 shift register piso latch", short="74HC597"),
     PartDef("note", "Text note", "Labels", "T", (),
             (_p("text", "Text", "Note", kind="text"),),
             (-40, -10, 80, 20), "A note on the diagram — for reports, documentation or worksheets. Double-click to change the text.",

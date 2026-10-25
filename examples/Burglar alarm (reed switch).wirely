@@ -4,7 +4,7 @@
  "title": "Burglar alarm (reed switch)",
  "components": [
   {
-   "id": "d1c004fe",
+   "id": "7915e99b",
    "kind": "battery",
    "ref": "B1",
    "x": 0,
@@ -16,7 +16,7 @@
    }
   },
   {
-   "id": "c957c468",
+   "id": "4c1c6c4a",
    "kind": "resistor",
    "ref": "R1",
    "x": 120,
@@ -29,7 +29,7 @@
    }
   },
   {
-   "id": "b991d5fa",
+   "id": "be218e07",
    "kind": "reed_switch",
    "ref": "S1",
    "x": 120,
@@ -41,7 +41,7 @@
    }
   },
   {
-   "id": "ab115380",
+   "id": "70eef950",
    "kind": "resistor",
    "ref": "R2",
    "x": 180,
@@ -54,7 +54,7 @@
    }
   },
   {
-   "id": "d1650cbd",
+   "id": "bc4ceaa0",
    "kind": "npn",
    "ref": "Q1",
    "x": 240,
@@ -66,7 +66,7 @@
    }
   },
   {
-   "id": "2cf15d0d",
+   "id": "07dad021",
    "kind": "buzzer",
    "ref": "BZ1",
    "x": 250,
@@ -78,7 +78,7 @@
    }
   },
   {
-   "id": "368a2c4e",
+   "id": "56a687ed",
    "kind": "ground",
    "ref": "GND1",
    "x": 0,
@@ -88,7 +88,7 @@
    "props": {}
   },
   {
-   "id": "6fa256ff",
+   "id": "97d6c11c",
    "kind": "note",
    "ref": "T1",
    "x": 130,
@@ -102,7 +102,7 @@
  ],
  "wires": [
   {
-   "id": "b0ef7742",
+   "id": "f19f4bdb",
    "points": [
     [
      0,
@@ -123,7 +123,7 @@
    ]
   },
   {
-   "id": "57bc759a",
+   "id": "80c7dc78",
    "points": [
     [
      120,
@@ -136,7 +136,7 @@
    ]
   },
   {
-   "id": "640f60b3",
+   "id": "9dce6e0a",
    "points": [
     [
      120,
@@ -149,7 +149,7 @@
    ]
   },
   {
-   "id": "a8b3360e",
+   "id": "a45f7a2a",
    "points": [
     [
      120,
@@ -162,7 +162,7 @@
    ]
   },
   {
-   "id": "a22907d2",
+   "id": "8d1f1057",
    "points": [
     [
      250,
@@ -175,7 +175,7 @@
    ]
   },
   {
-   "id": "96f71f84",
+   "id": "5fe66a67",
    "points": [
     [
      0,
@@ -196,7 +196,7 @@
    ]
   },
   {
-   "id": "ff7cb039",
+   "id": "7a8f7615",
    "points": [
     [
      120,

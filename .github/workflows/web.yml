@@ -1,0 +1,73 @@
+# Builds Wirely Web (the version that runs in a browser — for Chromebooks and school computers) and puts it on
+# GitHub Pages at  https://<your user name>.github.io/Wirely/
+#   - Every push to the main branch: builds it, tests it in a real browser, and (if the test passes) publishes it.
+#   - Actions tab → "Wirely Web (browser version)" → Run workflow: the same, any time.
+#   - Pushes to other branches: build and test only.
+# One-time setup: repository Settings → Pages → Build and deployment → Source: "GitHub Actions".
+name: Wirely Web (browser version)
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYODIDE_VERSION: "314.0.7"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Get Pyodide (Python for the browser) and its numpy
+        run: |
+          mkdir -p pyodide-dl && cd pyodide-dl
+          npm pack "pyodide@${PYODIDE_VERSION}" --silent
+          tar -xzf pyodide-*.tgz
+          WHEEL=$(python3 -c "import json; print(json.load(open('package/pyodide-lock.json'))['packages']['numpy']['file_name'])")
+          curl -fsSL -o "$WHEEL" "https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/$WHEEL" \
+            && echo "NUMPY_WHEEL=$PWD/$WHEEL" >> "$GITHUB_ENV" \
+            || echo "numpy wheel not downloaded - the web version will use its built-in maths instead"
+      - name: Build the web version
+        run: python tools/build_web.py --out _site --pyodide pyodide-dl/package ${NUMPY_WHEEL:+--numpy "$NUMPY_WHEEL"}
+      - name: Test it in a real browser (Chromium)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+          python tools/web_smoke.py _site --shots web-smoke ${NUMPY_WHEEL:+--need-numpy}
+      - name: Keep the test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-smoke-screenshots
+          path: web-smoke
+          retention-days: 7
+      - name: Package the site for GitHub Pages
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

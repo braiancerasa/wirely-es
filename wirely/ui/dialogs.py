@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QFil
 
 from ..model import parts as P
 from ..model.circuit import Circuit, Component
+from ..model.types_info import describe
 from ..model.units import fmt, parse
 from . import symbols as S
 from . import theme
@@ -71,6 +72,10 @@ class PropertiesDialog(QDialog):
                     else:
                         w.addItem(ch)
                 w.setCurrentText(str(v))
+                if p.key == "model":
+                    for ix, ch in enumerate(p.choices):
+                        if describe(ch):
+                            w.setItemData(ix, describe(ch), Qt.ToolTipRole)
             else:
                 w = QLineEdit(fmt(v, p.unit))
                 w.setPlaceholderText(f"e.g. {fmt(p.default, p.unit)}")
@@ -79,6 +84,15 @@ class PropertiesDialog(QDialog):
                 w.textChanged.connect(self._validate)
             self.fields[p.key] = (p, w)
             form.addRow(p.label, w)
+            if p.kind == "choice" and p.key == "model":
+                # what this type is good for — so you can tell why you'd pick one over another
+                info = QLabel(describe(w.currentText()))
+                info.setObjectName("hint")
+                info.setWordWrap(True)
+                info.setMinimumWidth(300)
+                w.currentTextChanged.connect(lambda t, lab=info: lab.setText(describe(t)))
+                self.type_info = info
+                form.addRow("", info)
         lay.addLayout(form)
         self.error = QLabel("")
         self.error.setObjectName("dialogError")

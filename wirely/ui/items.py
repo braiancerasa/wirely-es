@@ -99,10 +99,17 @@ class ComponentItem(QGraphicsItem):
         w = max([fm_b.horizontalAdvance(lines[0])] + [fm.horizontalAdvance(t) for t in lines[1:]])
         h = len(lines) * (LABEL_PX + 2)
         b = self._body
-        if b.width() >= b.height():          # lying flat: label above
+        pins = [QPointF(*self._pin_local(n)) for n in self.comp.pin_positions()]
+        right = any(pt.x() > b.right() + 1 for pt in pins)
+        above = any(pt.y() < b.top() - 1 for pt in pins)
+        below = any(pt.y() > b.bottom() + 1 for pt in pins)
+        if b.width() >= b.height() or (right and not above):   # lying flat, or pins on the right: label above
             r = QRectF(b.center().x() - w / 2, b.top() - h - 3, w, h)
             align = Qt.AlignHCenter
-        else:                                # standing up: label on the right
+        elif right and not below:                              # pins on the right and above: label below
+            r = QRectF(b.center().x() - w / 2, b.bottom() + 3, w, h)
+            align = Qt.AlignHCenter
+        else:                                                  # standing up: label on the right
             r = QRectF(b.right() + 5, b.center().y() - h / 2, w, h)
             align = Qt.AlignLeft
         return r, lines, align

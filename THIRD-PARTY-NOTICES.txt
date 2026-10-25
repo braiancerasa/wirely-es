@@ -10,6 +10,11 @@ It uses these libraries, which are installed separately (not included in this fo
 The downloadable apps are built with PyInstaller (GPL with a bundling exception), the Windows installer with
 Inno Setup, and the Linux AppImage with appimagetool. These tools are not part of Wirely itself.
 
+The browser version (Wirely Web) runs in Pyodide — Pyodide contributors — Mozilla Public License 2.0
+(https://pyodide.org/), which includes CPython (Python Software Foundation License) and, when it loads, NumPy
+(BSD 3-clause). The web site copies these unchanged from Pyodide's official release. The browser version does not
+use Qt: web/py/qtshim.py is Wirely's own small stand-in for the parts of Qt its drawing code uses.
+
 The circuit solver is Wirely's own. The automatic tests compare it with ngspice
 (https://ngspice.sourceforge.io/, modified BSD licence) when ngspice happens to be installed;
 ngspice is not part of Wirely and isn't needed to run it.

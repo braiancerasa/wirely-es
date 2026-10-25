@@ -1,8 +1,12 @@
 # Wirely
 
-**A free, open-source circuit design and simulation app for Windows, Mac and Linux.** Draw a circuit, press
-play, and watch it work — LEDs light, motors spin, relays click, meters read and wires show their voltage.
-For the workplace, the classroom and the workbench, all on your own computer, with no cloud and no account.
+**A free, open-source circuit design and simulation app for Windows, Mac and Linux — and in your web browser.**
+Draw a circuit, press play, and watch it work — LEDs light, motors spin, relays click, meters read and wires
+show their voltage. For the workplace, the classroom and the workbench, all on your own computer, with no cloud
+and no account.
+
+**▶ [Try it in your browser](https://richiewillmott.github.io/Wirely/)** — nothing to install, and it works on
+Chromebooks. Or [download the app](#download-and-install) for Windows, Mac and Linux.
 
 Under the hood is a real circuit solver, using the same method as SPICE, checked against hand calculations and
 against ngspice. So the numbers it shows are the numbers you'd measure.
@@ -30,7 +34,7 @@ answers.
 
 ## What it does
 
-- **Schematic editor** — a parts gallery of 55 parts with British/IEC symbols, drag-and-drop, wiring by
+- **Schematic editor** — a parts gallery of 62 parts with British/IEC symbols, drag-and-drop, wiring by
   dragging pin to pin, junctions, rotate and flip, undo/redo, copy/paste, text notes, autosave and crash
   recovery.
 - **Live simulation** — glowing LEDs and lamps, motors with back-EMF that slow under load, relays that click,
@@ -42,8 +46,11 @@ answers.
   electrolytics, transistors killed by a coil's voltage spike: they pop and tell you why.
 - **Graph and logic probe** — up to four probes, frequency read-outs, adjustable time and volts per division.
 - **Chips** — 555 timer, op-amps, logic gates, 4017 counter, 4511 decoder, 7-segment display,
-  optoisolators (PC817, 4N25, 4N35, TLP521, 6N139), MOSFETs,
+  74HC164/165/595/597 shift registers, the 4051 analogue switch, TL431/TLV431 references,
+  optoisolators (PC817, 4N25, 4N35, TLP521, 6N139), solid-state relays (TLP3122A), MOSFETs,
   transistors, relays, signal generator with PWM.
+- **Every part type explained** — double-click a part and choose its type: a line underneath says what it's
+  good for (e.g. why you'd pick an AO3400 over a 2N7002).
 - **Export** — PNG, SVG and PDF (always on white paper), and a parts list you can copy or save as CSV.
 - **Feels modern** — a flat look with light and dark themes, a splash screen, and an installer that makes
   `.wirely` files open in Wirely with their own icon.
@@ -70,6 +77,24 @@ anything else needed:
   To add it to your app menu: `bash packaging/linux/install-desktop.sh Wirely-<version>-x86_64.AppImage`.
 
 <p align="center"><img src="docs/images/splash.png" width="480" alt="Wirely starting up"></p>
+
+### Or use it in a web browser (Chromebooks, school computers)
+
+Open **[richiewillmott.github.io/Wirely](https://richiewillmott.github.io/Wirely/)** in Chrome, Edge, Firefox or
+Safari — nothing to install and no account. It's the same Wirely: the same parts, symbols, examples and
+simulator, running inside the browser (the desktop app's own Python code, run by
+[Pyodide](https://pyodide.org)). Your circuits stay on your computer — nothing is uploaded.
+
+- **Save** gives you a `.wirely` file, which opens in the browser version and the desktop app alike.
+- **File → Copy a link to this circuit** makes a link with the circuit inside it — paste it into Google
+  Classroom or Teams and everyone who opens it gets their own copy.
+- After the first visit it **works offline**, and Chrome can **install it as an app** (the install button in the
+  address bar), so it appears in a Chromebook's launcher.
+- On a touchpad, two-finger scroll moves around and pinch zooms; on a touch screen, drag the sheet with one finger.
+
+<p align="center"><img src="docs/images/web.png" width="760" alt="Wirely running in a web browser"></p>
+
+The browser version is a little slower than the desktop app, and it can't export SVG or PDF (it saves PNG pictures).
 
 Want to run it from the source code, change it, or build the installers yourself? See
 **[BUILDING.md](BUILDING.md)**, or the short version under [For developers](#for-developers) below.
@@ -176,7 +201,7 @@ gives the parts list.
 
 ### Examples
 
-**File → Open example** has 20 circuits to open and play with, from an LED and resistor, through 555 timers, logic,
+**File → Open example** has 22 circuits to open and play with, from an LED and resistor, through 555 timers, logic,
 op-amps, relays and motors, up to a buck converter.
 
 **Dark mode** — the moon button at the top right. Press **F1** in the app for every mouse and keyboard shortcut.
@@ -205,7 +230,7 @@ resistance, supply current, output swing that falls short further under heavier 
 into 10 kΩ, ±13 V into 2 kΩ), the LM358 reaching 0 V but not the top rail, and current limits. The output
 current really comes from the supply pins, and too much supply voltage destroys the chip.
 
-The automatic tests (243 of them) check it against answers worked out by hand — voltage dividers, the diode
+The automatic tests (271 of them) check it against answers worked out by hand — voltage dividers, the diode
 equation, LED current, transistor gain and saturation, Zener regulation, RC and RL curves, a half-wave
 rectifier, 555 astable and monostable timing, op-amp gains, bandwidth, slew rate and bias currents, a
 Schmitt-trigger oscillator, logic truth tables and counters — against the datasheets above, and against
@@ -237,6 +262,8 @@ package or for testing the real thing:
 - Fast-switching circuits (like the buck converter at 1 kHz) run **slower than real time** — the time label
   says "slowed". The answers are still right; they just take longer to arrive.
 - Sound depends on your computer's sound system; if it can't be opened, Wirely simply stays quiet.
+- The browser version needs a recent browser, takes a few seconds to start the first time (it downloads about
+  14 MB), and saves pictures as PNG only.
 
 ## For developers
 
@@ -252,7 +279,9 @@ instead.
 
 The circuit model (`wirely/model`) and the solver (`wirely/sim`) are plain Python with no Qt, so they can be
 tested on their own; the user interface is in `wirely/ui`. The README pictures are made by
-`tools/readme_media.py`. See [BUILDING.md](BUILDING.md) for building the installers and how the automatic
+`tools/readme_media.py`. The browser version lives in `web/`: `web/py/qtshim.py` stands in for the parts of Qt the
+sheet and drawing code use (recording the drawing for the page to replay on a canvas), and
+`python tools/build_web.py` builds the site (see BUILDING.md). See [BUILDING.md](BUILDING.md) for building the installers and how the automatic
 GitHub builds work, and [CHANGES.md](CHANGES.md) for what's new.
 
 ## Licence

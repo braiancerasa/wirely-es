@@ -4,7 +4,7 @@
  "title": "LED and resistor",
  "components": [
   {
-   "id": "6da46ebb",
+   "id": "1aed3c1b",
    "kind": "battery",
    "ref": "B1",
    "x": 0,
@@ -16,7 +16,7 @@
    }
   },
   {
-   "id": "84fe05cf",
+   "id": "cf0c5d3e",
    "kind": "switch",
    "ref": "S1",
    "x": 70,
@@ -28,7 +28,7 @@
    }
   },
   {
-   "id": "5e28c2dc",
+   "id": "fda2514a",
    "kind": "resistor",
    "ref": "R1",
    "x": 170,
@@ -41,7 +41,7 @@
    }
   },
   {
-   "id": "4ac6db3a",
+   "id": "d3b7b8e5",
    "kind": "led",
    "ref": "LED1",
    "x": 240,
@@ -56,7 +56,7 @@
  ],
  "wires": [
   {
-   "id": "083be210",
+   "id": "e45afd7a",
    "points": [
     [
      0,
@@ -73,7 +73,7 @@
    ]
   },
   {
-   "id": "dc200bb7",
+   "id": "291799b0",
    "points": [
     [
      100,
@@ -86,7 +86,7 @@
    ]
   },
   {
-   "id": "e3d13138",
+   "id": "ff59fc5d",
    "points": [
     [
      200,
@@ -103,7 +103,7 @@
    ]
   },
   {
-   "id": "c3fbfac1",
+   "id": "67f83079",
    "points": [
     [
      240,

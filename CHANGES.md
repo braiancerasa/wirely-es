@@ -1,5 +1,23 @@
 # Changes
 
+## 1.3.0 — parts requested by users, and Wirely in your web browser
+- **Wirely Web:** the whole app runs in a web browser, so it works on **Chromebooks** and school computers with
+  nothing to install — at https://richiewillmott.github.io/Wirely/. It's the desktop app's own Python code
+  (the sheet, the symbols and the simulator) running in the browser with Pyodide, so it looks and behaves the same.
+- In the browser: open and save `.wirely` files (they work in both versions), all the examples, the graph,
+  sound, PNG pictures, the parts list, **links that carry a circuit** (for Google Classroom / Teams), works
+  **offline** after the first visit, installs as an app, and touch-screen and touchpad gestures.
+- On the graph, a curved trace no longer hides the grid lines and the other traces under it.
+- **Shift registers:** 74HC164 (serial in, parallel out), 74HC595 (with output latch and output enable),
+  74HC165 (parallel in, serial out) and 74HC597 (with input latch). They warn if run above their 6 V limit.
+- **4051 analogue switch** (CD4051B and 74HC4051), with each type's datasheet on-resistance at its supply voltage.
+- **TL431 / TLV431 adjustable shunt references:** Vout = Vref × (1 + R1/R2), with their current and voltage limits.
+- **Solid-state relay (TLP3122A):** photo-MOSFET output that switches AC or DC, turning on over about a millisecond.
+- **2N7002** MOSFET.
+- **Every part type is explained:** choose a type in a part's properties and a line underneath says what it's for.
+- New examples: *TL431 adjustable reference* and *Shift register (74HC595)*.
+- Chip labels sit above the chip instead of over its pins.
+
 ## 1.2.0 — real filament lamps
 - **Filament lamps behave like real ones:** the filament's resistance rises as it heats up, so the current–voltage
   graph curves (I ∝ V^0.6, as measured on real lamps — the GCSE/A-level required practical), a cold lamp takes a
