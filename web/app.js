@@ -201,8 +201,8 @@ function drawText(ctx, op, pen, font) {
 // a small canvas showing recorded ops (gallery tiles, toolbar icons, dialogs)
 function opsCanvas(canvas, ops, w, h, scale = 1) {
   const dpr = Math.max(1, window.devicePixelRatio || 1);
-  canvas.width = Math.round(w * dpr * scale);
-  canvas.height = Math.round(h * dpr * scale);
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
   canvas.style.width = w + "px";
   canvas.style.height = h + "px";
   const ctx = canvas.getContext("2d");
