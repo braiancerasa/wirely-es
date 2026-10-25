@@ -424,6 +424,47 @@ class Capacitor(Device):
                 self.event = f"{self.comp.ref} popped — {why}."
 
 
+class RsDiode:
+    """A junction with a series resistance, worked out on the spot (no inside node): for the voltage across it,
+    find how it splits between the junction and the resistance, then stamp the combined current and slope.
+    With the resistance in series the current only rises in a straight line at high voltage, so Newton needs no
+    limiting. Used for the many diodes in a driver chip, where inside nodes would make every step slower."""
+
+    def __init__(self, a, k, Is=14.11e-9, n=1.984, Rs=0.5):
+        self.a, self.k, self.Is, self.nvt, self.Rs = a, k, Is, n * VT, Rs
+        self.current = self.power = 0.0
+
+    def _solve(self, vd):
+        Is, nvt, Rs = self.Is, self.nvt, self.Rs
+        if vd < 0.3:                    # hardly any current: the resistance makes no difference
+            vj = vd
+        else:
+            vj = min(vd, nvt * math.log(vd / (Rs * Is) + 1.0))      # start above the answer
+            for _ in range(60):
+                e = math.exp(vj / nvt)
+                f = vj + Rs * Is * (e - 1.0) - vd
+                df = 1.0 + Rs * Is * e / nvt
+                dv = f / df
+                vj -= dv
+                if abs(dv) < 1e-12:
+                    break
+        e = math.exp(min(vj / nvt, 700.0))
+        i = Is * (e - 1.0)
+        gj = Is * e / nvt
+        return i + GMIN * vd, gj / (1.0 + gj * Rs) + GMIN
+
+    def stamp(self, S, x):
+        vd = v(x, self.a) - v(x, self.k)
+        i, g = self._solve(vd)
+        S.g(self.a, self.k, g)
+        S.i(self.a, self.k, i - g * vd)
+
+    def accept(self, x):
+        vd = v(x, self.a) - v(x, self.k)
+        self.current = self._solve(vd)[0]
+        self.power = self.current * vd
+
+
 class Diode(Device):
     """Shockley diode with series resistance (via an internal node) and, for Zeners, reverse breakdown."""
     n_internal = 1
@@ -775,6 +816,8 @@ class Motor(Device):
             self.i_pins = [self.current, -self.current]
             self.power = 0.0
             return
+        # the current this step's solution was found with (the back-EMF of the speed before this step)
+        i = (vd - self.k * self.w) / self.R
         # rotor: J dω/dt = k·i − b·ω − load, with i = (v − kω)/R (solved implicitly: always stable)
         drive = self.k * vd / self.R
         if abs(self.w) < 1e-3 and abs(drive) <= self.TL:
@@ -783,7 +826,6 @@ class Motor(Device):
             sgn = 1.0 if (self.w if abs(self.w) > 1e-3 else drive) > 0 else -1.0
             self.w = (self.w + h / self.J * (drive - self.TL * sgn)) / \
                 (1 + h * (self.b + self.k * self.k / self.R) / self.J)
-        i = (vd - self.k * self.w) / self.R
         self.current = i
         self.vd = vd
         self.i_pins = [i, -i]

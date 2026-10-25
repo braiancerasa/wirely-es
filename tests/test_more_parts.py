@@ -340,10 +340,10 @@ def test_4026_counts_and_drives_the_display():
                                               "offset": 4.5}),
                 ("dc_supply", ("v", "0"), {"voltage": 9}),
                 ("ic4026", ("clk", "0", "0") + tuple("abcdefg") + ("co",), {}),
-                ("sevenseg", tuple("abcdefg") + ("0",), {})], 0.33)
+                ("sevenseg", tuple("abcdefg") + ("0",), {})], 0.43)
     cnt = s.device(c[2].id)
     lit = "".join(k for k, v in zip("abcdefg", s.device(c[3].id).lit()) if v > 0.5)
-    assert cnt.count == 4 and lit == "bcfg"                         # a 4 on the display
+    assert cnt.count == 4 and lit == "bcfg"                         # edges at 0.1 … 0.4 s: a 4 on the display
 
 
 def test_4026_carry_clocks_the_next_digit():
@@ -419,7 +419,7 @@ def test_readings_show_on_the_sheet_and_pin_with_a_click():
     simc.start(c)
     simc._tick()
     tags = []
-    sc._tag = lambda p, x, y, text, pinned, anchor: tags.append((text, pinned))
+    sc._tag = lambda p, x, y, text, pinned, anchor, key=None: tags.append((text, pinned))
     img = QImage(200, 200, QImage.Format_ARGB32)
     p = QPainter(img)
     sc.drawForeground(p, sc.sceneRect())
@@ -461,3 +461,89 @@ class _Click:
 
     def accept(self):
         pass
+
+
+def test_wire_current_into_a_0v_symbol_is_right():
+    """The 0 V symbol doesn't report a current (it goes back to the +9 V rail without a wire), so the wires
+    leading to it must carry whatever the parts put in: in the Night light, the transistor's emitter current."""
+    from wirely.sim.flow import FlowNetwork
+    c = Circuit.load(os.path.join(ROOT, "examples", "Night light.wirely"))
+    next(x for x in c.components.values() if x.kind == "ldr").props["light"] = 30.0     # dim: the LED is on
+    s = Simulator(c)
+    s.dc()
+    q = next(d for d in s.devices if d.comp.kind == "npn")
+    ldr = next(d for d in s.devices if d.comp.kind == "ldr")
+    ie = abs(q.i_pins[2])
+    assert ie > 1e-3
+
+    def names(cid):
+        return [n for n, _x, _y in s.device(cid).comp.part.pins]
+    flows = FlowNetwork(c, s.nets).solve(lambda cid, pin: s.device(cid).i_pins[names(cid).index(pin)]
+                                         if s.device(cid) and s.device(cid).i_pins else 0.0)
+    e = q.comp.pin_positions()["E"]
+    x_e = e[0]
+    # every piece of the wire running down from the emitter carries the emitter current …
+    down = [abs(a) for p1, p2, a in flows if p1[0] == p2[0] == x_e and min(p1[1], p2[1]) >= e[1]]
+    assert down and all(a == pytest.approx(ie, rel=1e-3) for a in down)
+    # … and along the bottom, the LDR's current joins it at the 0 V symbol
+    bottom = max(p[1] for p1, p2, _a in flows for p in (p1, p2))
+    along = [abs(a) for p1, p2, a in flows if p1[1] == p2[1] == bottom]
+    assert along and max(along) == pytest.approx(ie, rel=1e-3)
+    assert abs(ldr.i_pins[0]) < ie
+
+
+def test_reading_labels_can_be_dragged_out_of_the_way():
+    from PySide6.QtCore import QPointF
+    from PySide6.QtGui import QImage, QPainter
+    from PySide6.QtWidgets import QApplication
+    from wirely.ui.scene import CircuitScene
+    from wirely.ui.simcontrol import SimController
+    QApplication.instance() or QApplication([])
+    c = Circuit.load(os.path.join(ROOT, "examples", "Voltage divider.wirely"))
+    sc = CircuitScene(c)
+    simc = SimController()
+    sc.attach_sim(simc)
+    simc.start(c)
+    simc._tick()
+    w = next(iter(sc.wire_items.values())).wire
+    (a, b) = w.segments()[0]
+    sc._sim_press(_Click(QPointF((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)))      # pin the wire's reading
+    img = QImage(400, 400, QImage.Format_ARGB32)
+    p = QPainter(img)
+    sc.drawForeground(p, sc.sceneRect())
+    (rect, key), = [h for h in sc._tag_hits if h[1] == w.id]
+    start = rect.center()
+    sc._sim_press(_Click(start))                       # press on the label: starts a drag, doesn't unpin
+    assert sc._drag_tag is not None and w.id in sc.pinned
+    sc._sim_move(_Click(start + QPointF(60, -40)))
+    sc._sim_release(_Click(start + QPointF(60, -40)))
+    assert sc.tag_offsets[w.id] == pytest.approx((60, -40))
+    sc._tag_hits = []
+    sc.drawForeground(p, sc.sceneRect())
+    (rect2, _k), = [h for h in sc._tag_hits if h[1] == w.id]
+    assert rect2.center().x() - rect.center().x() == pytest.approx(60)
+    p.end()
+    simc.stop()
+
+
+def test_thyristor_switches_a_relay_coil_on_and_latches():
+    """A coil's current takes a moment to build up: the thyristor mustn't let go (below its holding current)
+    while its gate is still being driven, or a relay never pulls in."""
+    c, comps = build([("battery", ("v", "0"), {"voltage": 9}), ("push_break", ("v", "w"), {}),
+                      ("relay", ("w", "a", "x", "y", "z"), {"voltage": 6}), ("scr", ("a", "0", "g"), {}),
+                      ("push_make", ("w", "p"), {}), ("resistor", ("p", "g"), {"resistance": 4700})])
+    s = Simulator(c)
+    s.h_max = 1e-3
+    relay, reset, trig = s.device(comps[2].id), comps[1], comps[4]
+    s.run_until(0.1)
+    assert not relay.on
+    s.set_value(trig.id, "pressed", True)
+    s.run_until(0.105)                                  # a quick tap
+    s.set_value(trig.id, "pressed", False)
+    s.run_until(0.4)
+    assert relay.on and relay.current > 0.07           # pulled in, and held by the latched thyristor
+    s.set_value(reset.id, "pressed", True)
+    s.run_until(0.45)
+    s.set_value(reset.id, "pressed", False)
+    s.run_until(0.7)
+    assert not relay.on

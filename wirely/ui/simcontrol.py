@@ -15,7 +15,8 @@ from ..sim.flow import FlowNetwork
 FRAME_MS = 33
 SPEEDS = [("10× faster", 10.0), ("2× faster", 2.0), ("Real time", 1.0), ("½ speed", 0.5), ("⅕ speed", 0.2),
           ("1/10 speed", 0.1), ("1/100 speed", 0.01), ("1/1000 speed", 0.001)]
-INTERACTIVE = {"switch", "push_make", "push_break", "spdt", "dpdt", "reed_switch", "tilt_switch", "hall"}
+INTERACTIVE = {"switch", "push_make", "push_break", "spdt", "dpdt", "reed_switch", "tilt_switch", "hall", "rotary",
+               "keypad"}
 TOGGLES = {"switch": "closed", "reed_switch": "magnet", "tilt_switch": "tilted", "hall": "magnet"}
 ADJUSTABLE = {"ldr": "light", "thermistor": "temperature", "var_resistor": "setting", "potentiometer": "setting",
               "moisture": "moisture", "phototransistor": "light"}
@@ -171,7 +172,11 @@ class SimController(QObject):
                 info["v"] = sim.node_voltage(d.nodes[0]) - sim.node_voltage(d.nodes[1])
                 info["i"] = d.i_pins[0]
                 info["pins_v"] = {n: sim.node_voltage(d.nodes[i]) for i, n in enumerate(names[:len(d.nodes)])}
-            info["p"] = d.power
+            power = getattr(d, "power", 0.0)
+            if not power and d.i_pins and len(d.i_pins) == len(d.nodes) and abs(sum(d.i_pins)) < 1e-6:
+                # a part that didn't work its power out, wired fully through its pins: Σ voltage × current in
+                power = sum(sim.node_voltage(n) * i for n, i in zip(d.nodes, d.i_pins))
+            info["p"] = power
             parts[d.cid] = info
         live.parts = parts
         # current flow along the wires

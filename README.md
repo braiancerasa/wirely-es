@@ -34,7 +34,7 @@ answers.
 
 ## What it does
 
-- **Schematic editor** — a parts gallery of 78 parts with British/IEC symbols, drag-and-drop, wiring by
+- **Schematic editor** — a parts gallery of 84 parts with British/IEC symbols, drag-and-drop, wiring by
   dragging pin to pin, junctions, rotate and flip, undo/redo, copy/paste, text notes, autosave and crash
   recovery.
 - **Live simulation** — glowing LEDs and lamps, motors with back-EMF that slow under load, relays that click,
@@ -53,8 +53,8 @@ answers.
   74HC164/165/595/597 shift registers, the 4051 analogue switch, TL431/TLV431 references,
   optoisolators (PC817, 4N25, 4N35, TLP521, 6N139), solid-state relays (TLP3122A), MOSFETs,
   transistors, thyristors (SCRs), relays, signal generator with PWM.
-- **More parts** — bi-colour and RGB LEDs, bridge rectifier, transformer, DPDT switch and relay, Hall effect sensor
-  and solenoid.
+- **More parts** — bi-colour and RGB LEDs, bridge rectifier, transformer, DPDT switch and relay, Hall effect sensor,
+  solenoid, stepper motor, rotary switch, 12-key keypad, crystal clock, JK flip-flop and Schmitt NAND (4093).
 - **Every part type explained** — double-click a part and choose its type: a line underneath says what it's
   good for (e.g. why you'd pick an AO3400 over a 2N7002).
 - **Export** — PNG, SVG and PDF (always on white paper), and a parts list you can copy or save as CSV.
@@ -151,7 +151,8 @@ scale is in the corner) and dots flow along them to show the current. While it r
 - **click** switches, and **hold** push switches,
 - **drag the sliders** that appear under potentiometers, variable resistors and sensors (or use the mouse wheel),
 - **hover over any wire or part** to read its voltage, current (with direction) and power,
-- press **Readings** to show them all at once, or **click** a wire or part to pin its reading on the sheet,
+- press **Readings** to show them all at once, or **click** a wire or part to pin its reading on the sheet
+  (drag a reading to move it out of the way),
 - change the **speed** — from 10× faster down to 1/1000 speed, for slow motion.
 
 **Stop** (Shift+F5) goes back to editing, and anything that popped is mended.
@@ -238,7 +239,7 @@ resistance, supply current, output swing that falls short further under heavier 
 into 10 kΩ, ±13 V into 2 kΩ), the LM358 reaching 0 V but not the top rail, and current limits. The output
 current really comes from the supply pins, and too much supply voltage destroys the chip.
 
-The automatic tests (329 of them) check it against answers worked out by hand — voltage dividers, the diode
+The automatic tests (406 of them) check it against answers worked out by hand — voltage dividers, the diode
 equation, LED current, transistor gain and saturation, Zener regulation, RC and RL curves, a half-wave
 rectifier, 555 astable and monostable timing, op-amp gains, bandwidth, slew rate and bias currents, a
 Schmitt-trigger oscillator, logic truth tables and counters — against the datasheets above, and against

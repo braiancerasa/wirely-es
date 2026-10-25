@@ -218,6 +218,11 @@ _PARTS += [
             (-30, -20, 60, 40), "Makes square, sine or triangle waves — great with the graph.",
             "function generator clock pulse square wave", short="Signal generator"),
 
+    PartDef("xtal_clock", "Crystal clock", "Power supplies", "X", (("OUT", 40, 0),),
+            (_p("frequency", "Frequency", 1.0, "Hz", on_label=True, min=0.01, max=1e6),),
+            (-30, -18, 60, 36), "A steady, accurate clock for logic: a quartz crystal oscillator (with a divider "
+            "inside), so it keeps exact time — unlike a 555. OUT switches between 0 V and the supply."
+            + LOGIC_NOTE, "crystal quartz oscillator clock pulse 32768 timer", short="Crystal clock"),
     PartDef("nmos", "N-channel MOSFET", "Transistors", "Q", (("G", -30, 0), ("D", 10, -30), ("S", 10, 30)),
             (_p("model", "Type", "2N7000", kind="choice", choices=("2N7000", "2N7002", "BS170", "AO3400", "IRLZ44N", "IRF530", "IRF540", "IRF3205")),),
             (-30, -30, 50, 60), "Switched on by voltage at the gate — almost no gate current.",
@@ -246,6 +251,16 @@ _PARTS += [
             (("D", -50, -20), ("CLK", -50, 0), ("R", -50, 20), ("Q", 50, -20), ("Qn", 50, 20)), (),
             (-30, -40, 60, 80), "Copies D to Q on each rising clock edge. R resets Q to 0." + LOGIC_NOTE,
             "4013 latch memory clock", short="D flip-flop"),
+    PartDef("schmitt_nand", "Schmitt NAND gate", "Logic gates", "U", GATE2, (), (-30, -20, 70, 40),
+            "NAND gate with hysteresis (4093): switches cleanly even on slow signals, so with a resistor and "
+            "capacitor it makes an oscillator you can turn on and off." + LOGIC_NOTE,
+            "4093 schmitt trigger nand oscillator", short="Schmitt NAND"),
+    PartDef("jkff", "JK flip-flop", "Logic gates", "U",
+            (("J", -50, -20), ("CLK", -50, 0), ("K", -50, 20), ("S", 0, -60), ("R", 0, 60),
+             ("Q", 50, -20), ("Qn", 50, 20)), (),
+            (-30, -40, 60, 80), "On each rising clock edge: J=1 sets Q to 1, K=1 resets it to 0, both 1 toggles it "
+            "(so it divides the clock by 2), both 0 keeps it. S and R set or reset it straight away (4027)."
+            + LOGIC_NOTE, "4027 jk flip flop toggle divide counter", short="JK flip-flop"),
 
     PartDef("timer555", "555 timer", "Integrated circuits", "IC",
             (("GND", -20, 60), ("TRIG", -60, 20), ("OUT", 60, 0), ("RESET", -20, -60), ("CTRL", 20, 60),
@@ -373,19 +388,19 @@ _PARTS += [
     # ---------------------------------------------------------------- 1.4.0
     PartDef("led_bi2", "Bi-colour LED (2 legs)", "Diodes & LEDs", "LED", (("A", -30, 0), ("B", 30, 0)),
             (_p("max_current", "Maximum current", 0.03, "A", min=0),),
-            (-30, -24, 60, 44), "A red and a green LED back to back in one package: current from A to B lights "
+            (-30, -28, 60, 48), "A red and a green LED back to back in one package: current from A to B lights "
             "it red, from B to A green. Swap the direction quickly (or use AC) and it looks yellow. Needs a "
             "resistor in series.", "bicolour bicolor two colour dual red green led", short="Bi-colour LED"),
     PartDef("led_bi3", "Bi-colour LED (3 legs)", "Diodes & LEDs", "LED",
             (("R", -30, -10), ("G", -30, 10), ("K", 30, 0)),
             (_p("max_current", "Maximum current", 0.03, "A", min=0),),
-            (-30, -24, 60, 48), "A red and a green LED sharing one cathode (K): R lights red, G lights green, "
+            (-30, -30, 60, 54), "A red and a green LED sharing one cathode (K): R lights red, G lights green, "
             "both together look yellow. Each anode needs its own resistor.",
             "bicolour bicolor dual three leg common cathode red green led", short="Bi-colour LED (3)"),
     PartDef("led_rgb", "RGB LED", "Diodes & LEDs", "LED",
             (("R", -30, -20), ("G", -30, 0), ("B", -30, 20), ("K", 30, 0)),
             (_p("max_current", "Maximum current", 0.03, "A", min=0),),
-            (-30, -28, 60, 56), "Red, green and blue LEDs sharing one cathode (K). Mix them to make other "
+            (-30, -40, 60, 68), "Red, green and blue LEDs sharing one cathode (K). Mix them to make other "
             "colours: red + green = yellow, all three = white. Each anode needs its own resistor; use PWM "
             "(a signal generator) for in-between brightness.", "rgb colour mixing common cathode led",
             short="RGB LED"),
@@ -433,6 +448,17 @@ _PARTS += [
             (-30, -38, 60, 76), "Two changeover switches worked together: both commons go to A, or both to B. "
             "Used to reverse a motor. Click it while running.", "dpdt double pole reversing motor two way",
             short="DPDT switch"),
+    PartDef("rotary", "Rotary switch", "Switches", "S",
+            (("COM", -30, 0), ("1", 30, -30), ("2", 30, -10), ("3", 30, 10), ("4", 30, 30)),
+            (_p("position", "Position", "1", kind="choice", choices=("1", "2", "3", "4")),),
+            (-30, -38, 60, 76), "Connects COM to one of four contacts. Click it while running to turn it to the "
+            "next position.", "rotary selector switch way position knob", short="Rotary switch"),
+    PartDef("keypad", "Keypad (12 keys)", "Switches", "KP",
+            tuple((f"R{i + 1}", -30 + 10 * i, 70) for i in range(4)) + tuple((f"C{i + 1}", 10 + 10 * i, 70)
+                                                                             for i in range(3)), (),
+            (-40, -55, 80, 110), "Like a phone or door-lock keypad: each key joins its row (R1–R4) to its column "
+            "(C1–C3) while it's pressed. Click and hold a key while running.",
+            "keypad keyboard matrix buttons door lock code", short="Keypad"),
     PartDef("relay_dpdt", "DPDT relay", "Switches", "RL",
             (("C1", -40, -30), ("C2", -40, 30), ("COM1", 0, -20), ("NC1", 40, -30), ("NO1", 40, -10),
              ("COM2", 0, 20), ("NC2", 40, 10), ("NO2", 40, 30)),
@@ -448,6 +474,14 @@ _PARTS += [
             "to 0 V when a magnet is near, so use a pull-up resistor from OUT to +. Needs 4.5–24 V on VCC. Click "
             "it while running to bring the magnet close.", "hall effect magnet sensor a3144 switch",
             short="Hall sensor"),
+    PartDef("stepper", "Stepper motor", "Output devices", "M",
+            (("A1", -40, -10), ("A2", -40, 10), ("B1", 40, -10), ("B2", 40, 10)),
+            (_p("voltage", "Rated voltage", 12.0, "V", on_label=True, min=1),
+             _p("steps", "Steps per turn", "48", kind="choice", choices=("48", "200"))),
+            (-28, -28, 56, 56), "Turns in exact steps: current through one coil (A1–A2 or B1–B2) pulls the shaft "
+            "to the next position. Energise A, B, then A and B the other way round (e.g. with an L293D) and it turns "
+            "step by step. 48 steps is 7.5° a step; 200 is 1.8°.", "stepper motor step bipolar l293d",
+            short="Stepper motor"),
     PartDef("solenoid", "Solenoid", "Output devices", "SOL", TWO,
             (_p("voltage", "Rated voltage", 12.0, "V", on_label=True, min=0.5),),
             (-30, -16, 60, 32), "An electromagnet that pulls a metal plunger in — for door locks and valves. "

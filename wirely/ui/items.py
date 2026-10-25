@@ -104,13 +104,27 @@ class ComponentItem(QGraphicsItem):
         above = any(pt.y() < b.top() - 1 for pt in pins)
         below = any(pt.y() > b.bottom() + 1 for pt in pins)
         if b.width() >= b.height() or (right and not above):   # lying flat, or pins on the right: label above
+            side = "above"
+        elif right and not below:                              # pins on the right and above: label below
+            side = "below"
+        else:                                                  # standing up: label on the right
+            side = "right"
+        # … unless pins come out of that side (a chip turned round, a regulator upside down): use a clear one,
+        # or the outside top-right corner, where pins never are
+        clear = {"above": not above, "below": not below, "right": not right}
+        if not clear[side]:
+            side = next((s_ for s_ in ("above", "below", "right") if clear[s_]), "corner")
+        if side == "above":
             r = QRectF(b.center().x() - w / 2, b.top() - h - 3, w, h)
             align = Qt.AlignHCenter
-        elif right and not below:                              # pins on the right and above: label below
+        elif side == "below":
             r = QRectF(b.center().x() - w / 2, b.bottom() + 3, w, h)
             align = Qt.AlignHCenter
-        else:                                                  # standing up: label on the right
+        elif side == "right":
             r = QRectF(b.right() + 5, b.center().y() - h / 2, w, h)
+            align = Qt.AlignLeft
+        else:
+            r = QRectF(b.right() + 2, b.top() - h - 2, w, h)
             align = Qt.AlignLeft
         return r, lines, align
 

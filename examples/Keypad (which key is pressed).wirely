@@ -1,0 +1,512 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Keypad (which key is pressed)",
+ "components": [
+  {
+   "id": "c8a31218",
+   "kind": "keypad",
+   "ref": "KP1",
+   "x": 80,
+   "y": 200,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "997a1d91",
+   "kind": "led",
+   "ref": "LED1",
+   "x": 220,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Blue",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "92b37817",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 220,
+   "y": 60,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "55ef64fc",
+   "kind": "led",
+   "ref": "LED2",
+   "x": 310,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Blue",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "d698701c",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 310,
+   "y": 60,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "9c5f833d",
+   "kind": "led",
+   "ref": "LED3",
+   "x": 400,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Blue",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "936b3378",
+   "kind": "resistor",
+   "ref": "R3",
+   "x": 400,
+   "y": 60,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "2b9067d4",
+   "kind": "led",
+   "ref": "LED4",
+   "x": 490,
+   "y": 150,
+   "rot": 3,
+   "flip": false,
+   "props": {
+    "colour": "Green",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "43b2af6f",
+   "kind": "led",
+   "ref": "LED5",
+   "x": 580,
+   "y": 150,
+   "rot": 3,
+   "flip": false,
+   "props": {
+    "colour": "Yellow",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "a97b05f2",
+   "kind": "led",
+   "ref": "LED6",
+   "x": 670,
+   "y": 150,
+   "rot": 3,
+   "flip": false,
+   "props": {
+    "colour": "Orange",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "584eb4d5",
+   "kind": "led",
+   "ref": "LED7",
+   "x": 760,
+   "y": 150,
+   "rot": 3,
+   "flip": false,
+   "props": {
+    "colour": "Red",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "90337508",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 800,
+   "y": 90,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "7b55084f",
+   "kind": "rail_pos",
+   "ref": "V1",
+   "x": 180,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "d695eaab",
+   "kind": "note",
+   "ref": "T1",
+   "x": 450,
+   "y": 420,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Hold down a key while it runs: the LED for its column (blue)\nand the LED for its row (green, yellow, orange, red) light up."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "7f32e40d",
+   "points": [
+    [
+     110,
+     270
+    ],
+    [
+     110,
+     290
+    ],
+    [
+     220,
+     290
+    ],
+    [
+     220,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "e7dea1ef",
+   "points": [
+    [
+     220,
+     90
+    ],
+    [
+     220,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "a35fde37",
+   "points": [
+    [
+     220,
+     30
+    ],
+    [
+     220,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "77502141",
+   "points": [
+    [
+     100,
+     270
+    ],
+    [
+     100,
+     300
+    ],
+    [
+     310,
+     300
+    ],
+    [
+     310,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "06d8c759",
+   "points": [
+    [
+     310,
+     90
+    ],
+    [
+     310,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "759aa807",
+   "points": [
+    [
+     310,
+     30
+    ],
+    [
+     310,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "e3a86032",
+   "points": [
+    [
+     90,
+     270
+    ],
+    [
+     90,
+     310
+    ],
+    [
+     400,
+     310
+    ],
+    [
+     400,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "eb38ce83",
+   "points": [
+    [
+     400,
+     90
+    ],
+    [
+     400,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "e37e89b8",
+   "points": [
+    [
+     400,
+     30
+    ],
+    [
+     400,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "c2d877c2",
+   "points": [
+    [
+     80,
+     270
+    ],
+    [
+     80,
+     320
+    ],
+    [
+     490,
+     320
+    ],
+    [
+     490,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "b5289ceb",
+   "points": [
+    [
+     490,
+     120
+    ],
+    [
+     490,
+     90
+    ]
+   ]
+  },
+  {
+   "id": "e9f1ccc6",
+   "points": [
+    [
+     70,
+     270
+    ],
+    [
+     70,
+     330
+    ],
+    [
+     580,
+     330
+    ],
+    [
+     580,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "19d02093",
+   "points": [
+    [
+     580,
+     120
+    ],
+    [
+     580,
+     90
+    ]
+   ]
+  },
+  {
+   "id": "9d13429b",
+   "points": [
+    [
+     60,
+     270
+    ],
+    [
+     60,
+     340
+    ],
+    [
+     670,
+     340
+    ],
+    [
+     670,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "1e53a041",
+   "points": [
+    [
+     670,
+     120
+    ],
+    [
+     670,
+     90
+    ]
+   ]
+  },
+  {
+   "id": "a511ee4e",
+   "points": [
+    [
+     50,
+     270
+    ],
+    [
+     50,
+     350
+    ],
+    [
+     760,
+     350
+    ],
+    [
+     760,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "46de49a3",
+   "points": [
+    [
+     760,
+     120
+    ],
+    [
+     760,
+     90
+    ]
+   ]
+  },
+  {
+   "id": "f2d23cdd",
+   "points": [
+    [
+     490,
+     90
+    ],
+    [
+     760,
+     90
+    ]
+   ]
+  },
+  {
+   "id": "3497df21",
+   "points": [
+    [
+     760,
+     90
+    ],
+    [
+     800,
+     90
+    ]
+   ]
+  },
+  {
+   "id": "0f202c9c",
+   "points": [
+    [
+     220,
+     0
+    ],
+    [
+     400,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "75a7f936",
+   "points": [
+    [
+     180,
+     0
+    ],
+    [
+     220,
+     0
+    ]
+   ]
+  }
+ ]
+}

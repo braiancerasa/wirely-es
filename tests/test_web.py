@@ -124,3 +124,31 @@ def test_fallback_numpy_solves_like_numpy():
     # least squares on a singular system still gives a usable answer
     x = lite.linalg.lstsq(lite.array([[1.0, -1.0], [-1.0, 1.0]]), lite.array([1.0, -1.0]))[0]
     assert abs((x[0] - x[1]) - 1.0) < 1e-6
+
+
+def test_drag_a_pinned_reading_label():
+    out = run_web("""
+        import json, time, wirely_web
+        app = wirely_web.App()
+        L = 1
+        app.load(open("examples/Thyristor alarm (latching).wirely").read(), "x")
+        app.run()
+        for _ in range(4):
+            time.sleep(0.03); app.tick()
+        w = next(iter(app.circuit.wires.values()))
+        (a, b) = w.segments()[0]
+        mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+        app.press(mx, my, L, L, 0, mx, my); app.release(mx, my, L, 0, 0, mx, my)      # pin it
+        app.frame(-2000, -2000, 4000, 4000)
+        r = [h[0] for h in app.scene._tag_hits if h[1] == w.id][0]
+        cx, cy = r.x() + r.width() / 2, r.y() + r.height() / 2
+        app.press(cx, cy, L, L, 0, cx, cy)
+        app.move(cx + 50, cy + 30, L, 0, cx + 50, cy + 30)
+        app.release(cx + 50, cy + 30, L, 0, 0, cx + 50, cy + 30)
+        f = json.loads(app.frame(-2000, -2000, 4000, 4000))
+        r2 = [h[0] for h in app.scene._tag_hits if h[1] == w.id][0]
+        app.stop()
+        print(r2.x() - r.x(), r2.y() - r.y(), w.id in app.scene.pinned)
+    """)
+    dx, dy, still = out.split()[-3:]
+    assert float(dx) == 50 and float(dy) == 30 and still == "True"

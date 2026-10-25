@@ -222,7 +222,9 @@ def test_d_flip_flop_and_reset():
     s = Simulator(c)
     ff = s.device(comps[2].id)
     s.run_until(0.02)
-    assert ff.out["Q"] and not ff.out["Qn"]        # first rising clock edge copied D = 1
+    assert not ff.out["Q"]                          # the clock starting high at switch-on isn't an edge
+    s.run_until(0.12)
+    assert ff.out["Q"] and not ff.out["Qn"]        # first rising clock edge (0.1 s) copied D = 1
     s.set_value(comps[3].id, "closed", True)
     s.run_until(0.3)
     assert not ff.out["Q"]                          # held in reset
@@ -236,10 +238,10 @@ def test_4017_counts_clock_edges():
                       ("counter4017", ("clk", "0") + tuple(f"q{i}" for i in range(10)) + ("co",), {})])
     s = Simulator(c)
     s.h_max = 5e-3
-    s.run_until(0.55)                               # rising edges at 0, 0.1 … 0.5 s
+    s.run_until(0.55)                               # rising edges at 0.1 … 0.5 s (high at switch-on isn't one)
     cnt = s.device(comps[2].id)
-    assert cnt.count == 6 and cnt.out["Q6"] and not cnt.out["Q5"] and not cnt.out["CO"]
-    assert vnet(s, comps[2], "Q6") > 8.0 and vnet(s, comps[2], "Q5") < 0.1
+    assert cnt.count == 5 and cnt.out["Q5"] and not cnt.out["Q4"] and not cnt.out["CO"]
+    assert vnet(s, comps[2], "Q5") > 8.0 and vnet(s, comps[2], "Q4") < 0.1
 
 
 def test_4511_and_display_show_a_number():

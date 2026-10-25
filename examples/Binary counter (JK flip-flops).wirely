@@ -1,0 +1,453 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Binary counter (JK flip-flops)",
+ "components": [
+  {
+   "id": "71215988",
+   "kind": "xtal_clock",
+   "ref": "X1",
+   "x": 0,
+   "y": 100,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "frequency": 2
+   }
+  },
+  {
+   "id": "9742843a",
+   "kind": "jkff",
+   "ref": "U1",
+   "x": 160,
+   "y": 100,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "72d32466",
+   "kind": "jkff",
+   "ref": "U2",
+   "x": 520,
+   "y": 100,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "65185646",
+   "kind": "rail_pos",
+   "ref": "V1",
+   "x": 100,
+   "y": 50,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "d6d8d7be",
+   "kind": "rail_pos",
+   "ref": "V2",
+   "x": 100,
+   "y": 150,
+   "rot": 2,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "919da040",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 160,
+   "y": 20,
+   "rot": 2,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "82dd0c85",
+   "kind": "ground",
+   "ref": "GND2",
+   "x": 160,
+   "y": 180,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "d6270fe2",
+   "kind": "led",
+   "ref": "LED1",
+   "x": 260,
+   "y": 80,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "colour": "Red",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "b7784a6c",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 350,
+   "y": 80,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "0dc5e530",
+   "kind": "ground",
+   "ref": "GND3",
+   "x": 400,
+   "y": 80,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "b18d9ad6",
+   "kind": "rail_pos",
+   "ref": "V3",
+   "x": 460,
+   "y": 50,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "a21241a3",
+   "kind": "rail_pos",
+   "ref": "V4",
+   "x": 460,
+   "y": 150,
+   "rot": 2,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "18ba71d7",
+   "kind": "ground",
+   "ref": "GND4",
+   "x": 520,
+   "y": 20,
+   "rot": 2,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "56c4013e",
+   "kind": "ground",
+   "ref": "GND5",
+   "x": 520,
+   "y": 180,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "04538930",
+   "kind": "led",
+   "ref": "LED2",
+   "x": 620,
+   "y": 80,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "colour": "Red",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "15c4d919",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 710,
+   "y": 80,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "e11d534d",
+   "kind": "ground",
+   "ref": "GND6",
+   "x": 760,
+   "y": 80,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "218fe728",
+   "kind": "note",
+   "ref": "T1",
+   "x": 380,
+   "y": 280,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Each flip-flop has J = K = 1, so it toggles on every clock pulse — dividing by 2.\nLED2 and LED1 count in binary: 00, 01, 10, 11, 00 … (the clock ticks twice a second)."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "6a89b0db",
+   "points": [
+    [
+     40,
+     100
+    ],
+    [
+     110,
+     100
+    ]
+   ]
+  },
+  {
+   "id": "ef4169d1",
+   "points": [
+    [
+     210,
+     120
+    ],
+    [
+     225,
+     120
+    ],
+    [
+     225,
+     200
+    ],
+    [
+     445,
+     200
+    ],
+    [
+     445,
+     100
+    ],
+    [
+     470,
+     100
+    ]
+   ]
+  },
+  {
+   "id": "50f8e096",
+   "points": [
+    [
+     110,
+     80
+    ],
+    [
+     100,
+     80
+    ],
+    [
+     100,
+     50
+    ]
+   ]
+  },
+  {
+   "id": "8ede91d3",
+   "points": [
+    [
+     110,
+     120
+    ],
+    [
+     100,
+     120
+    ],
+    [
+     100,
+     150
+    ]
+   ]
+  },
+  {
+   "id": "70310d86",
+   "points": [
+    [
+     160,
+     40
+    ],
+    [
+     160,
+     20
+    ]
+   ]
+  },
+  {
+   "id": "47ad19bd",
+   "points": [
+    [
+     160,
+     160
+    ],
+    [
+     160,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "0994db5c",
+   "points": [
+    [
+     210,
+     80
+    ],
+    [
+     230,
+     80
+    ]
+   ]
+  },
+  {
+   "id": "0f0ba06f",
+   "points": [
+    [
+     290,
+     80
+    ],
+    [
+     320,
+     80
+    ]
+   ]
+  },
+  {
+   "id": "015ee796",
+   "points": [
+    [
+     380,
+     80
+    ],
+    [
+     400,
+     80
+    ]
+   ]
+  },
+  {
+   "id": "0f47bc9b",
+   "points": [
+    [
+     470,
+     80
+    ],
+    [
+     460,
+     80
+    ],
+    [
+     460,
+     50
+    ]
+   ]
+  },
+  {
+   "id": "bfc82ea4",
+   "points": [
+    [
+     470,
+     120
+    ],
+    [
+     460,
+     120
+    ],
+    [
+     460,
+     150
+    ]
+   ]
+  },
+  {
+   "id": "4f81ad68",
+   "points": [
+    [
+     520,
+     40
+    ],
+    [
+     520,
+     20
+    ]
+   ]
+  },
+  {
+   "id": "cc875a7a",
+   "points": [
+    [
+     520,
+     160
+    ],
+    [
+     520,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "8d222faa",
+   "points": [
+    [
+     570,
+     80
+    ],
+    [
+     590,
+     80
+    ]
+   ]
+  },
+  {
+   "id": "be057673",
+   "points": [
+    [
+     650,
+     80
+    ],
+    [
+     680,
+     80
+    ]
+   ]
+  },
+  {
+   "id": "55b12b15",
+   "points": [
+    [
+     740,
+     80
+    ],
+    [
+     760,
+     80
+    ]
+   ]
+  }
+ ]
+}

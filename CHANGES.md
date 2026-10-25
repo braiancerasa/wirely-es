@@ -1,5 +1,41 @@
 # Changes
 
+## 1.5.0 — new parts, a unit box for values, movable readings and many fixes
+- **A unit box next to values:** in a part's properties, resistance has Ω / kΩ / MΩ beside the number, capacitance
+  pF / nF / µF / mF / F, inductance µH / mH / H and frequency Hz / kHz / MHz. Typing the whole value (4k7, 100n)
+  still works — it's tidied into the number and its size.
+- **Crystal clock:** an exact square-wave clock for logic (set its frequency).
+- **Stepper motor** (48 or 200 steps a turn): its shaft turns one step each time the coils change — drive it with an
+  L293D. You can see the shaft turn.
+- **Rotary switch** (1 pole, 4 ways: click to turn it) and a **12-key keypad** (rows × columns, like a door-lock
+  keypad: hold down a key).
+- **JK flip-flop** (4027) and **Schmitt NAND gate** (4093).
+- New examples: *Stepper motor (crystal clock + L293D)*, *Keypad (which key is pressed)*, *Binary counter (JK flip-flops)*,
+  *Schmitt NAND flasher (4093)* and *Rotary switch (pick an LED)*.
+- **Logic at switch-on:** an input that's simply high from the start no longer counts as a clock edge, so counters
+  and flip-flops start from 0.
+- **Drag a reading** (pinned, or with Readings on) to move it out of the way; a dashed line shows what it belongs to.
+
+Bugs found by checking every example step by step and testing every part in thousands of random circuits:
+- **Wire currents next to 0 V symbols** (hover, Readings, flow dots) could be wrong — e.g. 7.3 mA instead of
+  14.8 mA in the Night light, or in the shift register example. Part readings and voltages were always right.
+- **Readings at the moment something switches:** regulators, 555s, logic chips, relays and motors showed the
+  current for the state they were switching *to* for one step (a 7805 flashed 137 A at switch-on). The 555 also
+  left out the current into its CTRL pin.
+- **Chips and displays show their power** in Readings (they showed 0 W).
+- **Mis-wired parts no longer freeze the simulation:** a voltage regulator with its input and output swapped (or
+  wired any other wrong way), a TL431 upside down or with REF on the supply, an op-amp whose output is held
+  outside its supply, and a burnt-out thyristor.
+- **Voltage regulators** leak back from OUT to IN when wired the wrong way round, like real ones.
+- **Op-amps** are destroyed by a reversed supply, or by their output being forced well outside their supply.
+- **Thyristors** now switch relay coils (and other coils) on: they used to let go while the coil's current was
+  still building up, even with the gate driven.
+- **Thyristors:** too much gate current (gate wired straight to the supply) burns them out, with a message saying
+  to add a gate resistor.
+- **Labels:** part names no longer sit on top of pins when chips and regulators are turned round, the bridge
+  rectifier's label sits clear of its pins, the RGB LED's name no longer has its light arrows through it, and the
+  pin names of a chip turned on its side run along their pins instead of overlapping.
+
 ## 1.4.1 — RGB LED fix, brighter LEDs
 - **RGB LEDs:** green is now the same kind of chip as blue (about 3.1 V, like real RGB LEDs), so green and blue
   on one resistor share the current and mix. (Red, at about 2 V, still takes nearly all the current if it shares

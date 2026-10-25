@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 
 from .chips import Digital, Relay, SEGMENTS, frac_cross, numeric_stamp, softplus
-from .devices import GMIN, VT, Diode, Device, R_OFF, R_ON, spike_message, v
+from .devices import Diode, Device, R_OFF, R_ON, RsDiode as _RsDiode, spike_message, v
 
 
 class _Sub:
@@ -193,6 +193,12 @@ class SCR(Device):
     def stamp(self, S, x, ctx):
         a, k, g = self.nodes
         self._wire()
+        if self.blown:                               # burnt out: open circuit
+            S.g(a, k, 1 / R_OFF)
+            S.g(g, k, 1 / R_OFF)
+            S.g(a, self.internal[0], 1.0)
+            S.g(g, self.internal[1], 1.0)
+            return
         S.g(g, k, 1 / self.RGK)
         self.gate.stamp(S, x, ctx)
         if self.on and not self.blown:
@@ -205,8 +211,21 @@ class SCR(Device):
         a, k, g = self.nodes
         self._wire()
         va, vk, vg = v(x, a), v(x, k), v(x, g)
+        if self.blown:
+            i_a, i_g = (va - vk) / R_OFF, (vg - vk) / R_OFF
+            self.i_pins = [i_a, -(i_a + i_g), i_g]
+            self.current, self.vd, self.power, self.on = i_a, va - vk, 0.0, False
+            return
         self.gate.accept(x, ctx)
         i_g = self.gate.current + (vg - vk) / self.RGK
+        if self.gate.event:                           # far too much gate current
+            self.gate.event = None
+            self.blown = self._told = True
+            self.on = False
+            self.event = (f"{self.comp.ref} burnt out — {abs(i_g):.1f} A into its gate. The gate only needs a few "
+                          "milliamps: put a resistor (1 kΩ or so) in series with it.")
+            self.i_pins = [0.0, -i_g, i_g]
+            return
         if self.on and not self.blown:
             self.main.accept(x, ctx)
             i_a = self.main.current
@@ -222,8 +241,9 @@ class SCR(Device):
         on = self.on
         if not on and (i_g >= self.igt or self.vd > self.vdrm) and self.vd > 0:
             on = True
-        elif on and i_a < self.ih:
-            on = False
+        elif on and i_a < self.ih and i_g < self.igt:
+            on = False          # lets go below its holding current — but not while the gate is still driven
+            #                     (into a coil the current takes a moment to build up)
         if on != self.on:
             self.on = on
             self.changed = True
@@ -242,7 +262,7 @@ class SCR(Device):
         bad = abs(i_a) > self.imax
         self.warn = "over" if bad else None
         if self._overload(bad, ctx.h, 0.1, abs(i_a) > 5 * self.imax):
-            self.blown = True
+            self.blown = self._told = True
             self.on = False
             self.event = (f"{self.comp.ref} burnt out — {abs(i_a):.1f} A is more than a {model} can carry "
                           f"({self.imax:g} A).")
@@ -285,6 +305,9 @@ class Regulator(Device):
         # dropout: about 60 % of the datasheet figure at no load, rising to all of it at the current limit
         self.drop0 = 0.6 * self.drop
         self.rdrop = 0.4 * self.drop / self.ilim
+        # its inside protection path: current flows back from OUT to IN if OUT is ever higher (wired the wrong
+        # way round, or a big output capacitor when the input is switched off)
+        self.rev = _RsDiode(self.nodes[2], self.nodes[0], Rs=1.0)
         if not hasattr(self, "hot"):
             self.hot = False
             self.heat = 0.0
@@ -327,6 +350,7 @@ class Regulator(Device):
             return
         V0 = [v(x, n) for n in nodes]
         numeric_stamp(S, nodes, V0, self._f)
+        self.rev.stamp(S, x)
 
     def accept(self, x, ctx):
         V = [v(x, n) for n in self.nodes]
@@ -337,37 +361,40 @@ class Regulator(Device):
         e = self._err(V)
         ilim = 1e-4 if self.hot else self.ilim
         vin, vg, vo = V
+        self.i_pins = self._f(V)                        # with the state this solution was found with
+        self.rev.accept(x)
+        self.i_pins[2] += self.rev.current
+        self.i_pins[0] -= self.rev.current
         mode = self.mode
         # which state the output stage is in, from the state it was in (each has its own straight-line equation;
         # the small margins stop it flicking back and forth on a boundary)
         if mode == "lin":
             i = (self.vreg - (vo - vg)) / self.RO
-            if vin - vo - self.drop0 - self.rdrop * min(max(i, 0.0), ilim) < -1e-3:   # not enough input to spare
+            if i < -self.ISINK:                             # OUT is above where it should be: pass transistor off
+                mode = "off"
+            elif vin - vo - self.drop0 - self.rdrop * min(i, ilim) < -1e-3:      # not enough input to spare
                 mode = "drop"
             elif i > ilim * 1.001:
                 mode = "lim"
-            elif i < -self.ISINK:
-                mode = "off"
         elif mode == "drop":
             i = (vin - vo - self.drop0) / self.rdrop
-            if vo - vg > self.vreg + 1e-3:
+            if i < -self.ISINK:                             # OUT above IN (wired the wrong way round, say)
+                mode = "off"
+            elif vo - vg > self.vreg + 1e-3:
                 mode = "lin"
             elif i > ilim * 1.001:
                 mode = "lim"
-            elif i < -self.ISINK:
-                mode = "off"
         elif mode == "lim":
             # the most it could give at the current limit, holding its voltage or with its input running out
             v_lin = vg + self.vreg - self.RO * ilim
             v_drop = vin - self.drop0 - self.rdrop * ilim
             if vo > min(v_lin, v_drop) + 1e-3:          # the load doesn't need the full current any more
                 mode = "lin" if v_lin <= v_drop else "drop"
-        elif mode == "off" and e > 0:
-            mode = "lin"
+        elif mode == "off" and e > 1e-3 and vin - vo - self.drop0 > 1e-3:
+            mode = "lin"            # OUT has fallen below where it should be, and there's input to spare to lift it
         if mode != self.mode:
             self.mode = mode
             self.changed = True
-        self.i_pins = self._f(V)
         iout = -self.i_pins[2]
         self.current = iout
         self.vd = V[0] - V[1]
@@ -768,64 +795,24 @@ class RelayDPDT(Relay):
         k = self.internal[0]
         i = self.coil_current(x, ctx)
         self.i_prev, self.v_prev = i, v(x, k) - v(x, c2)
-        on = (abs(i) >= self.i_pull) if not self.on else (abs(i) > self.i_drop)
-        if on != self.on:
-            self.on = on
-            self.changed = True
-            self.clicks += 1
         icoil = i + (v(x, c1) - v(x, c2)) / self.RP
-        r_no, r_nc = (R_ON, R_OFF) if self.on else (R_OFF, R_ON)
+        r_no, r_nc = (R_ON, R_OFF) if self.on else (R_OFF, R_ON)        # contacts as they were for this step
         pins = [icoil, -icoil]
         for com, nc, no in (self.nodes[2:5], self.nodes[5:8]):
             ino = (v(x, com) - v(x, no)) / r_no
             inc = (v(x, com) - v(x, nc)) / r_nc
             pins += [ino + inc, -inc, -ino]
         self.i_pins = pins
+        on = (abs(i) >= self.i_pull) if not self.on else (abs(i) > self.i_drop)
+        if on != self.on:
+            self.on = on
+            self.changed = True
+            self.clicks += 1
         self.current = i
         self.vd = v(x, c1) - v(x, c2)
 
 
 # ============================================================================================ motor driver
-class _RsDiode:
-    """A junction with a series resistance, worked out on the spot (no inside node): for the voltage across it,
-    find how it splits between the junction and the resistance, then stamp the combined current and slope.
-    With the resistance in series the current only rises in a straight line at high voltage, so Newton needs no
-    limiting. Used for the many diodes in a driver chip, where inside nodes would make every step slower."""
-
-    def __init__(self, a, k, Is=14.11e-9, n=1.984, Rs=0.5):
-        self.a, self.k, self.Is, self.nvt, self.Rs = a, k, Is, n * VT, Rs
-        self.current = self.power = 0.0
-
-    def _solve(self, vd):
-        Is, nvt, Rs = self.Is, self.nvt, self.Rs
-        if vd < 0.3:                    # hardly any current: the resistance makes no difference
-            vj = vd
-        else:
-            vj = min(vd, nvt * math.log(vd / (Rs * Is) + 1.0))      # start above the answer
-            for _ in range(60):
-                e = math.exp(vj / nvt)
-                f = vj + Rs * Is * (e - 1.0) - vd
-                df = 1.0 + Rs * Is * e / nvt
-                dv = f / df
-                vj -= dv
-                if abs(dv) < 1e-12:
-                    break
-        e = math.exp(min(vj / nvt, 700.0))
-        i = Is * (e - 1.0)
-        gj = Is * e / nvt
-        return i + GMIN * vd, gj / (1.0 + gj * Rs) + GMIN
-
-    def stamp(self, S, x):
-        vd = v(x, self.a) - v(x, self.k)
-        i, g = self._solve(vd)
-        S.g(self.a, self.k, g)
-        S.i(self.a, self.k, i - g * vd)
-
-    def accept(self, x):
-        vd = v(x, self.a) - v(x, self.k)
-        self.current = self._solve(vd)[0]
-        self.power = self.current * vd
-
 class L293D(Device):
     """L293D quadruple half-H driver. Each output Y follows its input A (TTL levels: high above about 2 V)
     while its enable is high, and is switched off (high impedance) when the enable is low. A high output is a
@@ -967,8 +954,227 @@ class L293D(Device):
     def live_extra(self):
         return {}
 
+
+# ============================================================================================ logic and clocks
+class JKFlipFlop(Digital):
+    """JK flip-flop (half a 4027): on a rising clock edge J=1,K=0 sets Q, J=0,K=1 resets it, J=K=1 toggles it,
+    J=K=0 keeps it. S and R (active high) set or reset it at once."""
+    inputs = ("J", "CLK", "K", "S", "R")
+    outputs = ("Q", "Qn")
+
+    def reset_state(self):
+        self.q = False
+
+    def clock(self, rising):
+        lv = self.level
+        if lv["S"] or lv["R"]:                          # set / reset straight away, whatever the clock does
+            if lv["S"] != lv["R"]:
+                self.q = bool(lv["S"])
+            return
+        if rising.get("CLK"):
+            j, k = lv["J"], lv["K"]
+            if j and k:
+                self.q = not self.q
+            elif j:
+                self.q = True
+            elif k:
+                self.q = False
+
+    def compute(self):
+        both = self.level["S"] and self.level["R"]          # both forced: the 4027 makes Q and Q̄ both high
+        return {"Q": True if both else self.q, "Qn": True if both else not self.q}
+
+
+class CrystalClock(Digital):
+    """A crystal oscillator module with a divider: a square wave at exactly the set frequency, 0 V or the logic
+    supply. Steps land exactly on its edges."""
+    inputs = ()
+    outputs = ("OUT",)
+
+    def update_params(self):
+        self.freq = max(1e-6, float(self.prop("frequency")))
+        self.t_now = getattr(self, "t_now", 0.0)
+        super().update_params()
+
+    def compute(self):
+        return {"OUT": ((self.t_now * self.freq) % 1.0) < 0.5}
+
+    def crossing(self, xo, xn, t0, t1):
+        half = 0.5 / self.freq
+        n = math.floor(t0 / half + 1e-9)
+        te = (n + 1) * half
+        if t0 < te < t1 - 1e-12 * half:
+            return (te - t0) / (t1 - t0)
+        return None
+
+    def accept(self, x, ctx):
+        # nudge just past an edge it landed on, so the edge counts as having happened
+        self.t_now = ctx.t + 1e-9 / self.freq
+        super().accept(x, ctx)
+
+
+# ============================================================================================ stepper motor
+class Stepper(Device):
+    """Bipolar stepper motor: two coils (A1–A2, B1–B2), each a resistance and inductance. The rotor's magnet
+    turns to line up with the coils' field — the direction (I_A, I_B) — so energising A, B, −A, −B in turn moves
+    it one step each time (a quarter of an electrical turn). It follows within a few milliseconds; step it faster
+    than it can follow and it falls behind. (No back-EMF: it's a slow-stepping model.)"""
+    reactive = True
+    n_internal = 2
+    RP = 100e3
+    TAU = 4e-3                  # how quickly the rotor follows the field (s)
+
+    def update_params(self):
+        self.V = float(self.prop("voltage"))
+        self.R = max(1.0, self.V / 0.3)          # about 0.3 A per coil at its rated voltage
+        self.L = self.R * 2e-3
+        self.nsteps = int(self.prop("steps") or 48)
+        if not hasattr(self, "theta"):
+            self.theta = 0.0                     # electrical angle (rad): a full step is π/2
+            self.i_prev = [0.0, 0.0]
+            self.v_prev = [0.0, 0.0]
+
+    def _companion(self, ctx, k):
+        if ctx.method == "trap":
+            G = ctx.h / (2 * self.L)
+            return G, self.i_prev[k] + G * self.v_prev[k]
+        G = ctx.h / self.L
+        return G, self.i_prev[k]
+
+    def stamp(self, S, x, ctx):
+        for k, (a, b) in enumerate(((0, 1), (2, 3))):
+            na, nb, m = self.nodes[a], self.nodes[b], self.internal[k]
+            S.g(na, nb, 1 / self.RP)
+            if self.blown:
+                S.g(na, m, 1 / R_OFF)
+                S.g(m, nb, 1.0)
+                continue
+            S.g(na, m, 1 / self.R)
+            if ctx.dc:
+                S.g(m, nb, 1e3)
+            else:
+                G, Ieq = self._companion(ctx, k)
+                S.g(m, nb, G)
+                S.i(m, nb, Ieq)
+
+    def accept(self, x, ctx):
+        pins, cur = [], []
+        self.power = 0.0
+        for k, (a, b) in enumerate(((0, 1), (2, 3))):
+            na, nb, m = self.nodes[a], self.nodes[b], self.internal[k]
+            vl = v(x, m) - v(x, nb)
+            if self.blown:
+                i = 0.0
+            elif ctx.dc:
+                i = vl * 1e3
+            else:
+                G, Ieq = self._companion(ctx, k)
+                i = G * vl + Ieq
+            self.i_prev[k], self.v_prev[k] = i, vl
+            tot = i + (v(x, na) - v(x, nb)) / self.RP
+            pins += [tot, -tot]
+            cur.append(i)
+            self.power += i * i * self.R
+        self.i_pins = pins
+        self.current = math.hypot(*cur)
+        self.ia, self.ib = cur
+        # the rotor turns towards the field (the shorter way round), if there's enough current to pull it
+        h = 0.0 if ctx.dc else ctx.h
+        irated = self.V / self.R
+        if self.current > 0.15 * irated and h > 0:
+            target = math.atan2(cur[1], cur[0])
+            d = (target - self.theta + math.pi) % (2 * math.pi) - math.pi
+            if abs(abs(d) - math.pi) > 1e-3:     # exactly opposite: no pull either way
+                self.theta += d * (1 - math.exp(-h / self.TAU))
+        self.vd = v(x, self.nodes[0]) - v(x, self.nodes[1])
+        self.warn = "hot" if self.current > 1.5 * irated else None
+        if self._overload(self.current > 2.5 * irated, h, 1.0):
+            self.blown = True
+            self.event = (f"{self.comp.ref} burnt out — {self.current:.1f} A is far more than its coils can take "
+                          f"({irated:.2f} A at {self.V:g} V).")
+
+    def after_dc(self):
+        pass
+
+    @property
+    def angle(self):
+        """Shaft angle in degrees (a full step is 360 / steps per turn)."""
+        return math.degrees(self.theta) * 4 / (self.nsteps)
+
+    @property
+    def step_count(self):
+        return round(self.theta / (math.pi / 2))
+
+    def reading(self):
+        return (self.step_count, " steps")
+
+    def live_extra(self):
+        return {"_angle": self.angle % 360.0, "_steps": self.step_count}
+
+
+# ============================================================================================ rotary switch, keypad
+class Rotary(Device):
+    """1-pole, 4-way rotary switch: COM to the selected contact. Pins COM, 1, 2, 3, 4."""
+
+    def _sel(self):
+        try:
+            return int(self.prop("position")) - 1
+        except (TypeError, ValueError):
+            return 0
+
+    def stamp(self, S, x, ctx):
+        sel = self._sel()
+        com = self.nodes[0]
+        for k in range(4):
+            S.g(com, self.nodes[1 + k], 1 / (R_ON if k == sel else R_OFF))
+
+    def accept(self, x, ctx):
+        sel = self._sel()
+        com = self.nodes[0]
+        pins = [0.0] * 5
+        for k in range(4):
+            i = (v(x, com) - v(x, self.nodes[1 + k])) / (R_ON if k == sel else R_OFF)
+            pins[0] += i
+            pins[1 + k] -= i
+        self.i_pins = pins
+        self.current = pins[0]
+
+
+KEYS = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#")
+
+
+class Keypad(Device):
+    """12-key matrix keypad: a pressed key joins its row (R1–R4) to its column (C1–C3)."""
+
+    def _pair(self):
+        key = str(self.comp.props.get("_key") or "")
+        if key not in KEYS:
+            return None
+        n = KEYS.index(key)
+        return n // 3, 4 + n % 3            # row pin index, column pin index
+
+    def stamp(self, S, x, ctx):
+        pair = self._pair()
+        for r in range(4):
+            for c in range(4, 7):
+                S.g(self.nodes[r], self.nodes[c], 1 / (R_ON if pair == (r, c) else R_OFF))
+
+    def accept(self, x, ctx):
+        pair = self._pair()
+        pins = [0.0] * 7
+        for r in range(4):
+            for c in range(4, 7):
+                i = (v(x, self.nodes[r]) - v(x, self.nodes[c])) / (R_ON if pair == (r, c) else R_OFF)
+                pins[r] += i
+                pins[c] -= i
+        self.i_pins = pins
+
+    def live_extra(self):
+        return {"_key": str(self.comp.props.get("_key") or "")}
+
 FACTORY = {
     "led_bi2": MultiLED, "led_bi3": MultiLED, "led_rgb": MultiLED, "bridge": Bridge, "scr": SCR,
     "reg_fixed": Regulator, "reg_adj": Regulator, "transformer": Transformer, "dpdt": DPDT, "hall": Hall,
-    "solenoid": Solenoid, "comparator": Comparator, "ic4026": Counter4026, "relay_dpdt": RelayDPDT, "l293d": L293D, "ic4060": Counter4060,
+    "solenoid": Solenoid, "comparator": Comparator, "ic4026": Counter4026, "relay_dpdt": RelayDPDT, "l293d": L293D, "jkff": JKFlipFlop, "xtal_clock": CrystalClock,
+    "stepper": Stepper, "rotary": Rotary, "keypad": Keypad, "ic4060": Counter4060,
 }

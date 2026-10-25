@@ -1,0 +1,385 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Rotary switch (pick an LED)",
+ "components": [
+  {
+   "id": "d2d368b0",
+   "kind": "rotary",
+   "ref": "S1",
+   "x": 80,
+   "y": 120,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "position": "1"
+   }
+  },
+  {
+   "id": "cec00f7d",
+   "kind": "rail_pos",
+   "ref": "V1",
+   "x": 30,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "2822a367",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 200,
+   "y": 230,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "87663750",
+   "kind": "led",
+   "ref": "LED1",
+   "x": 200,
+   "y": 310,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Red",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "2ed0014a",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 270,
+   "y": 230,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "4c6d6476",
+   "kind": "led",
+   "ref": "LED2",
+   "x": 270,
+   "y": 310,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Yellow",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "68298cde",
+   "kind": "resistor",
+   "ref": "R3",
+   "x": 340,
+   "y": 230,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "d015aabd",
+   "kind": "led",
+   "ref": "LED3",
+   "x": 340,
+   "y": 310,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Green",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "bfad83fb",
+   "kind": "resistor",
+   "ref": "R4",
+   "x": 410,
+   "y": 230,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "903b3834",
+   "kind": "led",
+   "ref": "LED4",
+   "x": 410,
+   "y": 310,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Blue",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "af5535e0",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 200,
+   "y": 380,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "f435614a",
+   "kind": "note",
+   "ref": "T1",
+   "x": 300,
+   "y": 60,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Click the rotary switch while it runs to turn it to the next position."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "bb7695e5",
+   "points": [
+    [
+     50,
+     120
+    ],
+    [
+     30,
+     120
+    ],
+    [
+     30,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "3f342b84",
+   "points": [
+    [
+     110,
+     90
+    ],
+    [
+     150,
+     90
+    ],
+    [
+     150,
+     180
+    ],
+    [
+     200,
+     180
+    ],
+    [
+     200,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "7ba97743",
+   "points": [
+    [
+     200,
+     260
+    ],
+    [
+     200,
+     280
+    ]
+   ]
+  },
+  {
+   "id": "e0c7b51b",
+   "points": [
+    [
+     200,
+     340
+    ],
+    [
+     200,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "e3ea50ed",
+   "points": [
+    [
+     110,
+     110
+    ],
+    [
+     140,
+     110
+    ],
+    [
+     140,
+     170
+    ],
+    [
+     270,
+     170
+    ],
+    [
+     270,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "007b211d",
+   "points": [
+    [
+     270,
+     260
+    ],
+    [
+     270,
+     280
+    ]
+   ]
+  },
+  {
+   "id": "5a34a63f",
+   "points": [
+    [
+     270,
+     340
+    ],
+    [
+     270,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "845c5d3d",
+   "points": [
+    [
+     110,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     160
+    ],
+    [
+     340,
+     160
+    ],
+    [
+     340,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "0dadf503",
+   "points": [
+    [
+     340,
+     260
+    ],
+    [
+     340,
+     280
+    ]
+   ]
+  },
+  {
+   "id": "8abeab4d",
+   "points": [
+    [
+     340,
+     340
+    ],
+    [
+     340,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "e98d8f30",
+   "points": [
+    [
+     110,
+     150
+    ],
+    [
+     410,
+     150
+    ],
+    [
+     410,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "4f6cc225",
+   "points": [
+    [
+     410,
+     260
+    ],
+    [
+     410,
+     280
+    ]
+   ]
+  },
+  {
+   "id": "fcbea7c7",
+   "points": [
+    [
+     410,
+     340
+    ],
+    [
+     410,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "a80160e9",
+   "points": [
+    [
+     200,
+     380
+    ],
+    [
+     410,
+     380
+    ]
+   ]
+  }
+ ]
+}

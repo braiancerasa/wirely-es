@@ -99,9 +99,16 @@ class Ctx:
             QPointF(0, 1) if align & Qt.AlignTop else QPointF(0, -1)
         # direction in the part's own frame -> direction on screen
         ins = _rotvec(ins, self.rot, self.flip)
+        side_pin = bool(align & (Qt.AlignLeft | Qt.AlignRight))
         if abs(ins.x()) > abs(ins.y()):
             r = QRectF(0, -size, w, 2 * size) if ins.x() > 0 else QRectF(-w, -size, w, 2 * size)
             a = (Qt.AlignLeft if ins.x() > 0 else Qt.AlignRight) | Qt.AlignVCenter
+        elif side_pin:
+            # a chip turned on its side: its side pins (only 10 apart) are now along the top or bottom, so
+            # their names run along the pins (reading upwards) instead of crashing into each other
+            p.rotate(-90)
+            r = QRectF(0, -size, w, 2 * size) if ins.y() < 0 else QRectF(-w, -size, w, 2 * size)
+            a = (Qt.AlignLeft if ins.y() < 0 else Qt.AlignRight) | Qt.AlignVCenter
         else:
             r = QRectF(-w / 2, 0, w, size + 2) if ins.y() > 0 else QRectF(-w / 2, -size - 2, w, size + 2)
             a = Qt.AlignHCenter | (Qt.AlignTop if ins.y() > 0 else Qt.AlignBottom)
@@ -489,7 +496,7 @@ def _mosfet(c, n=True):
 def _gate_body(c, kind):
     p = c.p
     path = QPainterPath()
-    if kind in ("and", "nand"):
+    if kind in ("and", "nand", "schmitt_nand"):
         path.moveTo(-25, -20)
         path.lineTo(0, -20)
         path.arcTo(QRectF(-20, -20, 40, 40), 90, -180)
@@ -521,7 +528,7 @@ def _gate_body(c, kind):
         p.setBrush(Qt.NoBrush)
         p.drawPath(back)
         ins = -26
-    bubble = kind in ("nand", "nor", "not", "schmitt_not")
+    bubble = kind in ("nand", "nor", "not", "schmitt_not", "schmitt_nand")
     if bubble:
         c.circle(tip + 3.5, 0, 3.5, c.paper, 1.8)
         c.line(tip + 7, 0, 40, 0)
@@ -532,15 +539,16 @@ def _gate_body(c, kind):
     else:
         c.line(-40, -10, ins, -10)
         c.line(-40, 10, ins, 10)
-    if kind == "schmitt_not":
+    if kind in ("schmitt_not", "schmitt_nand"):
+        dx = -2 if kind == "schmitt_nand" else 0
         hp = QPainterPath()
-        hp.moveTo(-14, 4)
-        hp.lineTo(-5, 4)
-        hp.lineTo(-7, -4)
-        hp.lineTo(2, -4)
-        hp.moveTo(-12, 4)
-        hp.lineTo(-10, -4)
-        hp.lineTo(-5, -4)
+        hp.moveTo(-14 + dx, 4)
+        hp.lineTo(-5 + dx, 4)
+        hp.lineTo(-7 + dx, -4)
+        hp.lineTo(2 + dx, -4)
+        hp.moveTo(-12 + dx, 4)
+        hp.lineTo(-10 + dx, -4)
+        hp.lineTo(-5 + dx, -4)
         p.setPen(c.pen(1.2))
         p.setBrush(Qt.NoBrush)
         p.drawPath(hp)
@@ -576,6 +584,22 @@ def _box_ic(c, x0, y0, x1, y1, title, labels=None, numbers=None, clock=None, tit
         cx, cy = x0, clock
         c.poly([(cx, cy - 4), (cx + 6, cy), (cx, cy + 4)], None, 1.2, closed=False)
     ty = title_y if title_y is not None else (y0 + y1) / 2 + (8 if c.kind == "timer555" else 0)
+    if title_y is not None and c.rot % 2 == 1:
+        # a narrow box (a regulator) turned on its side: the title runs along it
+        p = c.p
+        p.save()
+        p.translate((x0 + x1) / 2, ty)
+        if c.flip:
+            p.scale(-1, 1)
+        p.rotate(-90 * c.rot - 90)
+        f = QFont()
+        f.setPixelSize(11)
+        f.setBold(True)
+        p.setFont(f)
+        p.setPen(c.ink)
+        p.drawText(QRectF(-40, -11, 80, 22), Qt.AlignCenter, title)
+        p.restore()
+        return
     c.upright((x0 + x1) / 2, ty, title, 11)
 
 
@@ -1113,11 +1137,89 @@ def _ic4060(c):
     _box_ic(c, -40, -60, 40, 50, "4060", labels={"PI": "RS", "PO": "RTC", "POn": "CTC"})
 
 
+def _jkff(c):
+    _box_ic(c, -30, -40, 30, 40, "", labels={"CLK": "", "Qn": "Q̅"}, clock=0)
+
+
+def _xtal_clock(c):
+    c.rect(-30, -18, 60, 36, c.paper)
+    c.line(30, 0, 40, 0)
+    # a crystal: two plates with the quartz between them
+    c.line(-22, -8, -22, 8, 1.6)
+    c.line(-8, -8, -8, 8, 1.6)
+    c.rect(-19, -6, 8, 12, None, 1.4)
+    # and the square wave it makes
+    c.poly([(0, 6), (5, 6), (5, -6), (12, -6), (12, 6), (19, 6), (19, -6), (24, -6)], None, 1.4, closed=False)
+
+
+def _stepper(c):
+    for y, x0, x1 in ((-10, -40, -16), (10, -40, -16), (-10, 16, 40), (10, 16, 40)):
+        c.line(x0, y, x1, y)
+    c.circle(0, 0, 19, c.paper, 1.8)
+    # step marks round the inside, and the shaft's pointer showing where it is
+    for k in range(8):
+        a = math.radians(k * 45)
+        c.line(15 * math.cos(a), 15 * math.sin(a), 17.5 * math.cos(a), 17.5 * math.sin(a), 1.0)
+    ang = math.radians(float(c.props.get("_angle", 0.0)) - 90)
+    c.line(0, 0, 12 * math.cos(ang), 12 * math.sin(ang), 2.2)
+    c.circle(0, 0, 2.5, c.ink, 1.0)
+    c.upright(-30, -16, "A", 7, False)
+    c.upright(30, -16, "B", 7, False)
+
+
+def _rotary(c):
+    c.line(-30, 0, -16, 0)
+    pos = str(c.props.get("position", "1"))
+    for k, y in enumerate((-30, -10, 10, 30)):
+        c.line(14, y, 30, y)
+        _contact(c, 12, y)
+        c.upright(22, y - 6, str(k + 1), 6.5, False)
+    _contact(c, -14, 0)
+    sel = int(pos) - 1 if pos in ("1", "2", "3", "4") else 0
+    y = (-30, -10, 10, 30)[sel]
+    c.line(-12, 0, 10, y * 0.92, 1.8)
+    # the knob's arc
+    p = c.p
+    p.setPen(c.pen(1.0, style=Qt.DashLine))
+    p.setBrush(Qt.NoBrush)
+    p.drawArc(QRectF(-20, -32, 64, 64), 120 * 16, 120 * 16)
+
+
+KEYPAD_KEYS = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#")
+
+
+def keypad_key_at(x, y):
+    """Which key is at (x, y) in the keypad's own frame, or None."""
+    for n, k in enumerate(KEYPAD_KEYS):
+        cx, cy = -20 + 20 * (n % 3), -38 + 20 * (n // 3)
+        if abs(x - cx) <= 9 and abs(y - cy) <= 8:
+            return k
+    return None
+
+
+def _keypad(c):
+    c.rect(-40, -55, 80, 110, c.paper)
+    pressed = str(c.props.get("_key") or "")
+    for n, k in enumerate(KEYPAD_KEYS):
+        cx, cy = -20 + 20 * (n % 3), -38 + 20 * (n // 3)
+        down = k == pressed
+        p = c.p
+        p.setPen(c.pen(1.2))
+        p.setBrush(QColor(theme_accent()) if down else c.paper)
+        p.drawRoundedRect(QRectF(cx - 8, cy - 7, 16, 14), 3, 3)
+        c.upright(cx, cy, k, 8, True, QColor("#ffffff") if down else None)
+    for name, px, py in P.get("keypad").pins:
+        c.line(px, 55, px, py)
+        c.upright(px, 50, name, 5, False)
+
+
 DRAW.update({
     "led_bi2": _led_bi2, "led_bi3": lambda c: _led_multi(c, ("Red", "Green")),
     "led_rgb": lambda c: _led_multi(c, ("Red", "Green", "Blue")), "bridge": _bridge, "scr": _scr,
     "reg_fixed": _reg_fixed, "reg_adj": _reg_adj, "transformer": _transformer, "dpdt": _dpdt, "hall": _hall,
-    "solenoid": _solenoid, "comparator": _comparator, "ic4026": _ic4026, "ic4060": _ic4060, "l293d": _l293d,
+    "solenoid": _solenoid, "comparator": _comparator, "ic4026": _ic4026, "ic4060": _ic4060,
+    "jkff": _jkff, "xtal_clock": _xtal_clock, "stepper": _stepper, "rotary": _rotary, "keypad": _keypad,
+    "schmitt_nand": lambda c: _gate_body(c, "schmitt_nand"), "l293d": _l293d,
 })
 
 

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import math
 
-from .devices import (BJT, GMIN, LED_N, LED_RS, R_OFF, R_ON, VT, Device, Source, led_is, pnjlim, sexp,
+from .devices import (BJT, GMIN, LED_N, LED_RS, R_OFF, R_ON, VT, Device, RsDiode, Source, led_is, pnjlim, sexp,
                       spike_message, v)
 
 G_GATE = 1e-9            # MOSFET gate leakage to its source (1 GΩ)
@@ -428,6 +428,28 @@ class OpAmp(Device):
         self.vlogic = 9.0
         self._dc = False
 
+    @property
+    def protect(self):
+        """The output's protection diodes, to V+ and from V− (on the supply pins that are wired)."""
+        key = (self.auto_pos, self.auto_neg)
+        if getattr(self, "_protect_key", None) != key:
+            self._protect_key = key
+            neg, pos, out, vpn, vnn = self.nodes
+            ds, pins = [], []
+            if not self.auto_pos:
+                ds.append(RsDiode(out, vpn, Rs=5.0))
+                pins.append((2, 3))
+            if not self.auto_neg:
+                ds.append(RsDiode(vnn, out, Rs=5.0))
+                pins.append((4, 2))
+            self._protect, self._protect_pins = ds, pins
+        return self._protect
+
+    @property
+    def protect_pins(self):
+        self.protect
+        return self._protect_pins
+
     def rails(self, x):
         vp = self.vlogic if self.auto_pos else v(x, self.nodes[3])
         vn = 0.0 if self.auto_neg else v(x, self.nodes[4])
@@ -489,11 +511,20 @@ class OpAmp(Device):
         # keep this iteration's guess for the output and the internal node near the supply range
         vp_, vn_ = self.rails(x)
         span = abs(vp_ - vn_) / 2 + 2.0
+        last = getattr(self, "_clamped", {})
+        clamped = {}
         for i, (lo, hi) in ((2, (min(vp_, vn_) - 1.0, max(vp_, vn_) + 1.0)), (5, (-span, span))):
             if V0[i] < lo or V0[i] > hi:
                 V0[i] = min(hi, max(lo, V0[i]))
-                ctx.limited = True
+                clamped[i] = V0[i]
+                # only "not settled yet" while the held-back guess is still moving: if something outside the
+                # chip holds its output beyond the supply pins, the same clamp every time is the answer
+                if abs(last.get(i, float("nan")) - V0[i]) > 1e-9 or not math.isfinite(last.get(i, float("nan"))):
+                    ctx.limited = True
+        self._clamped = clamped
         numeric_stamp(S, nodes, V0, self._f)
+        for d in self.protect:
+            d.stamp(S, x)
 
     def accept(self, x, ctx):
         neg, pos, out, vpn, vnn = self.nodes
@@ -507,9 +538,27 @@ class OpAmp(Device):
         I = self._f(V)
         self.vm_prev = V[5]
         self.i_pins = [I[0], I[1], I[2], 0.0 if self.auto_pos else I[3], 0.0 if self.auto_neg else I[4]]
+        worst = 0.0
+        for d, (pa, pk) in zip(self.protect, self.protect_pins):
+            d.accept(x)
+            self.i_pins[pa] += d.current
+            self.i_pins[pk] -= d.current
+            worst = max(worst, abs(d.current))
+        # its protection diodes only take a few tens of milliamps
+        if not ctx.dc and self._overload(worst > 0.1, ctx.h, 1e-3, worst > 1.0):
+            self.blown = True
+            self.event = (f"{self.comp.ref} was destroyed — its output was held {'above V+' if V[2] > V[3] else 'below V−'} "
+                          f"by something outside it, forcing {worst:.1f} A through its protection diodes. An op-amp's "
+                          "output must stay between its supply pins.")
+            return
         self.vout = V[2]
         vp, vn = self.rails(x)
         self.power = sum(V[k] * self.i_pins[k] for k in range(5))
+        if (vp - vn) < -1.0 and not ctx.dc and not (self.auto_pos or self.auto_neg):
+            self.blown = True
+            self.event = (f"{self.comp.ref} was destroyed — its supply is the wrong way round (V+ is {vn - vp:.1f} V "
+                          "below V−). Swap the V+ and V− connections.")
+            return
         over = (vp - vn) > self.D.vs_max
         self.warn = "over" if over else None
         if self._overload(over, ctx.h, 0.05, (vp - vn) > 1.3 * self.D.vs_max):
@@ -582,10 +631,7 @@ class Timer555(Device):
         return min(fr) if fr else None
 
     def accept(self, x, ctx):
-        q = self.next_q(x)
-        if q != self.q:
-            self.q = q
-            self.changed = True
+        q_new = self.next_q(x)         # the currents below are for the state this solution was found with
         gnd, trig, out, reset, ctrl, thr, dis, vcc = self.nodes
         G = 1 / self.ROUT
         if self.q:
@@ -595,8 +641,13 @@ class Timer555(Device):
             iout = -G * (v(x, out) - v(x, gnd) - 0.1)
             idis = (v(x, dis) - v(x, gnd)) / 10.0
         icc = (v(x, vcc) - v(x, ctrl)) / 5000.0 + (v(x, vcc) - v(x, gnd)) / 3000.0 + (iout if self.q else 0.0)
-        self.i_pins = [0.0, 0.0, -iout, 0.0, 0.0, 0.0, idis, icc]
+        # CTRL is the middle of the internal 5k–5k–5k divider: a capacitor on it (as usual) takes current here
+        ictrl = (v(x, ctrl) - v(x, vcc)) / 5000.0 + (v(x, ctrl) - v(x, self.internal[0])) / 5000.0
+        self.i_pins = [0.0, 0.0, -iout, 0.0, ictrl, 0.0, idis, icc]
         self.i_pins[0] = -sum(self.i_pins[1:])
+        if q_new != self.q:
+            self.q = q_new
+            self.changed = True
         self.out_high = self.q
 
 
@@ -661,20 +712,7 @@ class Digital(Device):
         return best
 
     def accept(self, x, ctx):
-        hi, lo = self.thresholds()
-        rising = {}
-        for name, i in zip(self.inputs, self.in_idx):
-            vv = v(x, self.nodes[i])
-            old = self.level[name]
-            new = vv >= hi if not old else vv > lo
-            if new and not old:
-                rising[name] = True
-            self.level[name] = new
-        self.clock(rising)
-        out = self.compute()
-        if out != self.out:
-            self.out = out
-            self.changed = True
+        # pin currents first, from the outputs this solution was found with (not the ones about to change)
         G = 1 / ROUT_LOGIC
         pins = [0.0] * len(self.nodes)
         for name, i in zip(self.inputs, self.in_idx):
@@ -685,6 +723,27 @@ class Digital(Device):
             else:
                 pins[i] = (v(x, self.nodes[i]) - (self.vlogic if self.out[name] else 0.0)) * G
         self.i_pins = pins
+        # heat in the outputs (they run from the chip's own supply): current² × output resistance
+        self.power = sum(((v(x, self.nodes[i]) - (self.vlogic if self.out[n] else 0.0)) ** 2) * G
+                         for n, i in zip(self.outputs, self.out_idx) if self.out[n] is not None)
+        hi, lo = self.thresholds()
+        rising = {}
+        # at switch-on everything rises from 0 V together: inputs that are simply high from the start aren't edges
+        powering_up = ctx.dc or not getattr(self, "_powered", False)
+        if ctx.t > 0 and not ctx.dc:
+            self._powered = True
+        for name, i in zip(self.inputs, self.in_idx):
+            vv = v(x, self.nodes[i])
+            old = self.level[name]
+            new = vv >= hi if not old else vv > lo
+            if new and not old and not powering_up:
+                rising[name] = True
+            self.level[name] = new
+        self.clock(rising)
+        out = self.compute()
+        if out != self.out:
+            self.out = out
+            self.changed = True
         if (self.vmax and self.vlogic > self.vmax + 1.0 and not ctx.dc and ctx.t > 0
                 and not getattr(self, "_told", False)):
             self._told = True
@@ -700,7 +759,7 @@ class Gate(Digital):
         k = self.comp.kind
         self.inputs = ("A",) if k in ("not", "schmitt_not") else ("A", "B")
         self.outputs = ("Y",)
-        self.schmitt = k == "schmitt_not"
+        self.schmitt = k in ("schmitt_not", "schmitt_nand")
         super().update_params()
 
     def compute(self):
@@ -708,7 +767,7 @@ class Gate(Digital):
         a = self.level["A"]
         b = self.level.get("B", False)
         y = {"not": not a, "schmitt_not": not a, "and": a and b, "or": a or b, "nand": not (a and b),
-             "nor": not (a or b), "xor": a != b}[k]
+             "nor": not (a or b), "xor": a != b, "schmitt_nand": not (a and b)}[k]
         return {"Y": y}
 
 
@@ -1004,12 +1063,26 @@ class ShuntRef(Device):
             S.g(k, a, 1 / R_OFF)
             return
         V0 = [v(x, k), v(x, a), v(x, r)]
-        # keep the diode junction from jumping too far in one Newton step
         vka = V0[0] - V0[1]
-        lim = pnjlim(-vka, -(self.v_last[0] - self.v_last[1]), VT, 0.6)
+        old = self.v_last[0] - self.v_last[1]
+        # when it's sinking hard, the cathode drops into the corner near its lowest voltage, where the current
+        # changes very steeply: let each Newton step only go halfway down towards it, or the guesses overshoot
+        # wildly and bounce (as with SPICE's limiting at a diode's knee). Once there, it's free to go lower.
+        floor = self.vsat - 0.3
+        if vka < old and old > floor + 0.05 and vka < floor + 0.5 * (old - floor) - 1e-9:
+            vka = floor + 0.5 * (old - floor)
+            ctx.limited = True
+        # keep the diode junction from jumping too far in one Newton step
+        lim = pnjlim(-vka, -old, VT, 0.6)
         if abs(-lim - vka) > 1e-9:
             ctx.limited = True
-            V0[0] = V0[1] - lim
+            vka = -lim
+        if abs(vka - (V0[0] - V0[1])) > 1e-12:
+            # move the end that isn't 0 V (a 0 V node can't move, so changing it would do nothing)
+            if k >= 0:
+                V0[0] = V0[1] + vka
+            else:
+                V0[1] = V0[0] - vka
         self.v_last = V0
         numeric_stamp(S, [k, a, r], V0, self._f)
 
@@ -1397,15 +1470,15 @@ class Relay(Device):
         k = self.internal[0]
         i = self.coil_current(x, ctx)
         self.i_prev, self.v_prev = i, v(x, k) - v(x, c2)
+        icoil = i + (v(x, c1) - v(x, c2)) / self.RP
+        ino = (v(x, com) - v(x, no)) / (R_ON if self.on else R_OFF)       # contacts as they were for this step
+        inc = (v(x, com) - v(x, nc)) / (R_OFF if self.on else R_ON)
+        self.i_pins = [icoil, -icoil, ino + inc, -inc, -ino]
         on = (abs(i) >= self.i_pull) if not self.on else (abs(i) > self.i_drop)
         if on != self.on:
             self.on = on
             self.changed = True
             self.clicks += 1
-        icoil = i + (v(x, c1) - v(x, c2)) / self.RP
-        ino = (v(x, com) - v(x, no)) / (R_ON if self.on else R_OFF)
-        inc = (v(x, com) - v(x, nc)) / (R_OFF if self.on else R_ON)
-        self.i_pins = [icoil, -icoil, ino + inc, -inc, -ino]
         self.current = i
         self.vd = v(x, c1) - v(x, c2)
 
@@ -1564,6 +1637,7 @@ FACTORY = {
     "inductor": Inductor, "relay": Relay, "phototransistor": PhotoTransistor, "optocoupler": Optocoupler,
     "nmos": MOSFET, "pmos": MOSFET, "opamp": OpAmp, "timer555": Timer555,
     "not": Gate, "and": Gate, "or": Gate, "nand": Gate, "nor": Gate, "xor": Gate, "schmitt_not": Gate,
+    "schmitt_nand": Gate,
     "dff": DFF, "counter4017": Counter4017, "decoder4511": Decoder4511,
     "shunt_ref": ShuntRef, "ssr": SolidStateRelay,
     "sr164": ShiftReg164, "sr595": ShiftReg595, "sr165": ShiftReg165, "sr597": ShiftReg597, "mux4051": Mux4051,

@@ -36,7 +36,7 @@ from wirely import __version__                                      # noqa: E402
 from wirely.model import parts as P                                  # noqa: E402
 from wirely.model.circuit import Circuit                             # noqa: E402
 from wirely.model.types_info import describe                         # noqa: E402
-from wirely.model.units import fmt, parse                            # noqa: E402
+from wirely.model.units import fmt, has_unit_box, join, parse, split, unit_choices  # noqa: E402
 from wirely.sim.audio import Synth                                   # noqa: E402
 from wirely.ui import icons, symbols as S, theme                     # noqa: E402
 from wirely.ui import simcontrol as SC                               # noqa: E402
@@ -566,6 +566,12 @@ class App:
                     f["colours"] = {ch: S.LED_RGB[ch] for ch in p.choices if ch in S.LED_RGB}
                 if p.key == "model":
                     f["info"] = {ch: describe(ch) for ch in p.choices}
+            elif has_unit_box(p.unit):
+                # the number, with a box beside it for its size: Ω / kΩ / MΩ, pF / nF / µF …
+                f["value"], f["unit"] = split(float(v), p.unit)
+                f["units"] = unit_choices(p.unit)
+                f["placeholder"] = f"e.g. {split(float(p.default), p.unit)[0]}"
+                f["help"] = p.help or "Type the number and pick its size — or type it all, like 4k7 or 100n"
             else:
                 f["value"] = fmt(v, p.unit)
                 f["placeholder"] = f"e.g. {fmt(p.default, p.unit)}"
@@ -589,7 +595,10 @@ class App:
                 out[p.key] = str(raw)
             else:
                 try:
-                    v = parse(raw, p.unit)
+                    if p.key + "__unit" in values:
+                        v = join(raw, values[p.key + "__unit"], p.unit)
+                    else:
+                        v = parse(raw, p.unit)
                     if p.min is not None and v < p.min:
                         raise ValueError(f"{p.label} must be at least {fmt(p.min, p.unit)}")
                     if p.max is not None and v > p.max:
@@ -606,6 +615,18 @@ class App:
             problems.append(f"Another part is already called {ref}")
             bad.append("_ref")
         return out, ref, problems, bad
+
+    def tidy_value(self, cid, key, text, choice):
+        """Someone typed the whole value (4k7, 100n) next to a unit box: [number, unit-box choice] to show
+        instead (or null if it doesn't make sense yet)."""
+        comp = self.circuit.components.get(cid)
+        p = comp.part.prop(key) if comp else None
+        if p is None:
+            return "null"
+        try:
+            return json.dumps(list(split(join(text, choice, p.unit), p.unit)))
+        except ValueError:
+            return "null"
 
     def check_form(self, cid, values_json):
         comp = self.circuit.components.get(cid)

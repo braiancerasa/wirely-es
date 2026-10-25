@@ -12,9 +12,14 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QFil
 from ..model import parts as P
 from ..model.circuit import Circuit, Component
 from ..model.types_info import describe
-from ..model.units import fmt, parse
+from ..model.units import _NUM, fmt, has_unit_box, join, parse, split, unit_choices
 from . import symbols as S
 from . import theme
+
+
+def _plain_number(text) -> bool:
+    import re
+    return re.fullmatch(_NUM, str(text).strip().replace(" ", "").replace(",", ".")) is not None
 
 
 class PropertiesDialog(QDialog):
@@ -53,6 +58,7 @@ class PropertiesDialog(QDialog):
         self.ref.setToolTip("The label on the diagram, e.g. R1")
         form.addRow("Label", self.ref)
         self.fields = {}
+        self.unit_boxes = {}
         for p in part.props:
             v = comp.value(p.key)
             if p.kind == "bool":
@@ -76,6 +82,30 @@ class PropertiesDialog(QDialog):
                     for ix, ch in enumerate(p.choices):
                         if describe(ch):
                             w.setItemData(ix, describe(ch), Qt.ToolTipRole)
+            elif has_unit_box(p.unit):
+                # the number, with a box beside it for its size: Ω / kΩ / MΩ, pF / nF / µF …
+                num, choice = split(float(v), p.unit)
+                w = QLineEdit(num)
+                dnum, dchoice = split(float(p.default), p.unit)
+                w.setPlaceholderText(f"e.g. {dnum}")
+                w.setToolTip(p.help or "Type the number and pick its size — or type it all, like 4k7 or 100n")
+                box = QComboBox()
+                box.addItems(unit_choices(p.unit))
+                box.setCurrentText(choice)
+                box.setToolTip("Ω, kΩ (thousand), MΩ (million) … or pF, nF, µF …")
+                w.textChanged.connect(self._validate)
+                box.currentTextChanged.connect(self._validate)
+                w.editingFinished.connect(lambda p=p, w=w, box=box: self._tidy(p, w, box))
+                self.unit_boxes[p.key] = box
+                row = QWidget()
+                rl = QHBoxLayout(row)
+                rl.setContentsMargins(0, 0, 0, 0)
+                rl.setSpacing(6)
+                rl.addWidget(w, 1)
+                rl.addWidget(box)
+                self.fields[p.key] = (p, w)
+                form.addRow(p.label, row)
+                continue
             else:
                 w = QLineEdit(fmt(v, p.unit))
                 w.setPlaceholderText(f"e.g. {fmt(p.default, p.unit)}")
@@ -112,6 +142,17 @@ class PropertiesDialog(QDialog):
         lay.addLayout(btns)
         self.values = {}
 
+    def _tidy(self, p, w, box):
+        """Someone typed the whole value (4k7, 100n): show it as a number and its size in the box instead."""
+        try:
+            v = join(w.text(), box.currentText(), p.unit)
+        except ValueError:
+            return
+        num, choice = split(v, p.unit)
+        if (num, choice) != (w.text().strip(), box.currentText()) and not _plain_number(w.text()):
+            w.setText(num)
+            box.setCurrentText(choice)
+
     def _read(self):
         out, problems = {}, []
         for key, (p, w) in self.fields.items():
@@ -123,7 +164,10 @@ class PropertiesDialog(QDialog):
                 out[key] = w.currentText()
             else:
                 try:
-                    v = parse(w.text(), p.unit)
+                    if key in self.unit_boxes:
+                        v = join(w.text(), self.unit_boxes[key].currentText(), p.unit)
+                    else:
+                        v = parse(w.text(), p.unit)
                     if p.min is not None and v < p.min:
                         raise ValueError(f"{p.label} must be at least {fmt(p.min, p.unit)}")
                     if p.max is not None and v > p.max:
@@ -224,7 +268,8 @@ SHORTCUTS = [
     ("While running", "Click switches, hold push switches, drag the sliders, hover to read voltages"),
     ("Graph (oscilloscope)", "Put graph probes (A–D) on wires, press Play; Ctrl+G shows / hides the graph"),
     ("Readings", "While running, the Readings button shows the voltage and current on every wire and part — "
-                 "or click any wire or part to pin just its reading (click again to unpin)"),
+                 "or click any wire or part to pin just its reading (click again to unpin). Drag a reading to "
+                 "move it out of the way"),
     ("Logic probe", "Touch it on a wire: H = high, L = low"),
     ("Sound", "Buzzers, speakers, motors and relays make sound while running — the speaker button turns it off"),
     ("Right-click", "A menu for whatever's under the mouse (rotate, delete, properties …)"),

@@ -1061,6 +1061,9 @@ function editPart(cid) {
       if (f.colours) html += `<div class="swatchRow"><span class="swatch" id="${id}_sw"></span><select id="${id}">${opts}</select></div>`;
       else html += `<select id="${id}">${opts}</select>`;
       if (f.info) html += `<div class="hint info" id="${id}_info"></div>`;
+    } else if (f.units) {           // the number, with its size beside it: Ω / kΩ / MΩ, pF / nF / µF …
+      const opts = f.units.map((u) => `<option ${u === f.unit ? "selected" : ""}>${escapeHtml(u)}</option>`).join("");
+      html += `<div class="unitRow"><input type="text" id="${id}" value="${escapeHtml(f.value)}" placeholder="${escapeHtml(f.placeholder || "")}" title="${escapeHtml(f.help || "")}" spellcheck="false" autocomplete="off" inputmode="decimal"><select id="${id}__unit" title="Ω, kΩ (thousand), MΩ (million) … or pF, nF, µF …">${opts}</select></div>`;
     } else {
       html += `<input type="text" id="${id}" value="${escapeHtml(f.value)}" placeholder="${escapeHtml(f.placeholder || "")}" title="${escapeHtml(f.help || "")}" spellcheck="false" autocomplete="off">`;
     }
@@ -1074,6 +1077,7 @@ function editPart(cid) {
       for (const f of form.fields) {
         const el = d.querySelector("#f_" + f.key);
         v[f.key] = f.kind === "bool" ? el.checked : el.value;
+        if (f.units) v[f.key + "__unit"] = d.querySelector("#f_" + f.key + "__unit").value;
       }
       return v;
     };
@@ -1093,6 +1097,16 @@ function editPart(cid) {
       const el = d.querySelector("#f_" + f.key);
       el.addEventListener("input", validate);
       el.addEventListener("change", validate);
+      if (f.units) {
+        const box = d.querySelector("#f_" + f.key + "__unit");
+        box.addEventListener("change", validate);
+        // typed the whole value (4k7, 100n)? show it as a number and its size in the box
+        el.addEventListener("blur", () => {
+          if (/^\s*[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?\s*$/.test(el.value)) return;
+          const t = J(app.tidy_value(cid, f.key, el.value, box.value));
+          if (t) { el.value = t[0]; box.value = t[1]; validate(); }
+        });
+      }
       if (f.colours) {
         const sw = d.querySelector(`#f_${f.key}_sw`);
         const upd = () => { sw.style.background = f.colours[el.value] || "transparent"; };
@@ -1282,7 +1296,7 @@ function showExamplesMenu() {
 }
 async function openExample(name) {
   try {
-    const r = await fetch(encodeURI("examples/" + name + ".wirely"));
+    const r = await fetch("examples/" + encodeURIComponent(name + ".wirely"));
     if (!r.ok) throw new Error(r.status);
     const err = app.load(await r.text(), name);
     if (err) { toast(err, "error"); return; }

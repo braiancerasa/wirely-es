@@ -75,3 +75,46 @@ def _trim(x: float, digits: int) -> str:
     if "." in s:
         s = s.rstrip("0").rstrip(".")
     return s
+
+
+# ------------------------------------------------------------------ a number box with a unit box beside it
+# Units that get a drop-down of multipliers next to the number (Ω kΩ MΩ, pF nF µF …), in the order offered
+UNIT_STEPS = {
+    "Ω": ("", "k", "M"),
+    "F": ("p", "n", "µ", "m", ""),
+    "H": ("µ", "m", ""),
+    "Hz": ("", "k", "M"),
+}
+
+
+def has_unit_box(unit: str) -> bool:
+    return unit in UNIT_STEPS
+
+
+def unit_choices(unit: str) -> list:
+    """What the unit box shows, e.g. ["Ω", "kΩ", "MΩ"]."""
+    return [p + unit for p in UNIT_STEPS.get(unit, ("",))]
+
+
+def split(value: float, unit: str):
+    """A value as (number text, unit-box choice): 4700 Ω -> ("4.7", "kΩ"); 1e-7 F -> ("100", "nF")."""
+    steps = UNIT_STEPS.get(unit, ("",))
+    mults = [PREFIXES[p] for p in steps]
+    a = abs(value)
+    k = 0
+    for i, m in enumerate(mults):
+        if a >= m * 0.9995:
+            k = i
+    if value == 0:
+        k = steps.index("") if "" in steps else 0
+    return _trim(value / mults[k], 6), steps[k] + unit
+
+
+def join(text, choice: str, unit: str) -> float:
+    """The number typed plus the unit box: ("4.7", "kΩ") -> 4700. If what was typed already says its own size
+    (4k7, 100n, 2.2MΩ …), that wins and the box is ignored."""
+    s = str(text).strip().replace(" ", "").replace(",", ".")
+    if re.fullmatch(_NUM, s):
+        prefix = choice[: len(choice) - len(unit)] if choice.endswith(unit) else ""
+        return float(s) * PREFIXES.get(prefix, 1.0)
+    return parse(text, unit)

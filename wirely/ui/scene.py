@@ -58,6 +58,9 @@ class CircuitScene(QGraphicsScene):
         self.show_flow = True
         self.show_readings = False
         self.pinned = set()         # wires and parts whose reading is shown while running (clicked)
+        self.tag_offsets = {}       # reading labels dragged somewhere else: wire/part id -> (dx, dy)
+        self._tag_hits = []         # where the reading labels were drawn last frame: (rect, id)
+        self._drag_tag = None       # (id, mouse start, offset at start) while a reading label is being dragged
         self.anim_t = 0.0
         self.sliders = []
         self._held = None           # push switch being held down
@@ -93,6 +96,7 @@ class CircuitScene(QGraphicsScene):
     def set_circuit(self, circuit: Circuit):
         self.cancel()
         self.pinned = set()
+        self.tag_offsets = {}
         self.circuit = circuit
         self.rebuild()
 
@@ -270,6 +274,9 @@ class CircuitScene(QGraphicsScene):
         if pos is not None:
             self._mouse_pos = pos
         p = getattr(self, "_mouse_pos", None)
+        if self._drag_tag is not None or (p is not None and self.tag_at(p) is not None):
+            self.hover_info = None             # over a reading label (or dragging one): no bubble on top of it
+            return
         info = self._probe_info(p) if (p is not None and self.sim_active()) else None
         self.hover_info = (p, info[0], info[1]) if info else None
 
@@ -280,6 +287,11 @@ class CircuitScene(QGraphicsScene):
             if it in self.sliders:
                 QGraphicsScene.mousePressEvent(self, e)
                 return
+        tag = self.tag_at(pos)
+        if tag is not None and e.button() == Qt.LeftButton:       # a reading label: drag it out of the way
+            self._drag_tag = (tag, QPointF(pos), self.tag_offsets.get(tag, (0.0, 0.0)))
+            e.accept()
+            return
         item = self.item_at(pos)
         if isinstance(item, ComponentItem) and item.comp.kind in INTERACTIVE and e.button() == Qt.LeftButton:
             c = item.comp
@@ -288,6 +300,13 @@ class CircuitScene(QGraphicsScene):
                 self.sim_set_value(c.id, key, not c.value(key))
             elif c.kind in ("spdt", "dpdt"):
                 self.sim_set_value(c.id, "position", "B" if c.value("position") == "A" else "A")
+            elif c.kind == "rotary":
+                self.sim_set_value(c.id, "position", str(int(c.value("position")) % 4 + 1))
+            elif c.kind == "keypad":
+                key = self._keypad_key(item, pos)
+                if key:
+                    self.sim_set_value(c.id, "_key", key)
+                    self._held = c.id
             else:
                 self.sim_set_value(c.id, "pressed", True)
                 self._held = c.id
@@ -298,16 +317,53 @@ class CircuitScene(QGraphicsScene):
             self.update()
         e.accept()
 
+    def tag_at(self, pos):
+        """The wire or part whose reading label is under pos (the top one), or None."""
+        for r, key in reversed(self._tag_hits):
+            if r.adjusted(-2, -2, 2, 2).contains(pos):
+                return key
+        return None
+
+    def _keypad_key(self, item, pos):
+        """Which key of a keypad is under pos (allowing for the keypad being turned round)."""
+        from . import symbols as S
+        local = pos - item.pos()
+        q = S._rotvec(QPointF(local.x(), local.y()), item.comp.rot, item.comp.flip, inverse=True)
+        return S.keypad_key_at(q.x(), q.y())
+
     def _sim_release(self, e):
+        if self._drag_tag is not None:
+            self._drag_tag = None
+            e.accept()
+            return
         if self._held:
-            self.sim_set_value(self._held, "pressed", False)
+            comp = self.circuit.components.get(self._held)
+            if comp is not None and comp.kind == "keypad":
+                self.sim_set_value(self._held, "_key", "")
+                comp.props.pop("_key", None)
+            else:
+                self.sim_set_value(self._held, "pressed", False)
             self._held = None
         QGraphicsScene.mouseReleaseEvent(self, e)
 
     def _sim_move(self, e):
         from .simcontrol import INTERACTIVE
-        QGraphicsScene.mouseMoveEvent(self, e)
         pos = e.scenePos()
+        if self._drag_tag is not None:
+            key, start, (ox, oy) = self._drag_tag
+            self.tag_offsets[key] = (ox + pos.x() - start.x(), oy + pos.y() - start.y())
+            self._mouse_pos = pos
+            self.hover_info = None
+            self.update()
+            return
+        QGraphicsScene.mouseMoveEvent(self, e)
+        if self.tag_at(pos) is not None:
+            self._mouse_pos = pos
+            self.hover_info = None
+            for v in self.views():
+                v.viewport().setCursor(Qt.OpenHandCursor)
+            self.status.emit("Drag the reading to move it out of the way")
+            return
         item = self.item_at(pos)
         clickable = isinstance(item, ComponentItem) and item.comp.kind in INTERACTIVE
         for v in self.views():
@@ -316,7 +372,8 @@ class CircuitScene(QGraphicsScene):
         text = self._probe_text(pos)
         if clickable:
             what = {"reed_switch": "click to move the magnet", "hall": "click to move the magnet",
-                    "tilt_switch": "click to tilt it"}.get(
+                    "tilt_switch": "click to tilt it", "rotary": "click to turn it to the next position",
+                    "keypad": "hold down a key to press it"}.get(
                 item.comp.kind, "hold down to press" if item.comp.kind.startswith("push") else "click to switch")
             text = f"{text}   ·   {what}" if text else what.capitalize()
         elif isinstance(item, (ComponentItem, WireItem)) and text:
@@ -899,8 +956,9 @@ class CircuitScene(QGraphicsScene):
     NO_READING = {"ground", "note", "scope_probe", "logic_probe", "voltmeter", "ammeter"}
     SOURCES = {"cell", "battery", "dc_supply", "ac_supply", "rail_pos", "signal_gen"}
 
-    def _tag(self, p, x, y, text, pinned, anchor):
-        """A small reading label at (x, y): anchor "above" sits it above the point, "right" beside it."""
+    def _tag(self, p, x, y, text, pinned, anchor, key=None):
+        """A small reading label at (x, y): anchor "above" sits it above the point, "right" beside it. If it has
+        been dragged somewhere else, it's drawn there with a dashed line back to (x, y)."""
         from PySide6.QtGui import QFont, QFontMetricsF
         f = QFont()
         f.setPixelSize(8)
@@ -915,6 +973,21 @@ class CircuitScene(QGraphicsScene):
             r = QRectF(x, y + 1, w, h)
         else:
             r = QRectF(x + 5, y - h / 2, w, h)
+        dx, dy = self.tag_offsets.get(key, (0.0, 0.0))
+        if dx or dy:
+            r = r.translated(dx, dy)
+            # a dashed line from what it belongs to, to the nearest point of the label
+            px = min(max(x, r.left()), r.right())
+            py = min(max(y, r.top()), r.bottom())
+            if abs(px - x) + abs(py - y) > 4:
+                pen = QPen(QColor(theme.ACCENT if pinned else theme.BORDER), 0.9, Qt.DashLine)
+                p.setPen(pen)
+                p.drawLine(QPointF(x, y), QPointF(px, py))
+                p.setPen(Qt.NoPen)
+                p.setBrush(QColor(theme.ACCENT if pinned else theme.BORDER))
+                p.drawEllipse(QPointF(x, y), 1.8, 1.8)
+        if key is not None:
+            self._tag_hits.append((QRectF(r), key))
         bg = QColor(theme.PANEL)
         bg.setAlpha(232)
         p.setPen(QPen(QColor(theme.ACCENT if pinned else theme.BORDER), 1.0 if pinned else 0.8))
@@ -990,7 +1063,7 @@ class CircuitScene(QGraphicsScene):
             text = fmt(vv if abs(vv) >= 1e-3 else 0.0, "V")
             if amps >= 1e-6:
                 text += f"   {fmt(amps, 'A')} {arrow}"
-            self._tag(p, mx, my, text, pinned, "above" if a[1] == b[1] else "right")
+            self._tag(p, mx, my, text, pinned, "above" if a[1] == b[1] else "right", key=wid)
         for cid, it in self.comp_items.items():
             pinned = cid in self.pinned
             kind = it.comp.kind
@@ -1013,15 +1086,15 @@ class CircuitScene(QGraphicsScene):
             if lines:
                 r = lab.translated(it.pos())
                 if align == Qt.AlignLeft:            # label beside a standing part: reading underneath it
-                    self._tag(p, r.left(), r.bottom(), "  ".join(bits), pinned, "under")
+                    self._tag(p, r.left(), r.bottom(), "  ".join(bits), pinned, "under", key=cid)
                 else:                                # label above a part lying flat: reading underneath it
                     sym = it._sym.translated(it.pos())
                     self._tag(p, sym.center().x(), sym.bottom() + (22 if "reading" in info else 0),
-                              "  ".join(bits), pinned, "below")
+                              "  ".join(bits), pinned, "below", key=cid)
             else:
                 sym = it._sym.translated(it.pos())
                 y = sym.bottom() + (22 if "reading" in info else 0)
-                self._tag(p, sym.center().x(), y, "  ".join(bits), pinned, "below")
+                self._tag(p, sym.center().x(), y, "  ".join(bits), pinned, "below", key=cid)
 
     def drawForeground(self, p, rect: QRectF):
         from PySide6.QtGui import QPainter
@@ -1038,6 +1111,7 @@ class CircuitScene(QGraphicsScene):
             return
         if live is not None and self.show_flow:
             self._draw_flow(p, live, rect)
+        self._tag_hits = []
         if live is not None and (self.show_readings or self.pinned):
             self._draw_readings(p, live)
         if self.sim_active():
