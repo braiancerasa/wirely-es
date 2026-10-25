@@ -1,5 +1,11 @@
 # Changes
 
+## 1.4.1 — RGB LED fix, brighter LEDs
+- **RGB LEDs:** green is now the same kind of chip as blue (about 3.1 V, like real RGB LEDs), so green and blue
+  on one resistor share the current and mix. (Red, at about 2 V, still takes nearly all the current if it shares
+  a resistor with them — as in a real one; give each colour its own resistor to mix any colours.)
+- **LEDs look brighter when they're on:** a stronger colour and a bigger, brighter glow.
+
 ## 1.4.0 — Readings, and 16 new parts
 - **Readings:** a new toolbar button shows the voltage and current on every wire, and the voltage, current and
   power of every part, while the circuit runs. Click any wire or part while it runs to pin just its reading.

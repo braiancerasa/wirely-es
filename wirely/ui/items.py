@@ -168,25 +168,27 @@ class ComponentItem(QGraphicsItem):
         g = live.get("_glow", 0.0)
         if g <= 0.02 or live.get("blown"):
             return
+        led = "_rgb" in live or self.comp.kind == "led"
         if "_rgb" in live:                  # bi-colour and RGB LEDs: the colours they're mixing
             col = QColor(live["_rgb"])
-            radius = 16 + 14 * g
         elif self.comp.kind == "led":
             col = QColor(S.LED_RGB.get(self.comp.value("colour"), "#ff3b30"))
-            radius = 16 + 14 * g
         else:
             col = QColor(255, 205, 40)
-            radius = 18 + 18 * g
+        radius = (22 + 22 * g) if led else (18 + 18 * g)
         c = QPointF(0, 0)       # the LED / lamp itself sits at the part's centre (its box also covers the arrows)
         grad = QRadialGradient(c, radius)
+        core = QColor(col).lighter(160) if led else QColor(col)      # a bright, almost white centre
+        core.setAlphaF(min(1.0, 0.95 * g + 0.05) if led else 0.75 * g)
         inner = QColor(col)
-        inner.setAlphaF(0.75 * g)
+        inner.setAlphaF(min(1.0, 0.85 * g) if led else 0.75 * g)
         mid = QColor(col)
-        mid.setAlphaF(0.28 * g)
+        mid.setAlphaF(0.4 * g if led else 0.28 * g)
         outer = QColor(col)
         outer.setAlphaF(0.0)
-        grad.setColorAt(0.0, inner)
-        grad.setColorAt(0.45, mid)
+        grad.setColorAt(0.0, core)
+        grad.setColorAt(0.18 if led else 0.0, inner)
+        grad.setColorAt(0.5 if led else 0.45, mid)
         grad.setColorAt(1.0, outer)
         p.setPen(Qt.NoPen)
         p.setBrush(QBrush(grad))

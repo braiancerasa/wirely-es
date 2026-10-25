@@ -25,7 +25,8 @@ DIODES = {  # Is, n, Rs, max current (A)
     "1N5408": (1.4e-8, 1.9, 0.02, 3.0),
     "1N5819": (7.7e-7, 1.1, 0.05, 1.0),       # Schottky: about 0.4 V drop
 }
-LED_VF = {"Red": 1.95, "Orange": 2.0, "Yellow": 2.05, "Green": 2.15, "Blue": 3.1, "White": 3.1}
+LED_VF = {"Red": 1.95, "Orange": 2.0, "Yellow": 2.05, "Green": 2.15, "Blue": 3.1, "White": 3.1,
+          "True green": 3.1}       # the InGaN green in RGB LEDs (about the same as blue)
 LED_N, LED_RS = 2.0, 4.0
 BJTS = {  # polarity, Is, BF, BR, max Ic (A), max power (W)
     "BC548": (1, 1.8e-14, 290.0, 7.5, 0.1, 0.5),

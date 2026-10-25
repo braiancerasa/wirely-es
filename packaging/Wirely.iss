@@ -1,11 +1,11 @@
 ; Inno Setup script for the Wirely installer. build_exe.bat and the GitHub build run it automatically;
 ; or open it in Inno Setup and press Compile. Needs dist\Wirely (from PyInstaller) first.
-; The version comes from the command line (ISCC /DAppVersion=1.4.0 /DAppRevision=1.4.0); these are fallbacks.
+; The version comes from the command line (ISCC /DAppVersion=1.4.1 /DAppRevision=1.4.1); these are fallbacks.
 #ifndef AppVersion
-  #define AppVersion "1.4.0"
+  #define AppVersion "1.4.1"
 #endif
 #ifndef AppRevision
-  #define AppRevision "1.4.0"
+  #define AppRevision "1.4.1"
 #endif
 #define AppName "Wirely"
 

@@ -327,12 +327,18 @@ def _diode(c):
     _diode_body(c, c.ink)
 
 
+def led_fill(col, glow):
+    """An LED's body colour: pale when off; when lit, its full, strong colour (the glow around it shows how
+    bright it is)."""
+    fill = QColor(col)
+    fill.setAlphaF(0.22 if glow <= 0.02 else min(1.0, 0.7 + 0.5 * glow))
+    return fill
+
+
 def _led(c):
     col = QColor(LED_RGB.get(c.props.get("colour", "Red"), "#ff3b30"))
     glow = c.props.get("_glow", 0.0)            # set by the simulator from r2 on
-    fill = QColor(col)
-    fill.setAlphaF(0.35 + 0.65 * glow)
-    _diode_body(c, fill)
+    _diode_body(c, led_fill(col, glow))
     c.arrow(-1, -13, 7, -23, 4.5, 1.5)
     c.arrow(6, -10, 14, -20, 4.5, 1.5)
 
@@ -918,9 +924,7 @@ def _mini_diode(c, x0, x1, y, fill, w=8):
 
 
 def _lit(c, colour, k):
-    col = QColor(LED_MIX_RGB[colour])
-    col.setAlphaF(0.3 + 0.7 * k)
-    return col
+    return led_fill(QColor(LED_MIX_RGB[colour]), k)
 
 
 def _led_bi2(c):

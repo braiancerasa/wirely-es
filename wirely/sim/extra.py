@@ -38,11 +38,17 @@ class MultiLED(Device):
         "led_rgb": (("Red", 0, 3), ("Green", 1, 3), ("Blue", 2, 3)),
     }
 
+    # RGB LEDs use the same kind of chip for green as for blue (InGaN, about 3.1 V) — not the 2.1 V green of an
+    # ordinary green LED. So with one shared resistor, red (lowest voltage) takes nearly all the current, while
+    # green and blue share it.
+    CHIP = {"led_rgb": {"Green": "True green"}}
+
     def update_params(self):
         imax = float(self.prop("max_current") or 0.03)
         self.layout = self.LAYOUT[self.comp.kind]
         self.n_internal = len(self.layout)
-        self.leds = [Diode(_Sub(self.comp, "led", {"colour": col, "max_current": imax}),
+        chip = self.CHIP.get(self.comp.kind, {})
+        self.leds = [Diode(_Sub(self.comp, "led", {"colour": chip.get(col, col), "max_current": imax}),
                            [self.nodes[a], self.nodes[k]]) for col, a, k in self.layout]
 
     def _wire(self):

@@ -34,12 +34,25 @@ def test_rgb_led_mixes_the_colours_that_are_on():
                ("led_rgb", ("r", "g", "b", "0"), {})])
     d = s.device(c[3].id)
     look = d.live_extra()
-    assert look["_glows"][0] > 0.9 and look["_glows"][1] > 0.9 and look["_glows"][2] == 0
+    assert look["_glows"][0] > 0.9 and look["_glows"][1] > 0.8 and look["_glows"][2] == 0
     r, g, b = (int(look["_rgb"][k:k + 2], 16) for k in (1, 3, 5))
     assert r > 200 and g > 200 and b < 150                         # red + green = yellow
     # each LED takes (9 − Vf) / 470: red drops less than green
     assert d.i_pins[0] == pytest.approx((9 - 2.0) / 470, rel=0.05)
     assert d.i_pins[3] == pytest.approx(-(d.i_pins[0] + d.i_pins[1]))
+
+
+def test_rgb_led_green_and_blue_share_one_resistor():
+    """An RGB LED's green is the same kind of chip as its blue (about 3.1 V), so on one resistor they share the
+    current and mix to cyan — but red, at about 2 V, takes it all if it's wired in too."""
+    s, c = op([("dc_supply", ("v", "0"), {"voltage": 9}), ("resistor", ("k", "0"), {"resistance": 300}),
+               ("led_rgb", ("0", "v", "v", "k"), {})])
+    g = s.device(c[2].id).live_extra()["_glows"]
+    assert g[0] == 0 and g[1] > 0.5 and g[2] > 0.5
+    s, c = op([("dc_supply", ("v", "0"), {"voltage": 9}), ("resistor", ("k", "0"), {"resistance": 300}),
+               ("led_rgb", ("v", "v", "0", "k"), {})])
+    g = s.device(c[2].id).live_extra()["_glows"]
+    assert g[0] > 0.9 and g[1] < 0.05
 
 
 @pytest.mark.parametrize("forward,colour", [(True, 0), (False, 1)])
