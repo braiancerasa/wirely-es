@@ -192,19 +192,28 @@ class Device:
             sums[k] += v * h
         e[1] += h
 
+    # how much simulated time the eye averages over: about 1/15 s at real-time speed. The app sets it from the
+    # speed you choose (slow motion: a shorter stretch, so you see the flicker), not from how fast the computer
+    # actually keeps up — so a busy circuit running slower than real time still looks right.
+    eye_window = 0.066
+
     def take_light(self):
-        """How bright it looks: like an eye, averaged over the time since it was last looked at, so a part
-        switched on and off quickly (PWM, a multiplexed display) looks steadily dimmer instead of flickering."""
+        """How bright it looks: like an eye, averaged over the last moment, so a part switched on and off quickly
+        (PWM, a multiplexed display) looks steadily dimmer instead of flickering."""
         now = self.light_now() or []
         e = self.__dict__.get("_eye")
         if e is not None and e[1] > 0:
-            # the eye holds on to light for about 1/15 s: blend in the frame before too, so a PWM signal with only
-            # a cycle or two per frame doesn't shimmer
-            last = self.__dict__.get("_eye_last") or ([0.0] * len(e[0]), 0.0)
-            if len(last[0]) != len(e[0]):
-                last = ([0.0] * len(e[0]), 0.0)
-            vals = [(s + p) / (e[1] + last[1]) for s, p in zip(e[0], last[0])]
-            self._eye_last = (e[0], e[1])
+            hist = self.__dict__.setdefault("_eye_hist", [])
+            if hist and len(hist[0][0]) != len(e[0]):
+                hist.clear()
+            hist.append((e[0], e[1]))
+            total = sum(t for _s, t in hist)
+            while len(hist) > 1 and total - hist[0][1] >= self.eye_window:
+                total -= hist.pop(0)[1]
+            # the oldest frame counts only as far as it lies inside the window (all of it if it's the only one)
+            w0 = 1.0 if len(hist) == 1 else min(1.0, (self.eye_window - (total - hist[0][1])) / hist[0][1])
+            span = total - hist[0][1] * (1.0 - w0)
+            vals = [(w0 * hist[0][0][k] + sum(sums[k] for sums, _t in hist[1:])) / span for k in range(len(e[0]))]
             self._eye = [[0.0] * len(vals), 0.0, vals]
         elif e is not None and e[2] is not None:     # paused: nothing new to see
             vals = e[2]

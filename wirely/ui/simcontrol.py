@@ -45,6 +45,7 @@ class SimController(QObject):
         self.state = "stopped"
         self.sim = None
         self.speed = 1.0
+        D.Device.eye_window = 0.066
         self.behind = False
         self.live = Live()
         self._timer = QTimer(self)
@@ -103,6 +104,7 @@ class SimController(QObject):
 
     def set_speed(self, s: float):
         self.speed = s
+        D.Device.eye_window = 0.066 * s      # the eye's 1/15 s, in simulated time at this speed
 
     def set_value(self, cid, key, value):
         """A switch clicked / slider moved / value edited while running."""

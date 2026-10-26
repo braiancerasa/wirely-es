@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from test_sim import build  # noqa: E402
 
 from wirely.model.circuit import Circuit  # noqa: E402
+from wirely.sim import devices as D  # noqa: E402
 from wirely.sim.engine import Simulator  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -71,11 +72,26 @@ def test_in_slow_motion_you_see_it_flicker():
     s, led, _lamp = pwm_circuit(50)
     s.run_until(0.2)
     led.take_glow()
+    D.Device.eye_window = 0.066 / 1000          # 1/1000 speed: the eye's moment is a tiny stretch of simulated time
     frames = []
     for _ in range(12):
         s.run_until(s.t + 0.0001)
         frames.append(led.take_glow())
+    D.Device.eye_window = 0.066
     assert min(frames) < 0.2 and max(frames) > 0.9
+
+
+def test_running_slower_than_real_time_still_looks_steady():
+    """A busy circuit the computer can't keep up with gives each frame only a little simulated time; at
+    'Real time' it must still look like it would in real life (steady), not blink."""
+    s, led, _lamp = pwm_circuit(50)
+    s.run_until(0.2)
+    led.take_glow()
+    frames = []
+    for _ in range(40):
+        s.run_until(s.t + 0.0002)                  # far less than a PWM cycle per frame
+        frames.append(led.take_glow())
+    assert max(frames[-20:]) - min(frames[-20:]) < 0.08
 
 
 def test_a_blown_led_looks_dark():

@@ -1,5 +1,13 @@
 # Changes
 
+## 1.5.2 — PWM looks steady even when the simulation can't keep up, and fast switching runs faster
+- **LEDs on PWM no longer blink when a busy circuit runs slower than real time:** the eye's averaging now covers
+  the right stretch of simulated time for the speed you've chosen, not for how fast the computer keeps up. At a
+  slow-motion speed you still see them flick on and off.
+- **Faster simulation of fast switching** (555s, PWM, the buck converter): after a sudden change the simulator gets
+  back up to speed sooner, and takes bigger steps when little is changing. The *PWM dimmer* runs about 40% faster
+  and the *555 doorbell* nearly twice as fast, with the same accuracy (555 frequencies unchanged).
+
 ## 1.5.1 — PWM dims LEDs and bulbs
 - **LEDs, bulbs and displays look as bright as your eye would see them:** their light is averaged over each
   moment on screen, so PWM (switching fully on and off faster than you can see) makes them look steadily dimmer,

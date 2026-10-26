@@ -294,7 +294,9 @@ class Simulator:
         self._jump = False
         # choose the next step
         if self.reactive or self.ac_freq:
-            if dv < 0.25 * dv_max or was_jump:
+            if dv < 0.05 * dv_max and not was_jump:
+                self.h = min(h * 4.0, self.h_max)      # almost nothing changing (e.g. just after a switch): catch up
+            elif dv < 0.5 * dv_max or was_jump:
                 self.h = min(h * 1.8, self.h_max)
             elif dv > dv_max:
                 self.h = max(h * 0.5, 1e-9)

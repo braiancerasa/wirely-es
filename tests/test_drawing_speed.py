@@ -34,6 +34,7 @@ def lamp_circuit():
 
 def ticks(w, n):
     for _ in range(n):
+        time.sleep(0.02)                    # roughly a real frame's worth of time
         w.simc._tick()
         app.processEvents()
 
