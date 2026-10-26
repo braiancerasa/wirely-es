@@ -5,6 +5,8 @@
   potentiometers, thermistors and LDRs), an S-shaped fuse, a curved − plate on electrolytic capacitors and a
   filament in bulbs. Only the look changes; it's remembered next time.
 - The resistor's description no longer mentions a "realistic view" that doesn't exist.
+- **The website switches to a new version straight away** (or asks if there's unsaved work) instead of only on the
+  next visit.
 - **LEDs on PWM no longer blink when a busy circuit runs slower than real time:** the eye's averaging now covers
   the right stretch of simulated time for the speed you've chosen, not for how fast the computer keeps up. At a
   slow-motion speed you still see them flick on and off.

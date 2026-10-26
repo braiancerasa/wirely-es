@@ -98,23 +98,21 @@ def test_theme_and_voltage_colours_redraw_everything_even_when_paused(win):
 
 
 def test_export_while_running_in_dark_theme_is_in_paper_colours(win):
-    c, sw, _led = lamp_circuit()
+    """Exporting must draw everything afresh in paper colours, never reuse the dark pictures kept for the screen:
+    the picture is the same as one exported in the light theme with the simulation stopped."""
+    c, _sw, _led = lamp_circuit()
+    win._set_circuit(c, None)
+    paper = EX.render_image(win.scene, 1.0)
     start(win, c)
     win.set_theme("dark")
+    app.processEvents()
     img = EX.render_image(win.scene, 1.0)
-    # the paper is white and nothing is drawn in the dark theme's light ink
-    light_ink = 0
-    for x in range(0, img.width(), 3):
-        for y in range(0, img.height(), 3):
-            col = img.pixelColor(x, y)
-            if col.red() > 200 and col.green() > 200 and col.blue() > 200:
-                continue
-            if (col.red() + col.green() + col.blue()) / 3 > 170:
-                light_ink += 1
-    assert img.pixelColor(1, 1).red() > 250
-    assert light_ink < 30
-    assert all(it.cacheMode() == it.CacheMode.DeviceCoordinateCache for it in win.scene.comp_items.values())
     win.set_theme("light")
+    assert img.size() == paper.size()
+    differ = sum(1 for x in range(0, img.width(), 2) for y in range(0, img.height(), 2)
+                 if img.pixelColor(x, y) != paper.pixelColor(x, y))
+    assert differ == 0
+    assert all(it.cacheMode() == it.CacheMode.DeviceCoordinateCache for it in win.scene.comp_items.values())
 
 
 def test_flow_reuses_its_answer_only_when_the_currents_are_the_same():

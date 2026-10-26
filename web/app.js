@@ -1618,6 +1618,16 @@ if ("launchQueue" in window) {
 if ("serviceWorker" in navigator && !params.has("nosw") &&
     (location.protocol === "https:" || location.hostname === "localhost")) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch((e) => console.warn(e)));
+  // a new version has just been fetched in the background and taken over: switch to it straight away if nothing
+  // would be lost, otherwise offer it (before, it only showed up on the next visit)
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController || reloading) return;          // the very first visit: nothing older to replace
+    const safe = !ready || ((!ui.dirty || ui.empty) && ui.sim === "stopped");
+    if (safe) { reloading = true; location.reload(); return; }
+    toast("A new version of Wirely is ready.", "info", [["Reload", () => { reloading = true; location.reload(); }]], 0);
+  });
 }
 
 requestAnimationFrame(loop);

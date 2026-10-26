@@ -17,6 +17,7 @@
 - It works for **RGB LEDs** too: PWM one colour to change the mix. Multiplexed 7-segment displays look steady as well.
 - **New example: *PWM dimmer (555)*.** Turn the knob while it runs to dim an LED and a bulb.
 - **The website shows its version number** next to the logo.
+- **The website updates itself:** when a new version comes out, it switches over straight away (or asks first if you have unsaved work), instead of showing the old one until your next visit.
 
 ## Fixed
 
