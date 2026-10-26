@@ -690,6 +690,7 @@ const ACTIONS = {
   fit: () => zoomFit(),
   escape: () => app.escape(),
   dark: () => setTheme(ui.dark ? "light" : "dark"),
+  us_symbols: () => setSymbols(ui.us ? "uk" : "us"),
   props: () => { const cid = app.action("props"); if (cid) editPart(cid); },
   copy: () => { const t = app.action("copy"); if (t) clipboardWrite(t); },
   copy_readings: () => {
@@ -843,6 +844,7 @@ const MENUS = {
   view: () => [
     ["Zoom in", "zoom_in", "+"], ["Zoom out", "zoom_out", "−"], ["Zoom to fit", "zoom_fit", "Ctrl+0"], null,
     [check(ui.grid) + "Show grid", "grid", "G"], [check(ui.dark) + "Dark theme", "dark", ""],
+    [check(ui.us) + "US symbols", "us_symbols", ""],
   ],
   help: () => [
     ["Mouse and keyboard…", "help", "F1"],
@@ -1570,6 +1572,12 @@ function setTheme(mode) {
   requestDraw();
   drawGraphSoon();
 }
+function setSymbols(style) {
+  ui.us = app.set_symbols(style) === "us";
+  try { localStorage.setItem("wirely-symbols", ui.us ? "us" : "uk"); } catch (e) { /* storage off */ }
+  setupGallery();
+  requestDraw();
+}
 function rebuildToolIcons() {
   const icons = J(app.toolbar_icons(JSON.stringify(TOOL_ICONS)));
   for (const name in toolButtons) {
@@ -1584,6 +1592,7 @@ async function setupUI() {
   try { mode = localStorage.getItem("wirely-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"); } catch (e) { /* storage off */ }
   applyColours(J(app.set_theme(mode)));
   document.documentElement.dataset.theme = mode;
+  try { ui.us = app.set_symbols(localStorage.getItem("wirely-symbols") || "uk") === "us"; } catch (e) { /* storage off */ }
   setupToolbar();
   setupGallery();
   setupGraph();

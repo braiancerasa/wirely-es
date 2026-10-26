@@ -13,6 +13,7 @@ from .. import APP_NAME, REVISION, __version__
 from ..model.circuit import FILE_EXT, Circuit
 from . import export as EX
 from . import icons, theme
+from . import symbols as S
 from .dialogs import BomDialog, PropertiesDialog, ShortcutsDialog
 from .gallery import Gallery
 from .graph import GraphPanel
@@ -49,6 +50,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.settings = QSettings("Wirely", "Wirely")
         theme.apply(self.settings.value("theme", "light"))
+        S.set_style(self.settings.value("symbols", "uk"))
         QApplication.instance().setStyleSheet(theme.stylesheet())
         self.setWindowIcon(icons.app_icon())
         self.path = None
@@ -189,6 +191,9 @@ class MainWindow(QMainWindow):
         self.a_dark = A("Dark theme", self.toggle_theme, None, "theme", "Switch between light and dark",
                         checkable=True)
         self.a_dark.setChecked(theme.MODE == "dark")
+        self.a_us = A("US symbols", self.toggle_symbols, None, None,
+                      "Draw parts the American way (zigzag resistors) instead of the British way", checkable=True)
+        self.a_us.setChecked(S.STYLE == "us")
         self.a_help = A("Mouse and keyboard…", lambda: ShortcutsDialog(self).exec(), "F1")
         self.a_about = A(f"About {APP_NAME}", self.about)
         self.a_play = A("Run", self.sim_run, "F5", "play", "Run the circuit — watch it work")
@@ -254,7 +259,7 @@ class MainWindow(QMainWindow):
                       None, self.a_props]),
             ("Simulate", [self.a_play, self.a_pause, self.a_stop, None, self.a_volts, self.a_flow, self.a_readings, self.a_copy_readings,
                           self.a_graph, self.a_sound]),
-            ("View", [self.a_zoom_in, self.a_zoom_out, self.a_fit, None, self.a_grid, self.a_dark]),
+            ("View", [self.a_zoom_in, self.a_zoom_out, self.a_fit, None, self.a_grid, self.a_dark, self.a_us]),
             ("Help", [self.a_help, self.a_about]),
         ):
             m = QMenu(self)
@@ -808,6 +813,13 @@ class MainWindow(QMainWindow):
         self.settings.setValue("grid", "true" if self.scene.show_grid else "false")
         self.view.resetCachedContent()
         self.scene.update()
+
+    def toggle_symbols(self):
+        S.set_style("uk" if S.STYLE == "us" else "us")
+        self.settings.setValue("symbols", S.STYLE)
+        self.a_us.setChecked(S.STYLE == "us")
+        self.gallery.refresh()
+        self.scene.repaint_all()
 
     def toggle_theme(self):
         self.set_theme("light" if theme.MODE == "dark" else "dark")

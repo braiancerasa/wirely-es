@@ -104,7 +104,7 @@ _PARTS = [
     PartDef("resistor", "Resistor", "Resistors", "R", TWO,
             (_p("resistance", "Resistance", 1000.0, "Ω", on_label=True, min=1e-3),
              _p("power", "Power rating", 0.25, "W", min=0.0)),
-            (-30, -10, 60, 20), "A fixed resistor. Colour bands come in the realistic view.", "ohm"),
+            (-30, -10, 60, 20), "A fixed resistor.", "ohm"),
     PartDef("var_resistor", "Variable resistor", "Resistors", "VR", TWO,
             (_p("resistance", "Maximum resistance", 10000.0, "Ω", on_label=True, min=1e-3),
              _p("setting", "Setting", 50.0, "%", min=0, max=100)),

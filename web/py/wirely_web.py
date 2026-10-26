@@ -487,7 +487,7 @@ class App:
             "sel": bool(comps or wires), "comps": len(comps), "running": running,
             "undo": self.hi > 0 and not running, "redo": self.hi < len(self.history) - 1 and not running,
             "paste": bool(self.clip) and not running, "volts": sc.show_volts, "flow": sc.show_flow, "readings": sc.show_readings,
-            "sound": self.sound_on, "graph": self.graph_on, "grid": sc.show_grid, "dark": theme.MODE == "dark",
+            "sound": self.sound_on, "graph": self.graph_on, "grid": sc.show_grid, "dark": theme.MODE == "dark", "us": S.STYLE == "us",
             "dirty": self.is_dirty(), "name": self.name, "empty": self.circuit.is_empty(),
             "counts": f"{n} part{'s' * (n != 1)} · {w} wire{'s' * (w != 1)}",
             "status": self.status or (EMPTY_HINT if not running else ""),
@@ -903,6 +903,14 @@ class App:
         p = QPainter()
         icons.draw_mark(p, 1.0)
         return json.dumps(p.ops)
+
+    def set_symbols(self, style):
+        """'us' for American symbols (zigzag resistors …), 'uk' for British ones."""
+        S.set_style(style)
+        self.ids.clear()                 # every drawing is made again in the new style
+        self.new_defs.clear()
+        self.reset_defs = True
+        return S.STYLE
 
     def set_theme(self, mode):
         theme.apply(mode)

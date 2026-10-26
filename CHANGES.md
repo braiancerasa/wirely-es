@@ -1,6 +1,10 @@
 # Changes
 
-## 1.5.2 — PWM looks steady even when the simulation can't keep up, and fast switching runs faster
+## 1.5.2 — US symbols, PWM looks steady even when the simulation can't keep up, and fast switching runs faster
+- **US symbols:** View → US symbols draws parts the American way: zigzag resistors (and variable resistors,
+  potentiometers, thermistors and LDRs), an S-shaped fuse, a curved − plate on electrolytic capacitors and a
+  filament in bulbs. Only the look changes; it's remembered next time.
+- The resistor's description no longer mentions a "realistic view" that doesn't exist.
 - **LEDs on PWM no longer blink when a busy circuit runs slower than real time:** the eye's averaging now covers
   the right stretch of simulated time for the speed you've chosen, not for how fast the computer keeps up. At a
   slow-motion speed you still see them flick on and off.

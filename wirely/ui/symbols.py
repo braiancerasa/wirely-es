@@ -22,6 +22,25 @@ LED_RGB = {
 }
 
 
+# Symbol style: "uk" (British / IEC: box resistors) or "us" (American / ANSI: zigzag resistors). Only the look
+# changes — same pins, same sizes, same circuits.
+STYLE = "uk"
+
+
+def set_style(style):
+    global STYLE
+    STYLE = "us" if style == "us" else "uk"
+
+
+def _zigzag(c, x0, x1, amp=6.0, peaks=6, w=LW):
+    """A zigzag from (x0, 0) to (x1, 0): the American resistor."""
+    step = (x1 - x0) / peaks
+    pts = [(x0, 0.0)]
+    pts += [(x0 + step * (k + 0.5), -amp if k % 2 == 0 else amp) for k in range(peaks)]
+    pts.append((x1, 0.0))
+    c.poly(pts, None, w, closed=False)
+
+
 class Ctx:
     """What a drawing needs: the painter, ink colour, the part's values and its rotation (for text)."""
 
@@ -220,7 +239,10 @@ def _ground(c):
 # ------------------------------------------------------------------------------------------ resistors
 def _resistor(c):
     _leads(c)
-    c.rect(-20, -7, 40, 14, c.paper)
+    if STYLE == "us":
+        _zigzag(c, -20, 20)
+    else:
+        c.rect(-20, -7, 40, 14, c.paper)
 
 
 def _var_resistor(c):
@@ -234,6 +256,17 @@ def _potentiometer(c):
 
 
 def _fuse(c):
+    if STYLE == "us":                   # an S-shaped wire
+        c.line(-30, 0, -14, 0)
+        c.line(14, 0, 30, 0)
+        path = QPainterPath()
+        path.moveTo(-14, 0)
+        path.cubicTo(-7, -14, 0, -7, 0, 0)
+        path.cubicTo(0, 7, 7, 14, 14, 0)
+        c.p.setPen(c.pen())
+        c.p.setBrush(Qt.NoBrush)
+        c.p.drawPath(path)
+        return
     c.rect(-18, -5, 36, 10, c.paper)
     c.line(-30, 0, 30, 0)
 
@@ -247,6 +280,18 @@ def _capacitor(c):
 
 
 def _electrolytic(c):
+    if STYLE == "us":                   # straight + plate, curved − plate
+        c.line(-20, 0, -4, 0)
+        c.line(5, 0, 20, 0)
+        c.line(-4, -12, -4, 12, 2.6)
+        path = QPainterPath()
+        path.moveTo(8, -12)
+        path.quadTo(2, 0, 8, 12)
+        c.p.setPen(c.pen(2.6))
+        c.p.setBrush(Qt.NoBrush)
+        c.p.drawPath(path)
+        _plus(c, -12, -11, 3)
+        return
     c.line(-20, 0, -8, 0)
     c.line(8, 0, 20, 0)
     c.rect(-8, -12, 4, 24, c.paper, 1.6)
@@ -307,7 +352,10 @@ def _ldr(c):
     c.line(-30, 0, -12, 0)
     c.line(12, 0, 30, 0)
     c.circle(0, 0, 17, None, 1.6)
-    c.rect(-12, -5, 24, 10, c.paper)
+    if STYLE == "us":
+        _zigzag(c, -12, 12, 5, 4)
+    else:
+        c.rect(-12, -5, 24, 10, c.paper)
     c.arrow(-21, -24, -9, -12, 5, 1.5)
     c.arrow(-9, -27, 3, -15, 5, 1.5)
 
@@ -385,6 +433,18 @@ def _lamp(c):
     fill = QColor(255, 214, 10)
     fill.setAlphaF(0.85 * glow)
     c.circle(0, 0, 13, fill if glow > 0 else c.paper)
+    if STYLE == "us":                   # a looped filament between the two leads
+        c.line(-13, 0, -6, 0, 1.8)
+        c.line(6, 0, 13, 0, 1.8)
+        path = QPainterPath()
+        path.moveTo(-6, 0)
+        path.cubicTo(-6, -10, 2, -10, 2, -5)
+        path.cubicTo(2, -1, -2, -1, -2, -5)
+        path.cubicTo(-2, -10, 6, -10, 6, 0)
+        c.p.setPen(c.pen(1.8))
+        c.p.setBrush(Qt.NoBrush)
+        c.p.drawPath(path)
+        return
     d = 13 / math.sqrt(2)
     c.line(-d, -d, d, d, 1.8)
     c.line(-d, d, d, -d, 1.8)
