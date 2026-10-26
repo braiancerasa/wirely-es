@@ -141,7 +141,7 @@ class SimController(QObject):
             if extra is not None:            # parts that report their own look (RGB LEDs, solenoids …)
                 info.update(extra())
             if k in ("led", "lamp"):
-                info["_glow"] = d.glow()
+                info["_glow"] = d.take_glow()
             elif k == "motor":
                 a = self._angle.get(d.cid, 0.0) + 360.0 * 1.5 * d.speed * wall_dt * min(self.speed, 1.0) ** 0.3
                 self._angle[d.cid] = a % 360.0
@@ -151,14 +151,14 @@ class SimController(QObject):
             elif k in ("relay", "relay_dpdt"):
                 info["_on"] = d.on
             elif k == "optocoupler":
-                info["_ir"] = d.glow()
+                info["_ir"] = d.take_glow()
             elif k == "ssr":
-                info["_ir"] = d.glow()
+                info["_ir"] = d.take_glow()
                 info["_on"] = d.drive > 0.5
             elif k == "buzzer":
                 info["level"] = d.level()
             elif k == "sevenseg":
-                info["_segs"] = d.lit()
+                info["_segs"] = d.take_lit()
             elif k == "logic_probe":
                 vv, vl = getattr(d, "vd", 0.0), sim.vlogic
                 info["_level"] = "H" if vv > 0.7 * vl else "L" if vv < 0.3 * vl else "?"

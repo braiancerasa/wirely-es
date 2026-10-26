@@ -4,7 +4,7 @@ from __future__ import annotations
 import bisect
 
 from PySide6.QtCore import QPointF, QRectF, Qt, Signal
-from PySide6.QtGui import QColor, QFont, QPainter, QPainterPath, QPen
+from PySide6.QtGui import QColor, QFont, QPainter, QPen, QPolygonF
 from PySide6.QtWidgets import (QComboBox, QFileDialog, QHBoxLayout, QLabel, QPushButton, QToolButton, QVBoxLayout,
                                QWidget)
 
@@ -236,29 +236,32 @@ class GraphPanel(QWidget):
             pen = QPen(QColor(CHANNEL_RGB.get(ch, "#e0a800")), 2.0)
             pen.setJoinStyle(Qt.RoundJoin)
             p.setPen(pen)
-            path = QPainterPath()
-            if len(ts) > 3 * cols:
-                # many points: draw each pixel column as its min/max
+            pts = []
+            if len(ts) > cols:
+                # more points than pixels across: draw each pixel column as its min/max (looks the same)
                 bucket = {}
                 for t, val in zip(ts, vs):
                     c = int((t - t0) / (t1 - t0) * cols)
                     lo_hi = bucket.get(c)
                     bucket[c] = (min(lo_hi[0], val), max(lo_hi[1], val), val) if lo_hi else (val, val, val)
-                first = True
                 for c in sorted(bucket):
                     lo, hi, last = bucket[c]
                     x = area.left() + c
-                    if first:
-                        path.moveTo(x, Y(lo))
-                        first = False
-                    path.lineTo(x, Y(lo))
-                    path.lineTo(x, Y(hi))
-                    path.lineTo(x, Y(last))
+                    pts += [(x, Y(lo)), (x, Y(hi)), (x, Y(last))]
             else:
-                path.moveTo(X(ts[0]), Y(vs[0]))
-                for t, val in zip(ts[1:], vs[1:]):
-                    path.lineTo(X(t), Y(val))
-            p.drawPath(path)
+                sx = area.width() / (t1 - t0)
+                sy = -area.height() / (v1 - v0)
+                ax, ay = area.left() - t0 * sx, area.bottom() - v0 * sy
+                pts = [(ax + t * sx, ay + val * sy) for t, val in zip(ts, vs)]
+            # leave out points in the middle of a level stretch (a square wave is mostly flat): same picture,
+            # far less to draw
+            line = []
+            for x, y in pts:
+                if len(line) >= 2 and abs(line[-1][1] - y) < 0.25 and abs(line[-2][1] - y) < 0.25:
+                    line[-1] = (x, y)
+                else:
+                    line.append((x, y))
+            p.drawPolyline(QPolygonF([QPointF(x, y) for x, y in line]))
         p.restore()
         if mouse is not None and area.contains(mouse):
             t = t0 + (mouse.x() - area.left()) / area.width() * (t1 - t0)

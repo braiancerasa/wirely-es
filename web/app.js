@@ -263,6 +263,7 @@ if ${haveNumpy ? "False" : "True"}:
 `);
     setProgress(0.9, "Getting the parts ready…");
     app = py.runPython("import wirely_web\nwirely_web.App()");
+    $("ver").textContent = "v" + app.version();
     await setupUI();
     ready = true;
     $("app").classList.remove("loading");
@@ -348,7 +349,25 @@ function circuitInView() {
   return b[0] >= x0 && b[1] >= y0 && b[0] + b[2] <= x1 && b[1] + b[3] <= y1;
 }
 
+let gridCache = null, gridKey = "";
 function drawGrid(ctx) {
+  // the dots only change when you pan, zoom, resize or change theme: keep a ready-drawn copy
+  const key = [view.cx, view.cy, view.zoom, view.w, view.h, view.dpr, sheet.width, sheet.height,
+               colours.GRID_DOT, colours.GRID_DOT_MAJOR].join(",");
+  if (key !== gridKey || !gridCache) {
+    if (!gridCache) gridCache = document.createElement("canvas");
+    gridCache.width = sheet.width;
+    gridCache.height = sheet.height;
+    const g = gridCache.getContext("2d");
+    g.clearRect(0, 0, gridCache.width, gridCache.height);
+    paintGrid(g);
+    gridKey = key;
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.drawImage(gridCache, 0, 0);
+}
+
+function paintGrid(ctx) {
   // the same dots as the desktop sheet (CircuitScene.drawBackground)
   const s = view.zoom;
   const step = s >= 0.9 ? GRID : s >= 0.45 ? GRID * 2 : GRID * 5;
@@ -443,9 +462,8 @@ function loop(t) {
   if (ready) {
     if (ui.sim === "running" && t - lastTick >= 30) {
       lastTick = t;
-      app.tick();
+      if (app.tick()) dirty = true;     // false when nothing on the sheet looks any different
       afterTick();
-      dirty = true;
     }
     if (dirty) {
       dirty = false;

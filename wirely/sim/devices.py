@@ -174,6 +174,46 @@ class Device:
         """Text shown on meters during the simulation, or None."""
         return None
 
+    # ---- light that people see (LEDs, bulbs, displays)
+    GAMMA = 0.6          # how bright light looks: the eye isn't linear, half the light looks more than half as bright
+
+    def light_now(self):
+        """Light given out right now, 0..1 for each lit thing in the part (a list), or None if it gives none."""
+        return None
+
+    def see(self, h):
+        """Add one time step of light to what the eye has collected since the screen was last drawn."""
+        now = self.light_now()
+        e = self.__dict__.get("_eye")
+        if e is None or len(e[0]) != len(now):
+            e = self._eye = [[0.0] * len(now), 0.0, None]
+        sums = e[0]
+        for k, v in enumerate(now):
+            sums[k] += v * h
+        e[1] += h
+
+    def take_light(self):
+        """How bright it looks: like an eye, averaged over the time since it was last looked at, so a part
+        switched on and off quickly (PWM, a multiplexed display) looks steadily dimmer instead of flickering."""
+        now = self.light_now() or []
+        e = self.__dict__.get("_eye")
+        if e is not None and e[1] > 0:
+            # the eye holds on to light for about 1/15 s: blend in the frame before too, so a PWM signal with only
+            # a cycle or two per frame doesn't shimmer
+            last = self.__dict__.get("_eye_last") or ([0.0] * len(e[0]), 0.0)
+            if len(last[0]) != len(e[0]):
+                last = ([0.0] * len(e[0]), 0.0)
+            vals = [(s + p) / (e[1] + last[1]) for s, p in zip(e[0], last[0])]
+            self._eye_last = (e[0], e[1])
+            self._eye = [[0.0] * len(vals), 0.0, vals]
+        elif e is not None and e[2] is not None:     # paused: nothing new to see
+            vals = e[2]
+        else:
+            vals = now
+        if self.blown:
+            return [0.0] * len(vals)
+        return [float(max(0.0, min(1.0, v))) ** self.GAMMA for v in vals]
+
     def _overload(self, bad: bool, h: float, limit_s: float, instant: bool = False) -> bool:
         """True when a part has been overloaded long enough to fail."""
         if instant:
@@ -550,11 +590,21 @@ class Diode(Device):
             self.event = (f"{self.comp.ref} popped! {abs(i) * 1000:.0f} mA is too much for this {what} "
                           f"(max {self.imax * 1000:.0f} mA).{hint}")
 
+    def light_now(self):
+        if self.comp is None or self.comp.kind != "led":
+            return None
+        if self.blown:
+            return [0.0]
+        # LEDs give no visible light below about 0.1 mA, and look fully lit from about 15 mA
+        return [max(0.0, min(1.0, (getattr(self, "current", 0.0) - 1e-4) / 0.015))]
+
     def glow(self):
         if self.blown or self.comp.kind != "led":
             return 0.0
-        # LEDs give no visible light below about 0.1 mA, and look fully lit from about 15 mA
-        return max(0.0, min(1.0, (self.current - 1e-4) / 0.015)) ** 0.6
+        return self.light_now()[0] ** self.GAMMA
+
+    def take_glow(self):
+        return self.take_light()[0] if self.comp.kind == "led" else 0.0
 
 
 class BJT(Device):
@@ -750,8 +800,17 @@ class Lamp(Device):
         lamp on half power looks much dimmer than half, and goes dark quickly as it cools."""
         if self.blown:
             return 0.0
-        f = (self.theta ** 10 - 0.003) / 0.997
-        return max(0.0, min(1.0, f)) ** 0.5
+        return self.light_now()[0] ** self.GAMMA
+
+    GAMMA = 0.5
+
+    def light_now(self):
+        if self.blown:
+            return [0.0]
+        return [max(0.0, min(1.0, (self.theta ** 10 - 0.003) / 0.997))]
+
+    def take_glow(self):
+        return self.take_light()[0]
 
 
 class Buzzer(Resistive):

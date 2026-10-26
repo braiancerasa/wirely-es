@@ -24,6 +24,8 @@ button, select, input, textarea { font: inherit; color: inherit; }
 #logo { display: flex; align-items: center; gap: 7px; font-weight: 600; font-size: 19px; color: var(--LOGO_TEXT);
   margin-right: 8px; letter-spacing: .2px; user-select: none; }
 #logo canvas { width: 26px; height: 26px; }
+#ver { font-size: 11px; font-weight: 500; color: var(--TEXT_MUTED); margin-left: -3px;
+  align-self: flex-end; margin-bottom: 3px; letter-spacing: 0; }
 .menuBtn { border: 1px solid transparent; background: transparent; border-radius: 5px; padding: 4px 9px;
   font-weight: 600; cursor: pointer; }
 .menuBtn:hover, .menuBtn.open { background: var(--ACCENT_LIGHT); border-color: var(--ACCENT_BORDER); }

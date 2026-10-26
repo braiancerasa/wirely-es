@@ -886,7 +886,69 @@ def rotary_demo():
     return c
 
 
+def pwm_dimmer():
+    """A 555 makes a fast on/off signal; the knob changes how long it's on each time (the duty cycle). The LED
+    and bulb flick on and off over a hundred times a second, too fast to see, so they just look dimmer."""
+    c = Circuit()
+    c.title = "PWM dimmer (555)"
+    b = c.add("battery", 0, 210, rot=1, props={"voltage": 9})                     # + (0,180) - (0,240)
+    ic = c.add("timer555", 300, 200)                                             # DIS (240,180) THR (240,200) TRIG (240,220)
+    r1 = c.add("resistor", 180, 90, rot=1, props={"resistance": 1000})           # (180,60) (180,120)
+    vr = c.add("potentiometer", 100, 210, props={"resistance": 100e3, "setting": 25})  # 1 (70,210) 2 (130,210) W (100,180)
+    d1 = c.add("diode", 70, 260, rot=1, props={"model": "1N4148"})               # A (70,230) K (70,290)
+    d2 = c.add("diode", 130, 260, rot=3, props={"model": "1N4148"})              # A (130,290) K (130,230)
+    ct = c.add("capacitor", 200, 310, rot=1, props={"capacitance": 100e-9})     # (200,290) (200,330)
+    cc = c.add("capacitor", 320, 300, rot=1, props={"capacitance": 10e-9})      # (320,280) (320,320)
+    r3 = c.add("resistor", 400, 250, rot=1, props={"resistance": 470})           # (400,220) (400,280)
+    led = c.add("led", 400, 330, rot=1, props={"colour": "Red"})                 # A (400,300) K (400,360)
+    q = c.add("nmos", 500, 200, props={"model": "2N7000"})                       # G (470,200) D (510,170) S (510,230)
+    lamp = c.add("lamp", 510, 110, rot=1, props={"voltage": 9, "power": 0.5})   # (510,80) (510,140)
+    P = lambda part, n: pin(c, part, n)
+    assert P(ic, "DIS") == (240, 180) and P(vr, "wiper") == (100, 180) and P(d2, "A") == (130, 290)
+    assert P(q, "D") == (510, 170) and P(led, "K") == (400, 360) and P(d1, "K") == (70, 290)
+    # +9 V along the top, 0 V along the bottom
+    wire(c, P(b, "+"), (0, 40), (180, 40))
+    wire(c, (180, 40), (280, 40))
+    wire(c, (280, 40), (320, 40))
+    wire(c, (320, 40), (510, 40), P(lamp, "1"))
+    wire(c, P(b, "-"), (0, 380), (200, 380))
+    wire(c, (200, 380), (280, 380))
+    wire(c, (280, 380), (320, 380))
+    wire(c, (320, 380), (400, 380))
+    wire(c, (400, 380), (510, 380))
+    c.add("ground", 0, 380)
+    wire(c, P(ic, "VCC"), (320, 40))
+    wire(c, P(ic, "RESET"), (280, 40))
+    wire(c, P(r1, "1"), (180, 40))
+    wire(c, P(r1, "2"), (180, 180))
+    wire(c, P(ic, "DIS"), (180, 180))
+    wire(c, P(vr, "wiper"), (180, 180))
+    # charging goes through one side of the knob and D1, discharging through the other side and D2
+    wire(c, P(vr, "1"), P(d1, "A"))
+    wire(c, P(vr, "2"), P(d2, "K"))
+    wire(c, P(d1, "K"), P(d2, "A"))
+    wire(c, P(d2, "A"), P(ct, "1"))
+    wire(c, P(ct, "1"), (240, 290), P(ic, "TRIG"))
+    wire(c, P(ic, "TRIG"), P(ic, "THR"))
+    wire(c, P(ct, "2"), (200, 380))
+    wire(c, P(ic, "GND"), (280, 380))
+    wire(c, P(ic, "CTRL"), P(cc, "1"))
+    wire(c, P(cc, "2"), (320, 380))
+    # the output drives the LED and, through the MOSFET, the bulb
+    wire(c, P(ic, "OUT"), (400, 200), P(r3, "1"))
+    wire(c, (400, 200), P(q, "G"))
+    wire(c, P(r3, "2"), P(led, "A"))
+    wire(c, P(led, "K"), (400, 380))
+    wire(c, P(q, "S"), (510, 380))
+    wire(c, P(q, "D"), P(lamp, "2"))
+    c.add("note", 260, 450, props={"text": "Turn the knob (VR1) while it runs: the LED and bulb get brighter or dimmer.\n"
+                                            "The 555 switches them fully on and off about 140 times a second — too fast\n"
+                                            "to see, so they just look dimmer. Slow the simulation right down to watch it."})
+    return c
+
+
 NEW_15 = (stepper_motor, keypad_demo, jk_counter, schmitt_flasher, rotary_demo)
+NEW_151 = (pwm_dimmer,)
 
 def main(only=None):
     os.makedirs(OUT, exist_ok=True)
@@ -894,7 +956,7 @@ def main(only=None):
                buzzer_and_motor, flasher_555, led_chaser, opamp_light_sensor, logic_gates, mosfet_motor,
                rc_filter_graph, binary_display, relay_lamp, motor_load, doorbell_555, burglar_alarm,
                rain_alarm, buck_converter, optoisolator, tl431_reference,
-               shift_register_595) + NEW_14 + NEW_15:
+               shift_register_595) + NEW_14 + NEW_15 + NEW_151:
         if only and fn not in only:
             continue
         c = fn()

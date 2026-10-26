@@ -32,10 +32,17 @@ def paper_mode(scene):
     draft_visible = scene.draft.isVisible()
     scene.draft.hide()
     scene.exporting = True
+    # draw everything afresh in paper colours, not from the pictures kept for the screen
+    cached = [it for it in scene.items() if it.cacheMode() != it.CacheMode.NoCache]
+    for it in cached:
+        it.setCacheMode(it.CacheMode.NoCache)
     try:
         yield
     finally:
         scene.exporting = False
+        for it in cached:
+            it.setCacheMode(it.CacheMode.DeviceCoordinateCache)
+            it.update()
         for k, v in saved.items():
             setattr(theme, k, v)
         for it in selected:

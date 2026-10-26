@@ -884,6 +884,11 @@ class QGraphicsItem:
     def setToolTip(self, *a):
         pass
 
+    NoCache, ItemCoordinateCache, DeviceCoordinateCache = 0, 1, 2
+
+    def setCacheMode(self, *a):          # the page keeps its own ready-drawn pictures (App._def)
+        pass
+
     def setZValue(self, z):
         self._z = float(z)
 

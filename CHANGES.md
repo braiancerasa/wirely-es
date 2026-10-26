@@ -1,5 +1,17 @@
 # Changes
 
+## 1.5.1 — PWM dims LEDs and bulbs
+- **LEDs, bulbs and displays look as bright as your eye would see them:** their light is averaged over each
+  moment on screen, so PWM (switching fully on and off faster than you can see) makes them look steadily dimmer,
+  as in real life, instead of flickering at random. Slow the simulation down and you can watch them flick on and off.
+  This works for RGB LEDs (PWM one colour to change the mix) and multiplexed 7-segment displays too.
+- New example: *PWM dimmer (555)* — turn the knob to dim an LED and a bulb.
+- The website shows its version number next to the logo.
+- **Much less CPU while running:** the dotted grid is kept ready-drawn instead of being drawn dot by dot every
+  frame, parts and wires are only redrawn when they change, a frame where nothing looks any different isn't drawn
+  at all, and the current-flow dots and graph do less work. E.g. the Night light went from about 60% of a CPU core
+  to under 10% on the desktop. It looks exactly the same. The browser version gains too.
+
 ## 1.5.0 — new parts, a unit box for values, movable readings and many fixes
 - **A unit box next to values:** in a part's properties, resistance has Ω / kΩ / MΩ beside the number, capacitance
   pF / nF / µF / mF / F, inductance µH / mH / H and frequency Hz / kHz / MHz. Typing the whole value (4k7, 100n)

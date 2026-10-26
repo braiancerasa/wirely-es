@@ -16,7 +16,7 @@ from ..model import parts as P
 from ..model.circuit import Circuit, Component, Wire, drag_end, move_segment, route, snap, tidy
 from ..model.circuit import on_segment as _on_seg
 from . import theme
-from .items import ComponentItem, DraftWire, WireItem
+from .items import ComponentItem, DraftWire, WireItem, live_look_key
 
 MIME_PART = "application/x-wirely-part"
 MIME_CLIP = "application/x-wirely-clip"
@@ -191,12 +191,76 @@ class CircuitScene(QGraphicsScene):
                 for pt in self._junctions:
                     if pt in net.points:
                         self._junction_net[pt] = net.name
-        self.update()
+        self.repaint_all()
 
     def _on_frame(self):
         self.anim_t = self.sim.live.t if self.sim else 0.0
         self.update_hover()
+        changed = self.refresh_look()
+        fg = self._foreground_key()
+        # nothing on screen looks any different: don't draw the same picture again (saves a lot of CPU)
+        self.frame_changed = bool(changed or fg != self._last_fg)
+        if self.frame_changed:
+            self._last_fg = fg
+            self.update()
+
+    _last_fg = None
+    frame_changed = True
+
+    def repaint_all(self):
+        """Draw every part and wire afresh (the theme, voltage colours or simulation state changed)."""
+        for it in list(self.comp_items.values()) + list(self.wire_items.values()):
+            it.look = ("stale",)
+            it.update()
+        self._last_fg = None
+        self.refresh_look()
         self.update()
+
+    def refresh_look(self) -> bool:
+        """Parts and wires keep a ready-drawn picture; redraw only those whose live look has changed (a glow,
+        a reading, a wire's voltage colour …). Returns True if any did."""
+        active = self.sim_active()
+        changed = False
+        for it in self.comp_items.values():
+            k = live_look_key(self.live_part(it.comp.id), it.comp.kind, self.anim_t) if active else None
+            if k != it.look:
+                it.look = k
+                it.update()
+                changed = True
+        colours = active and self.show_volts
+        wire_v, vmax = (self.sim.live.wire_v, self.sim.live.vmax) if colours else ({}, 1.0)
+        for wid, it in self.wire_items.items():
+            v = wire_v.get(wid)            # its colour comes from its voltage (finer steps than you can see)
+            k = (round(v / max(vmax, 1e-9) * 400), round(vmax, 2)) if v is not None else None
+            if k != it.look:
+                it.look = k
+                it.update()
+                changed = True
+        return changed
+
+    def _foreground_key(self):
+        """What the dots, junctions, readings and colour key are drawn from, to the precision you can see."""
+        if not self.sim_active():
+            return None
+        live = self.sim.live
+        h = self.hover_info
+        bubble = (round(h[0].x(), 1), round(h[0].y(), 1), h[1], tuple(h[2])) if h else None
+
+        def r3(v):
+            return float(f"{v:.3g}") if isinstance(v, float) else v
+        k = [round(live.vmax, 2), self.show_flow, self.show_volts, self.show_readings, tuple(sorted(self.pinned)),
+             tuple(sorted(self.tag_offsets.items())), bubble]
+        if self.show_volts:
+            k.append(tuple((n, round(v, 2)) for n, v in sorted(live.net_v.items())))
+        if self.show_flow:
+            k.append(tuple((round(ph, 1), r3(a)) for _a, _b, ph, a in live.flows))
+        if self.show_readings or self.pinned:
+            k.append(tuple((wid, r3(v)) for wid, v in sorted(live.wire_v.items())))
+            k.append(tuple(r3(a) for _a, _b, _ph, a in live.flows))
+            for cid in sorted(live.parts):
+                info = live.parts[cid]
+                k.append((cid, info.get("reading"), r3(info.get("v")), r3(info.get("i")), r3(info.get("p"))))
+        return tuple(k)
 
     def sim_set_value(self, cid, key, value):
         if self.sim_active():
@@ -369,6 +433,8 @@ class CircuitScene(QGraphicsScene):
         for v in self.views():
             v.viewport().setCursor(Qt.PointingHandCursor if clickable else Qt.ArrowCursor)
         self.update_hover(pos)
+        if self.sim.state != "running":        # paused: no frames are coming, so show the bubble move now
+            self.update()
         text = self._probe_text(pos)
         if clickable:
             what = {"reed_switch": "click to move the magnet", "hall": "click to move the magnet",

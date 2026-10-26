@@ -37,7 +37,7 @@ answers.
 - **Schematic editor** — a parts gallery of 84 parts with British/IEC symbols, drag-and-drop, wiring by
   dragging pin to pin, junctions, rotate and flip, undo/redo, copy/paste, text notes, autosave and crash
   recovery.
-- **Live simulation** — glowing LEDs and lamps, motors with back-EMF that slow under load, relays that click,
+- **Live simulation** — glowing LEDs and lamps (PWM dims them, as in real life), motors with back-EMF that slow under load, relays that click,
   buzzers and loudspeakers you can hear, meters with live readouts, voltage-coloured wires and moving current
   flow.
 - **Interactive** — switches, push buttons, reed and tilt switches, potentiometers, light and temperature
@@ -239,7 +239,7 @@ resistance, supply current, output swing that falls short further under heavier 
 into 10 kΩ, ±13 V into 2 kΩ), the LM358 reaching 0 V but not the top rail, and current limits. The output
 current really comes from the supply pins, and too much supply voltage destroys the chip.
 
-The automatic tests (406 of them) check it against answers worked out by hand — voltage dividers, the diode
+The automatic tests (420 of them) check it against answers worked out by hand — voltage dividers, the diode
 equation, LED current, transistor gain and saturation, Zener regulation, RC and RL curves, a half-wave
 rectifier, 555 astable and monostable timing, op-amp gains, bandwidth, slew rate and bias currents, a
 Schmitt-trigger oscillator, logic truth tables and counters — against the datasheets above, and against

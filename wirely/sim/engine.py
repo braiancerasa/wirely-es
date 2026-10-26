@@ -158,6 +158,8 @@ class Simulator:
         for d in self.devices:
             d.accept(self.x, self.ctx)
             d.event = None
+        # parts that give out light: the eye averages it (so PWM dims them, as in real life)
+        self.lights = [d for d in self.devices if d.light_now() is not None]
 
     # ========================================================================================== solving
     def _solve_once(self, x0, ctx):
@@ -281,6 +283,8 @@ class Simulator:
             if getattr(d, "changed", False):
                 d.changed = False
                 switched = True
+        for d in self.lights:
+            d.see(h)
         if self.recording and self.speakers:
             for cid, (a, b) in self.speakers.items():
                 self.spk_record.append((self.t, cid, (float(x[a]) if a >= 0 else 0.0) - (float(x[b]) if b >= 0 else 0.0)))

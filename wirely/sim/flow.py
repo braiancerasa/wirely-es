@@ -52,7 +52,8 @@ class FlowNetwork:
         """pin_current(cid, pin) = current INTO the part at that pin. Returns [((x1,y1),(x2,y2), amps)],
         amps > 0 meaning conventional current flows from the first point to the second."""
         out = []
-        for pts, edges, pin_nodes, grounds in self.groups:
+        memo = self.__dict__.setdefault("_memo", {})
+        for g, (pts, edges, pin_nodes, grounds) in enumerate(self.groups):
             n = len(pts)
             inj = np.zeros(n)
             for cid, pin, i in pin_nodes:
@@ -64,6 +65,13 @@ class FlowNetwork:
             if not np.any(np.abs(inj) > 1e-12):
                 out.extend((pts[a], pts[b], 0.0) for a, b, _w in edges)
                 continue
+            # same currents in as last frame (a circuit that has settled): same answer, no need to work it out again
+            now = [float(v) for v in inj]
+            last = memo.get(g)
+            tol = 1e-12 + 1e-6 * max(abs(v) for v in now)
+            if last is not None and len(last[0]) == n and all(abs(a - b) <= tol for a, b in zip(now, last[0])):
+                out.extend(last[1])
+                continue
             L = np.zeros((n, n))
             for a, b, _w in edges:
                 L[a, a] += 1
@@ -72,6 +80,7 @@ class FlowNetwork:
                 L[b, a] -= 1
             # potentials: L·φ = −injection (pin currents flowing in raise the potential), fix one node per piece
             phi = np.linalg.lstsq(L + 1e-9 * np.eye(n), inj, rcond=None)[0]
-            for a, b, _w in edges:
-                out.append((pts[a], pts[b], float(phi[a] - phi[b])))
+            res = [(pts[a], pts[b], float(phi[a] - phi[b])) for a, b, _w in edges]
+            memo[g] = (now, res)
+            out.extend(res)
         return out

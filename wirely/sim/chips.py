@@ -1242,10 +1242,16 @@ class SolidStateRelay(Device):
                 self.event = (f"{self.comp.ref} burnt out — {abs(i_o):.1f} A through its output is more than a "
                               f"{model} can switch ({self.imax:g} A).")
 
+    def light_now(self):
+        return [0.0] if self.blown else [max(0.0, min(1.0, (self.i_led - 1e-4) / 0.005))]
+
     def glow(self):
         if self.blown:
             return 0.0
-        return max(0.0, min(1.0, (self.i_led - 1e-4) / 0.005)) ** 0.6
+        return self.light_now()[0] ** self.GAMMA
+
+    def take_glow(self):
+        return self.take_light()[0]
 
     def after_dc(self):
         pass
@@ -1297,8 +1303,15 @@ class SevenSeg(Device):
         pins[7] = -sum(pins[:7])
         self.i_pins = pins
 
+    def light_now(self):
+        return [max(0.0, min(1.0, (i - 1e-4) / 0.01)) for i in self.seg_i]
+
     def lit(self):
-        return [max(0.0, min(1.0, (i - 1e-4) / 0.01)) ** 0.6 for i in self.seg_i]
+        return [v ** self.GAMMA for v in self.light_now()]
+
+    def take_lit(self):
+        """Segments as an eye sees them: a multiplexed display looks steady, not flickering."""
+        return self.take_light()
 
 
 class SignalGen(Source):
@@ -1626,11 +1639,17 @@ class Optocoupler(BJT):
                 self.event = (f"{ref} burnt out — {abs(i_c) * 1000:.0f} mA through its output is too much for a "
                               f"{model} (max {self.icmax * 1000:.0f} mA). Add a resistor to the load.")
 
+    def light_now(self):
+        return [0.0] if self.blown else [max(0.0, min(1.0, (self.i_led - 1e-4) / 0.01))]
+
     def glow(self):
         """0..1: how hard the (invisible, infrared) LED inside is shining."""
         if self.blown:
             return 0.0
-        return max(0.0, min(1.0, (self.i_led - 1e-4) / 0.01)) ** 0.6
+        return self.light_now()[0] ** self.GAMMA
+
+    def take_glow(self):
+        return self.take_light()[0]
 
 
 FACTORY = {

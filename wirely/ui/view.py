@@ -15,6 +15,8 @@ class CircuitView(QGraphicsView):
         super().__init__(scene, parent)
         self.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
         self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
+        # the dotted grid is the same every frame: keep a ready-drawn copy (redrawn only on scroll / zoom / theme)
+        self.setCacheMode(QGraphicsView.CacheBackground)
         self.setDragMode(QGraphicsView.RubberBandDrag)
         self.setRubberBandSelectionMode(Qt.IntersectsItemShape)
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)

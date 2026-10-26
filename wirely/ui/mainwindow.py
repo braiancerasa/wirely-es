@@ -729,7 +729,7 @@ class MainWindow(QMainWindow):
     def _toggle_volts(self):
         self.scene.show_volts = self.a_volts.isChecked()
         self.settings.setValue("volts", "true" if self.scene.show_volts else "false")
-        self.scene.update()
+        self.scene.repaint_all()
         self.view.viewport().update()
 
     def _toggle_sound(self):
@@ -806,6 +806,7 @@ class MainWindow(QMainWindow):
         self.scene.show_grid = not self.scene.show_grid
         self.a_grid.setChecked(self.scene.show_grid)
         self.settings.setValue("grid", "true" if self.scene.show_grid else "false")
+        self.view.resetCachedContent()
         self.scene.update()
 
     def toggle_theme(self):
@@ -820,7 +821,8 @@ class MainWindow(QMainWindow):
                 a.setIcon(icons.icon(a.data()))
         self.a_dark.setChecked(theme.MODE == "dark")
         self.gallery.refresh()
-        self.scene.update()
+        self.view.resetCachedContent()
+        self.scene.repaint_all()
         self.view.viewport().update()
 
     def about(self):

@@ -45,6 +45,30 @@ def _font(bold=False):
     return f
 
 
+def _r(v, k=2):
+    return round(float(v), k)
+
+
+def live_look_key(live, kind, anim_t):
+    """The parts of a part's live readings that change how it looks: while it's running, a part is only drawn again
+    when this changes (otherwise its ready-drawn picture is reused). The browser version uses it the same way."""
+    if not live:
+        return None
+    k = (live.get("blown"), bool(live.get("warn")), live.get("reading"))
+    for name in sorted(n for n in live if n.startswith("_")):
+        val = live[name]
+        if isinstance(val, (list, tuple)):
+            val = tuple(_r(x) if isinstance(x, (int, float)) else x for x in val)
+        elif isinstance(val, float):
+            val = _r(val)
+        k += ((name, val),)
+    if kind == "motor":
+        k += (round(live.get("angle", 0.0) / 3),)
+    if kind == "buzzer" and live.get("level", 0) > 0:
+        k += (_r(live["level"]), round((anim_t * 6) % 1.0, 1))
+    return k
+
+
 class ComponentItem(QGraphicsItem):
     """One part on the sheet. Its position is the part's centre; rotation is applied when drawing."""
 
@@ -58,6 +82,10 @@ class ComponentItem(QGraphicsItem):
         self.setZValue(10 if ghost else 1)
         if ghost:
             self.setOpacity(0.55)
+        else:
+            # keep a ready-drawn picture: redrawn only when the part changes (see CircuitScene.refresh_look)
+            self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
+        self.look = None
         self.sync()
 
     # ---- geometry
@@ -287,6 +315,8 @@ class WireItem(QGraphicsItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setAcceptHoverEvents(True)
         self.setZValue(0)
+        self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
+        self.look = None
         self.sync()
 
     def sync(self):

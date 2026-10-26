@@ -83,8 +83,11 @@ class MultiLED(Device):
     def glows(self):
         return [led.glow() for led in self.leds]
 
+    def light_now(self):
+        return [led.light_now()[0] for led in self.leds]
+
     def live_extra(self):
-        g = self.glows()
+        g = self.take_light()
         r = gg = b = 0.0
         for k, (col, _a, _k) in zip(g, self.layout):
             cr, cg, cb = LED_MIX[col]

@@ -41,7 +41,7 @@ from wirely.sim.audio import Synth                                   # noqa: E40
 from wirely.ui import icons, symbols as S, theme                     # noqa: E402
 from wirely.ui import simcontrol as SC                               # noqa: E402
 from wirely.ui.graph import TIMEBASES, VOLTS, GraphPanel             # noqa: E402
-from wirely.ui.items import ComponentItem, DraftWire, WireItem      # noqa: E402
+from wirely.ui.items import ComponentItem, DraftWire, WireItem, live_look_key  # noqa: E402
 from wirely.ui.live_items import SliderItem                          # noqa: E402
 from wirely.ui.scene import CircuitScene                             # noqa: E402
 
@@ -144,29 +144,6 @@ class WebSynth(Synth):
 class _Sound:
     def __init__(self, synth):
         self.synth = synth
-
-
-def _r(v, k=2):
-    return round(float(v), k)
-
-
-def _live_key(live, kind, anim_t):
-    """The parts of a part's live readings that change how it looks (so unchanged drawings are reused)."""
-    if not live:
-        return None
-    k = (live.get("blown"), bool(live.get("warn")), live.get("reading"))
-    for name in sorted(n for n in live if n.startswith("_")):
-        val = live[name]
-        if isinstance(val, (list, tuple)):
-            val = tuple(_r(x) if isinstance(x, (int, float)) else x for x in val)
-        elif isinstance(val, float):
-            val = _r(val)
-        k += ((name, val),)
-    if kind == "motor":
-        k += (round(live.get("angle", 0.0) / 3),)
-    if kind == "buzzer" and live.get("level", 0) > 0:
-        k += (_r(live["level"]), round((anim_t * 6) % 1.0, 1))
-    return k
 
 
 # ============================================================================================ the app
@@ -691,7 +668,8 @@ class App:
     def tick(self):
         """One step of the running simulation (the page calls this about 30 times a second)."""
         if self.simc.state != "running":
-            return
+            return False
+        self.scene.frame_changed = True
         try:
             self.simc._tick()
         except Exception as e:                 # noqa: BLE001
@@ -701,6 +679,7 @@ class App:
             if self.simc.live.samples:
                 self.graph.add_samples(self.simc.live.samples, self.simc.live.t)
                 self.simc.live.samples = []
+        return bool(self.scene.frame_changed)     # False: the sheet looks just the same, no need to draw it
 
     def sim_info(self):
         if not self.simc.active():
@@ -757,7 +736,7 @@ class App:
                 live = None if (it.ghost or exporting) else sc.live_part(c.id)
                 key = ("c", c.kind, c.rot, c.flip, c.ref, json.dumps(c.props, sort_keys=True, default=str),
                        it.isSelected() and not exporting, it.hover and not exporting, it.ghost,
-                       _live_key(live, c.kind, anim_t), mode)
+                       live_look_key(live, c.kind, anim_t), mode)
             elif isinstance(it, WireItem):
                 vc = None if exporting else sc.wire_colour(it.wire.id)
                 key = ("w", tuple(it.wire.points), it.isSelected() and not exporting, it.hover and not exporting,
