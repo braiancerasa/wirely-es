@@ -1,7 +1,7 @@
 # Building Wirely
 
 This is for people who want to run Wirely from its source code, change it, or make the installers themselves.
-To just **use** Wirely, download it from the [latest release](https://github.com/richiewillmott/Wirely/releases/latest)
+To just **use** Wirely, download it from the [latest release](https://github.com/wirely-app/wirely-app.github.io/releases/latest)
 instead — see the [README](README.md).
 
 ## Run from source
@@ -39,7 +39,7 @@ the page and Python, and `web/py/fallback/numpy` is a small pure-Python stand-in
 real numpy can't be downloaded.
 
 **On GitHub** (`.github/workflows/web.yml`): every push builds it and tests it in a real browser (Chromium);
-pushes to the main branch then publish it to GitHub Pages, at `https://<your user name>.github.io/Wirely/`.
+pushes to the main branch then publish it to GitHub Pages, at `https://wirely-app.github.io/ (a project named <owner>.github.io is served at the root)`.
 One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
 **Yourself:**

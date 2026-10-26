@@ -679,7 +679,7 @@ def browser_card(path):
     f.setPixelSize(16)
     p.setFont(f)
     p.setPen(QColor(60, 66, 74))
-    p.drawText(QRectF(x0 + 130, y0 - 33, 540, 26), Qt.AlignVCenter, "richiewillmott.github.io/Wirely")
+    p.drawText(QRectF(x0 + 130, y0 - 33, 540, 26), Qt.AlignVCenter, "wirely-app.github.io")
     p.drawImage(QRectF(x0, y0, W, H), shot)
     f.setPixelSize(54)
     f.setWeight(QFont.DemiBold)
@@ -698,8 +698,8 @@ n_examples = len([f for f in os.listdir(EXAMPLES) if f.endswith(".wirely")])
 from wirely.model import parts as _P  # noqa: E402
 card(card_image([("Wirely " + __version__, 110, "#f5f7fa", True),
                  (f"{len(_P.PARTS)} parts  ·  {n_examples} example circuits", 48, "#aabac6", False),
-                 ("richiewillmott.github.io/Wirely", 52, "#ffc83c", True),
-                 ("github.com/richiewillmott/Wirely", 44, "#aabac6", False)],
+                 ("wirely-app.github.io", 52, "#ffc83c", True),
+                 ("github.com/wirely-app/wirely-app.github.io", 44, "#aabac6", False)],
                 sub="Free and open source (GPL-3)  ·  Windows · Mac · Linux · browser  ·  no account needed"),
      4.5)
 

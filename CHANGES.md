@@ -1,6 +1,8 @@
 # Changes
 
 ## 1.5.2 — US symbols, PWM looks steady even when the simulation can't keep up, and fast switching runs faster
+- **New address: https://wirely-app.github.io/** (code: github.com/wirely-app/wirely-app.github.io). The old
+  address forwards there, keeping shared links working and bringing along unsaved work the browser kept.
 - **US symbols:** View → US symbols draws parts the American way: zigzag resistors (and variable resistors,
   potentiometers, thermistors and LDRs), an S-shaped fuse, a curved − plate on electrolytic capacitors and a
   filament in bulbs. Only the look changes; it's remembered next time.
@@ -93,7 +95,7 @@ Bugs found by checking every example step by step and testing every part in thou
 
 ## 1.3.0 — parts requested by users, and Wirely in your web browser
 - **Wirely Web:** the whole app runs in a web browser, so it works on **Chromebooks** and school computers with
-  nothing to install — at https://richiewillmott.github.io/Wirely/. It's the desktop app's own Python code
+  nothing to install — at https://wirely-app.github.io/. It's the desktop app's own Python code
   (the sheet, the symbols and the simulator) running in the browser with Pyodide, so it looks and behaves the same.
 - In the browser: open and save `.wirely` files (they work in both versions), all the examples, the graph,
   sound, PNG pictures, the parts list, **links that carry a circuit** (for Google Classroom / Teams), works

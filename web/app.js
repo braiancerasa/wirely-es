@@ -275,7 +275,7 @@ if ${haveNumpy ? "False" : "True"}:
     $("loadText").classList.add("error");
     $("loadText").innerHTML = "Sorry — Wirely couldn't start in this browser.<br>" + escapeHtml(String(e && e.message || e)) +
       "<br><br>Try reloading the page. Wirely works in recent versions of Chrome, Edge, Firefox and Safari." +
-      ' You can also <a href="https://github.com/richiewillmott/Wirely/releases/latest">download the desktop app</a>.';
+      ' You can also <a href="https://github.com/wirely-app/wirely-app.github.io/releases/latest">download the desktop app</a>.';
   }
 }
 
@@ -886,8 +886,8 @@ function showPopup(items, x, y, onPick) {
 
 function pickMenu(act) {
   if (act === "examples") { showExamplesMenu(); return; }
-  if (act === "desktop") { window.open("https://github.com/richiewillmott/Wirely/releases/latest", "_blank", "noopener"); closeMenus(); return; }
-  if (act === "github") { window.open("https://github.com/richiewillmott/Wirely", "_blank", "noopener"); closeMenus(); return; }
+  if (act === "desktop") { window.open("https://github.com/wirely-app/wirely-app.github.io/releases/latest", "_blank", "noopener"); closeMenus(); return; }
+  if (act === "github") { window.open("https://github.com/wirely-app/wirely-app.github.io", "_blank", "noopener"); closeMenus(); return; }
   doAction(act);
 }
 
@@ -1189,8 +1189,8 @@ function showAbout() {
     <p>This is the same Wirely as the desktop app — the same parts, drawings and simulator — running in your browser
     with <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> (Python for the web). Nothing is uploaded:
     your circuits stay on your computer.</p>
-    <p><a href="https://github.com/richiewillmott/Wirely" target="_blank" rel="noopener">Wirely on GitHub</a> ·
-    <a href="https://github.com/richiewillmott/Wirely/releases/latest" target="_blank" rel="noopener">Desktop app for Windows, Mac and Linux</a></p>
+    <p><a href="https://github.com/wirely-app/wirely-app.github.io" target="_blank" rel="noopener">Wirely on GitHub</a> ·
+    <a href="https://github.com/wirely-app/wirely-app.github.io/releases/latest" target="_blank" rel="noopener">Desktop app for Windows, Mac and Linux</a></p>
     <p class="hint">Maths: ${escapeHtml(numpyKind)}</p></div>
     <div class="dlgButtons"><button class="btn primary" id="aClose">Close</button></div>`, (d) => {
     opsCanvas(d.querySelector("#abMark"), J(app.logo_ops()), 50, 50, 50 / 32);
@@ -1392,6 +1392,23 @@ window.addEventListener("hashchange", () => {
   confirmDiscard(() => openLinkCircuit());
 });
 
+// Wirely used to live at richiewillmott.github.io/Wirely. The page left there forwards people here and brings
+// along any unsaved work it had kept (…#carry=…), which goes into this address's own autosave and is offered as usual.
+async function takeCarriedAutosave() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  const carry = h.get("carry");
+  if (!carry) return;
+  try {
+    const d = JSON.parse(await decompress(carry));
+    let mine = null;
+    try { mine = JSON.parse(localStorage.getItem(Autosave.key) || "null"); } catch (e) { mine = null; }
+    if (d && d.text && (!mine || !mine.t || mine.t < d.t)) localStorage.setItem(Autosave.key, JSON.stringify(d));
+  } catch (e) { /* damaged or storage off: nothing to bring across */ }
+  h.delete("carry");
+  const rest = h.toString();
+  history.replaceState(null, "", location.pathname + location.search + (rest ? "#" + rest : ""));
+}
+
 async function openStartCircuit() {
   await loadExampleList();
   if (launchFile) {
@@ -1399,6 +1416,7 @@ async function openStartCircuit() {
     launchFile = null;
     return;
   }
+  await takeCarriedAutosave();
   if (await openLinkCircuit()) return;
   const ex = params.get("example");
   if (ex && examples.includes(ex)) { await openExample(ex); return; }

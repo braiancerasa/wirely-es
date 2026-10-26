@@ -1,5 +1,5 @@
 # Builds Wirely Web (the version that runs in a browser — for Chromebooks and school computers) and puts it on
-# GitHub Pages at  https://<your user name>.github.io/Wirely/
+# GitHub Pages at  https://wirely-app.github.io/ (a project named <owner>.github.io is served at the root)
 #   - Every push to the main branch: builds it, tests it in a real browser, and (if the test passes) publishes it.
 #   - Actions tab → "Wirely Web (browser version)" → Run workflow: the same, any time.
 #   - Pushes to other branches: build and test only.

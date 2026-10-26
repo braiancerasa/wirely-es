@@ -5,7 +5,7 @@ Draw a circuit, press play, and watch it work — LEDs light, motors spin, relay
 show their voltage. For the workplace, the classroom and the workbench, all on your own computer, with no cloud
 and no account.
 
-**▶ [Try it in your browser](https://richiewillmott.github.io/Wirely/)** — nothing to install, and it works on
+**▶ [Try it in your browser](https://wirely-app.github.io/)** — nothing to install, and it works on
 Chromebooks. Or [download the app](#download-and-install) for Windows, Mac and Linux.
 
 Under the hood is a real circuit solver, using the same method as SPICE, checked against hand calculations and
@@ -67,7 +67,7 @@ answers.
 
 ## Download and install
 
-Get it from the [**latest release**](https://github.com/richiewillmott/Wirely/releases/latest) — no Python or
+Get it from the [**latest release**](https://github.com/wirely-app/wirely-app.github.io/releases/latest) — no Python or
 anything else needed:
 
 - **Windows:** `Wirely-Setup-<version>.exe` — run it and follow the installer. It adds Wirely to the Start menu and
@@ -86,7 +86,7 @@ anything else needed:
 
 ### Or use it in a web browser (Chromebooks, school computers)
 
-Open **[richiewillmott.github.io/Wirely](https://richiewillmott.github.io/Wirely/)** in Chrome, Edge, Firefox or
+Open **[wirely-app.github.io](https://wirely-app.github.io/)** in Chrome, Edge, Firefox or
 Safari — nothing to install and no account. It's the same Wirely: the same parts, symbols, examples and
 simulator, running inside the browser (the desktop app's own Python code, run by
 [Pyodide](https://pyodide.org)). Your circuits stay on your computer — nothing is uploaded. (The website counts

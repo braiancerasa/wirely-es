@@ -2,7 +2,7 @@
 
 ## Use it in your browser — nothing to install
 
-**https://richiewillmott.github.io/Wirely/** — works on Chromebooks, and in Chrome, Edge, Firefox and Safari on any computer. It updates by itself.
+**https://wirely-app.github.io/** — works on Chromebooks, and in Chrome, Edge, Firefox and Safari on any computer. It updates by itself.
 
 ## Downloads (desktop app)
 
@@ -12,6 +12,7 @@
 
 ## New
 
+- **Wirely has a new home: [wirely-app.github.io](https://wirely-app.github.io/)**. The old address forwards there automatically, old shared circuit links still work, and any unsaved work your browser kept comes with you.
 - **US symbols:** turn on **View → US symbols** to draw parts the American way: zigzag resistors (and variable resistors, potentiometers, thermistors and LDRs), an S-shaped fuse, a curved minus plate on electrolytic capacitors and a filament in bulbs. Wirely remembers your choice.
 - **PWM dims LEDs and bulbs:** LEDs, bulbs and displays now look as bright as your eye would see them. Switch one fully on and off faster than you can see (PWM) and it looks steadily dimmer, instead of flickering at random. This holds even when a busy circuit runs slower than real time. Choose a slow-motion speed and you can watch it flick on and off.
 - It works for **RGB LEDs** too: PWM one colour to change the mix. Multiplexed 7-segment displays look steady as well.
