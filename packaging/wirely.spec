@@ -32,7 +32,7 @@ if sys.platform == "win32":
                     subtype=0x0, date=(0, 0)),
   kids=[StringFileInfo([StringTable('080904B0', [
       StringStruct('CompanyName', 'Wirely'),
-      StringStruct('FileDescription', 'Wirely - circuit design and simulation'),
+      StringStruct('FileDescription', 'Wirely - diseño y simulación de circuitos'),
       StringStruct('FileVersion', '{VERSION}'),
       StringStruct('InternalName', 'Wirely'),
       StringStruct('LegalCopyright', 'Wirely contributors, GPL-3.0-or-later'),

@@ -1,6 +1,7 @@
-; Inno Setup script for the Wirely installer. build_exe.bat and the GitHub build run it automatically;
-; or open it in Inno Setup and press Compile. Needs dist\Wirely (from PyInstaller) first.
-; The version comes from the command line (ISCC /DAppVersion=1.5.3 /DAppRevision=1.5.3); these are fallbacks.
+; Script de Inno Setup para el instalador de Wirely. build_exe.bat y la compilación de GitHub lo ejecutan
+; automáticamente; también se puede abrir en Inno Setup y presionar Compile. Antes hace falta dist\Wirely
+; (lo genera PyInstaller). La versión llega por la línea de comandos (ISCC /DAppVersion=1.5.3 /DAppRevision=1.5.3);
+; estos son los valores por defecto.
 #ifndef AppVersion
   #define AppVersion "1.5.3"
 #endif
@@ -32,6 +33,7 @@ OutputBaseFilename=Wirely-Setup-{#AppRevision}
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 ChangesAssociations=yes
+VersionInfoDescription=Instalador de Wirely
 
 [Languages]
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"

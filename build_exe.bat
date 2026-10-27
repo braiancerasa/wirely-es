@@ -37,8 +37,10 @@ if errorlevel 1 (
 )
 echo [Wirely] dist\Wirely\Wirely.exe funciona.
 
-for /f %%v in ('"%VPY%" -c "import wirely; print(wirely.__version__)"') do set VER=%%v
-for /f %%r in ('"%VPY%" -c "import wirely; print(wirely.__revision__)"') do set REV=%%r
+rem La versión se pasa por un archivo temporal: la ruta del proyecto puede tener espacios.
+"%VPY%" -c "import wirely; print(wirely.__version__); print(wirely.__revision__)" > "%TEMP%\wirely_version.txt"
+< "%TEMP%\wirely_version.txt" (set /p VER= & set /p REV=)
+if exist "%TEMP%\wirely_version.txt" del "%TEMP%\wirely_version.txt"
 
 set ISCC=
 if exist "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" set ISCC=%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe
@@ -46,8 +48,14 @@ if exist "%ProgramFiles%\Inno Setup 6\ISCC.exe" set ISCC=%ProgramFiles%\Inno Set
 if exist "%LocalAppData%\Programs\Inno Setup 6\ISCC.exe" set ISCC=%LocalAppData%\Programs\Inno Setup 6\ISCC.exe
 if defined ISCC (
   echo [Wirely] Creando el instalador...
-  "%ISCC%" /Q /DAppVersion=%VER% /DAppRevision=%REV% "packaging\Wirely.iss"
-  if errorlevel 1 ( echo Falló la creación del instalador - la app sigue en dist\Wirely. ) else ( echo [Wirely] Instalador: dist\Wirely-Setup-%REV%.exe )
+  if defined VER if defined REV (
+    "%ISCC%" /Q /DAppVersion=%VER% /DAppRevision=%REV% "packaging\Wirely.iss"
+  ) else (
+    "%ISCC%" /Q "packaging\Wirely.iss"
+  )
+  if errorlevel 1 echo Falló la creación del instalador - la app sigue en dist\Wirely.
+  if not errorlevel 1 if defined REV echo [Wirely] Instalador: dist\Wirely-Setup-%REV%.exe
+  if not errorlevel 1 if not defined REV echo [Wirely] Instalador creado en dist.
 ) else (
   echo [Wirely] Se omitió el instalador: Inno Setup no está instalado. Descárguelo gratis desde https://jrsoftware.org/isdl.php
 )
