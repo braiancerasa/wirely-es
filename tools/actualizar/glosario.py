@@ -20,9 +20,10 @@ DATA = Path(__file__).with_name("glosario.json")
 
 SUFFIXES = {".py", ".js", ".html", ".wirely", ".md", ".iss", ".sh", ".bat", ".toml",
             ".webmanifest", ".desktop", ".xml"}
-EXCLUDE_DIRS = {".git", ".venv", "build", "dist", "_site", "__pycache__", "node_modules",
+EXCLUDE_DIRS = {".git", ".opencode", ".venv", "build", "dist", "_site", "__pycache__", "node_modules",
                 "actualizacion", "tests", "fallback", "docs", "assets"}
-EXCLUDE_FILES = {"LICENSE", "THIRD-PARTY-NOTICES.txt", "requirements.txt", "glosario.json"}
+EXCLUDE_FILES = {"LICENSE", "THIRD-PARTY-NOTICES.txt", "requirements.txt", "glosario.json",
+                 "ACTUALIZAR.md", "ACTUALIZAR.bat"}
 
 LETRAS = "0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ"
 

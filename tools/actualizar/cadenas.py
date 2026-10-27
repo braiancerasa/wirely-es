@@ -30,9 +30,9 @@ CATALOGO = DATOS / "cadenas.json"
 VERSION = DATOS / "version.json"
 
 SUFFIXES = {".py", ".js", ".html", ".wirely", ".iss", ".bat", ".sh", ".md", ".webmanifest"}
-EXCLUDE_DIRS = {".git", ".venv", "build", "dist", "_site", "__pycache__", "node_modules",
+EXCLUDE_DIRS = {".git", ".opencode", ".venv", "build", "dist", "_site", "__pycache__", "node_modules",
                 "actualizacion", "web-smoke", "pyodide-dl"}
-EXCLUDE_FILES = {"LICENSE", "THIRD-PARTY-NOTICES.txt", "sw.js"}
+EXCLUDE_FILES = {"LICENSE", "THIRD-PARTY-NOTICES.txt", "sw.js", "ACTUALIZAR.md", "ACTUALIZAR.bat"}
 
 # Palabras que delatan inglés o español. No hace falta que estén todas: la idea es
 # que la lista de sospechosas sea corta y que la IA la revise entera.

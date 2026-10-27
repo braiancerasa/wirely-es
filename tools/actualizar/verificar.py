@@ -205,7 +205,7 @@ PASOS = [
 def main(argv=None):
     for flujo in (sys.stdout, sys.stderr):
         try:
-            flujo.reconfigure(encoding="utf-8", errors="replace")
+            flujo.reconfigure(encoding="utf-8", errors="replace", line_buffering=True)
         except Exception:
             pass
 

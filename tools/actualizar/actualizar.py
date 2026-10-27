@@ -44,7 +44,7 @@ REQUIERE_LIMPIO = "El árbol de trabajo tiene cambios sin guardar. Ejecute «cer
 def flujos_utf8():
     for flujo in (sys.stdout, sys.stderr):
         try:
-            flujo.reconfigure(encoding="utf-8", errors="replace")
+            flujo.reconfigure(encoding="utf-8", errors="replace", line_buffering=True)
         except Exception:
             pass
 
@@ -96,6 +96,12 @@ def en_merge():
 def conflictos():
     salida = git("diff", "--name-only", "--diff-filter=U").stdout
     return [linea for linea in salida.splitlines() if linea.strip()]
+
+
+def archivos_con_marcadores():
+    """Archivos que todavía tienen marcas de conflicto (<<<<<<< / >>>>>>>)."""
+    salida = git("grep", "-l", "-E", r"^(<<<<<<< |>>>>>>> )").stdout
+    return [linea.strip() for linea in salida.splitlines() if linea.strip()]
 
 
 def asunto(ref):
@@ -201,7 +207,8 @@ def cmd_actualizar(args):
         print(f"\nHay {len(pendientes)} archivo(s) con conflictos:")
         for archivo in pendientes:
             print(f"  {archivo}")
-        print("\nResuélvalos conservando la traducción (y traduciendo lo nuevo), y después ejecute:")
+        print("\nResuélvalos conservando la traducción (y traduciendo lo nuevo): borre las líneas de marca de")
+        print("conflicto y deje el texto final. No hace falta ejecutar git add. Después:")
         print("  python tools/actualizar/actualizar.py pendientes")
         print("  python tools/actualizar/actualizar.py verificar")
         print("  python tools/actualizar/actualizar.py cerrar")
@@ -235,8 +242,12 @@ def cmd_verificar(args):
 
 
 def cmd_cerrar(args):
+    marcados = archivos_con_marcadores()
+    if marcados:
+        salir("Todavía hay marcas de conflicto en:\n  " + "\n  ".join(marcados) +
+              "\nBorre esas líneas (las que empiezan con los signos de menor y de mayor) y vuelva a intentar.")
     if conflictos():
-        salir("Todavía hay conflictos sin resolver:\n  " + "\n  ".join(conflictos()))
+        git("add", "-A")        # ya no quedan marcas: los conflictos están resueltos
     tag = args.tag
     if not tag and EN_CURSO.exists():
         tag = json.loads(EN_CURSO.read_text(encoding="utf-8")).get("tag")
