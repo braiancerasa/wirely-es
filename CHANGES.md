@@ -1,5 +1,18 @@
 # Cambios
 
+## 1.5.3 — Lecturas con sentido para condensadores, inductores y transistores
+- **Los condensadores ya no muestran potencia.** Un condensador que se carga o se descarga toma o devuelve
+  energía, pero no convierte nada de eso en calor, así que la lectura en «mW» que tenía al lado (voltaje ×
+  corriente) inducía a error. Un condensador ideal ahora muestra solo su voltaje y su corriente.
+- **Los inductores muestran solo lo que realmente disipan** (la pequeña pérdida de la bobina), no la energía que
+  entra y sale de su campo magnético.
+- **Los MOSFET muestran su corriente de drenador.** La lectura era la del voltaje y la corriente de la compuerta,
+  que siempre es de unos 0 A, así que un MOSFET que conmutaba un motor parecía no dejar pasar nada. Ahora muestra
+  el voltaje entre drenador y fuente y la corriente que circula por él (la corriente de drenador).
+- **Los transistores NPN y PNP** muestran de la misma manera el voltaje entre colector y emisor y la corriente de
+  colector, en lugar de los de la base.
+- Nueva prueba que cubre todo lo anterior.
+
 ## 1.5.2 — Símbolos de EE. UU., el PWM se ve estable incluso cuando la simulación no da abasto, y la conmutación veloz corre más rápido
 - **Nueva dirección: https://wirely-app.github.io/** (código: github.com/wirely-app/wirely-app.github.io). La
   dirección anterior redirige allí, mantiene funcionando los enlaces compartidos y traslada el trabajo sin guardar

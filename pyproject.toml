@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wirely"
-version = "1.5.2"
+version = "1.5.3"
 description = "App gratuita de diseño y simulación de circuitos: dibuje un circuito, presione Ejecutar y véalo funcionar"
 license = { text = "GPL-3.0-or-later" }
 authors = [{ name = "Richard Willmott" }]
