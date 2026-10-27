@@ -1,0 +1,61 @@
+{
+  "descripcion": "Terminología fija de la traducción al español (Argentina) de Wirely. Las reglas se aplican de arriba hacia abajo; las frases van antes que las palabras sueltas.",
+  "reglas": [
+    { "buscar": "interruptor de lengüeta", "reemplazar": "interruptor magnético" },
+    { "buscar": "interruptor lengüeta", "reemplazar": "interruptor magnético" },
+    { "buscar": "lengüeta", "reemplazar": "magnético" },
+
+    { "buscar": "optoaisladores", "reemplazar": "optoacopladores" },
+    { "buscar": "optoaislador", "reemplazar": "optoacoplador" },
+
+    { "buscar": "altavoces", "reemplazar": "parlantes" },
+    { "buscar": "altavoz", "reemplazar": "parlante" },
+
+    { "buscar": "las tensiones", "reemplazar": "los voltajes" },
+    { "buscar": "una tensión", "reemplazar": "un voltaje" },
+    { "buscar": "la tensión", "reemplazar": "el voltaje" },
+    { "buscar": "de baja tensión", "reemplazar": "de bajo voltaje" },
+    { "buscar": "caída de tensión", "reemplazar": "caída de voltaje" },
+    { "buscar": "tensiones", "reemplazar": "voltajes" },
+    { "buscar": "tensión", "reemplazar": "voltaje" },
+
+    { "buscar": "CA", "reemplazar": "AC", "ignorar_mayusculas": false },
+    { "buscar": "CC", "reemplazar": "DC", "ignorar_mayusculas": false },
+
+    { "buscar": "ratón", "reemplazar": "mouse" },
+    { "buscar": "pulsados", "reemplazar": "presionados" },
+    { "buscar": "pulsadas", "reemplazar": "presionadas" },
+    { "buscar": "pulsado", "reemplazar": "presionado" },
+    { "buscar": "pulsada", "reemplazar": "presionada" },
+    { "buscar": "pulsando", "reemplazar": "presionando" },
+    { "buscar": "pulsar", "reemplazar": "presionar" },
+    { "buscar": "pulsa", "reemplazar": "presiona" },
+    { "buscar": "pulse el", "reemplazar": "presione el" },
+    { "buscar": "pulse en", "reemplazar": "presione en" },
+    { "buscar": "pulse la", "reemplazar": "presione la" },
+    { "buscar": "pulse los", "reemplazar": "presione los" },
+
+    { "buscar": "añadir", "reemplazar": "agregar" },
+    { "buscar": "añada", "reemplazar": "agregue" },
+    { "buscar": "añadido", "reemplazar": "agregado" },
+    { "buscar": "añadida", "reemplazar": "agregada" },
+    { "buscar": "añadiendo", "reemplazar": "agregando" },
+
+    { "buscar": "ordenadores", "reemplazar": "computadoras" },
+    { "buscar": "ordenador", "reemplazar": "computadora" },
+    { "buscar": "computador", "reemplazar": "computadora" },
+
+    { "buscar": "bombillas", "reemplazar": "lámparas" },
+    { "buscar": "bombilla", "reemplazar": "lámpara" },
+    { "buscar": "ficheros", "reemplazar": "archivos" },
+    { "buscar": "fichero", "reemplazar": "archivo" },
+
+    { "buscar": "presione play", "reemplazar": "presione Ejecutar" },
+    { "buscar": "presiona play", "reemplazar": "presiona Ejecutar" },
+    { "buscar": "pulse play", "reemplazar": "presione Ejecutar" },
+
+    { "buscar": "haga click", "reemplazar": "haga clic" },
+    { "buscar": "doble click", "reemplazar": "doble clic" },
+    { "buscar": "un click", "reemplazar": "un clic" }
+  ]
+}
