@@ -171,11 +171,12 @@ class SimController(QObject):
                 info["reading"] = fmt(round(val, 9) if abs(val) > 1e-9 else 0.0, unit, 3)
             if len(d.nodes) >= 2 and k not in ("ground",):
                 names = [n for n, _x, _y in d.comp.part.pins]
-                info["v"] = sim.node_voltage(d.nodes[0]) - sim.node_voltage(d.nodes[1])
-                info["i"] = d.i_pins[0]
+                ia, ib = d.main_pins or (0, 1)       # transistors: the channel (C−E, D−S), not the control pin
+                info["v"] = sim.node_voltage(d.nodes[ia]) - sim.node_voltage(d.nodes[ib])
+                info["i"] = d.i_pins[ia]
                 info["pins_v"] = {n: sim.node_voltage(d.nodes[i]) for i, n in enumerate(names[:len(d.nodes)])}
             power = getattr(d, "power", 0.0)
-            if not power and d.i_pins and len(d.i_pins) == len(d.nodes) and abs(sum(d.i_pins)) < 1e-6:
+            if not power and not d.stores_energy and d.i_pins and len(d.i_pins) == len(d.nodes) and abs(sum(d.i_pins)) < 1e-6:
                 # a part that didn't work its power out, wired fully through its pins: Σ voltage × current in
                 power = sum(sim.node_voltage(n) * i for n, i in zip(d.nodes, d.i_pins))
             info["p"] = power

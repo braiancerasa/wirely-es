@@ -221,3 +221,27 @@ def test_graph_auto_timebase_follows_the_fastest_probe(qapp=None):
     only_dc = GraphPanel()
     only_dc.add_samples([(s[0], {"A": s[1]["A"]}) for s in samples], t)
     assert only_dc.timebase() == 0.5     # nothing repeats: the usual slow sweep
+
+
+def test_capacitor_reads_no_heat_and_mosfet_reads_its_channel(win):
+    """A capacitor charging soaks up V×I as stored energy, not heat; a MOSFET's readout is its drain–source
+    voltage and drain current, not the gate's (which is always ~0 A)."""
+    win.open_file(os.path.join(EXAMPLES, "5 V power supply (7805).wirely"))
+    win.a_play.trigger()
+    run_for(win, 1.0)
+    cap = find(win, "electrolytic")
+    info = win.scene.live_part(cap.id)
+    assert abs(info["i"]) > 1e-3 and abs(info["v"]) > 1.0          # it is charging or topping up
+    assert info["p"] == 0.0
+    win.a_stop.trigger()
+
+    win.open_file(os.path.join(EXAMPLES, "MOSFET motor switch.wirely"))
+    sw = find(win, "switch")
+    win.a_play.trigger()
+    click(win, (sw.x, sw.y))
+    run_for(win, 1.5)
+    q = win.scene.live_part(find(win, "nmos").id)
+    assert abs(q["i"]) > 0.02                                       # the motor's current, not the gate's
+    assert abs(q["v"]) < 0.5                                        # drain–source: fully on
+    assert 0 < q["p"] < 0.1
+    win.a_stop.trigger()

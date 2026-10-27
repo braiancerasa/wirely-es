@@ -199,6 +199,7 @@ class MOSFET(Device):
     shows the Miller plateau."""
     nonlinear = True
     reactive = True
+    main_pins = (1, 2)          # readout: V(D−S) and the drain current (pins are G, D, S)
     n_internal = 2              # [0] the drain inside its series resistance, [1] the gate inside its resistance
 
     def update_params(self):
@@ -1379,6 +1380,7 @@ class Inductor(Device):
     """An inductor (trapezoidal companion model, backward Euler after a jump) with 100 kΩ across it — real
     coils have some loss, and it keeps the spike finite when the current is suddenly cut off."""
     reactive = True
+    stores_energy = True
     RP = 100e3
 
     def update_params(self):
@@ -1414,7 +1416,7 @@ class Inductor(Device):
         self.i_prev, self.v_prev, self.vd = i, vd, vd
         tot = i + vd / self.RP
         self.i_pins = [tot, -tot]
-        self.power = vd * tot
+        self.power = vd * vd / self.RP         # only the loss across it is heat; the rest is stored in the field
 
     def after_dc(self):
         pass                                   # keep the DC current as the starting current

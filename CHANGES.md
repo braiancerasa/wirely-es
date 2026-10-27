@@ -1,5 +1,18 @@
 # Changes
 
+## 1.5.3 — Readings that make sense for capacitors, inductors and transistors
+- **Capacitors no longer show power.** A capacitor charging or discharging takes in or gives back energy but
+  doesn't turn any of it into heat, so the "mW" reading beside it (voltage × current) was misleading. An ideal
+  capacitor now shows only its voltage and current.
+- **Inductors show only what they really dissipate** (the small loss in the coil), not the energy going into and
+  out of their magnetic field.
+- **MOSFETs show their drain current.** The reading used to be the gate's voltage and current, which is always
+  about 0 A, so a MOSFET switching a motor appeared to pass nothing. It now shows the voltage across the MOSFET
+  (drain to source) and the current through it (the drain current).
+- **NPN and PNP transistors** likewise show the voltage from collector to emitter and the collector current,
+  instead of the base's.
+- New test covering all of the above.
+
 ## 1.5.2 — US symbols, PWM looks steady even when the simulation can't keep up, and fast switching runs faster
 - **New address: https://wirely-app.github.io/** (code: github.com/wirely-app/wirely-app.github.io). The old
   address forwards there, keeping shared links working and bringing along unsaved work the browser kept.

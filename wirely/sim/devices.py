@@ -141,6 +141,8 @@ class Device:
     n_internal = 0
     nonlinear = False
     reactive = False
+    stores_energy = False    # V×I is energy going into / out of storage, not heat: never derive power from it
+    main_pins = None         # (first, second) pin indices whose voltage and current the readout shows; None = pins 0, 1
 
     def __init__(self, comp, nodes):
         self.comp = comp
@@ -428,6 +430,7 @@ class Source(Device):
 
 class Capacitor(Device):
     reactive = True
+    stores_energy = True     # an ideal capacitor dissipates nothing: V×I just charges or discharges it
 
     def update_params(self):
         self.C = float(self.prop("capacitance"))
@@ -465,6 +468,7 @@ class Capacitor(Device):
         self.v_prev, self.i_prev = vd, i
         self.i_pins = [i, -i]
         self.vd = vd
+        self.power = 0.0
         if self.vmax is not None and not self.blown:
             bad = vd < -1.0 or vd > 1.2 * self.vmax
             if self._overload(bad, ctx.h, 0.1):
@@ -619,6 +623,7 @@ class Diode(Device):
 class BJT(Device):
     """Ebers–Moll transistor. Pins B, C, E. PNP handled by flipping all polarities."""
     nonlinear = True
+    main_pins = (1, 2)       # readout: V(C−E) and the collector current
 
     def update_params(self):
         pol, Is, bf, br, icmax, pmax = BJTS.get(self.prop("model"), BJTS["BC548"])
