@@ -30,7 +30,7 @@ def parse(text, unit: str = "") -> float:
         return float(text)
     s = str(text).strip().replace(" ", "").replace(",", ".")
     if not s:
-        raise ValueError("Please type a value")
+        raise ValueError("Escriba un valor")
     if s.lower().endswith("meg"):           # SPICE style 1meg
         s = s[:-3] + "M"
     # strip a trailing unit word (longest first), e.g. "10kΩ", "4.7uF", "9V"
@@ -49,7 +49,7 @@ def parse(text, unit: str = "") -> float:
         return float(f"{whole}.{frac}") * mult
     m = re.fullmatch(r"(" + _NUM + r")([pnuµμmkKMG]?)", s)
     if not m:
-        raise ValueError(f"'{text}' isn't a value I understand (try e.g. 10k, 4k7, 100n)")
+        raise ValueError(f"'{text}' no es un valor que entienda (pruebe p. ej. 10k, 4k7, 100n)")
     return float(m.group(1)) * PREFIXES[m.group(2)]
 
 

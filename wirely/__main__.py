@@ -114,6 +114,12 @@ def main():
         except Exception:  # noqa: BLE001
             pass
     app = QApplication(sys.argv[:1])
+    # Etiquetas en español para los diálogos y botones propios de Qt (Guardar / Descartar / Sí / No …)
+    from PySide6.QtCore import QLibraryInfo, QLocale, QTranslator
+    _qt_es = QTranslator(app)
+    if _qt_es.load(QLocale("es_AR"), "qtbase", "_",
+                   QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)):
+        app.installTranslator(_qt_es)
     opener = _FileOpener(app)
     app.setApplicationName("Wirely")
     app.setOrganizationName("Wirely")
@@ -122,11 +128,11 @@ def main():
     def step(text, frac):
         if splash is not None:
             splash.step(text, frac)
-    step("Loading the parts library…", 0.2)
+    step("Cargando la biblioteca de componentes…", 0.2)
     from wirely.model import parts  # noqa: F401
-    step("Loading the circuit solver…", 0.4)
+    step("Cargando el solucionador de circuitos…", 0.4)
     from wirely.sim import engine  # noqa: F401
-    step("Building the window…", 0.65)
+    step("Creando la ventana…", 0.65)
     from wirely.ui.mainwindow import MainWindow
     from wirely.ui import icons
     app.setWindowIcon(icons.app_icon())
@@ -136,7 +142,7 @@ def main():
     w = MainWindow()
     if theme:
         w.set_theme(theme)
-    step("Opening…", 0.9)
+    step("Abriendo…", 0.9)
     w.show()
     if splash is not None:
         splash.finish(w)

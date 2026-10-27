@@ -1,7 +1,7 @@
-"""Colours and Qt stylesheets for the light and dark themes (same family as FreeShape).
+"""Colores y hojas de estilo Qt para los temas claro y oscuro (misma familia que FreeShape).
 
-Other modules read colours as attributes of this module at draw time (theme.ACCENT, theme.CANVAS …),
-so apply("dark") / apply("light") switches everything in place.
+Otros módulos leen los colores como atributos de este módulo en tiempo de dibujo (theme.ACCENT, theme.CANVAS …),
+así que apply("dark") / apply("light") cambia todo en su sitio.
 """
 import os as _os
 
@@ -11,7 +11,7 @@ LIGHT = {
     "PANEL": "#ffffff", "PANEL_ALT": "#f5f6f8", "INPUT": "#ffffff", "ERROR": "#d93025", "OK_GREEN": "#2e9e44",
     "SELECTED_ROW": "#ffe9b8", "INVALID_BG": "#fdecea", "LOGO_TEXT": "#3b4250", "ICON_INK": "#3b4250",
     "SPARK": "#f5a524",
-    # the circuit sheet
+    # la hoja del circuito
     "CANVAS": "#ffffff", "CANVAS_OUTSIDE": "#eef0f3", "GRID_DOT": "#cfd5dc", "GRID_DOT_MAJOR": "#aab3be",
     "INK": "#1f2328", "WIRE": "#1f2328", "LABEL": "#3b4250", "LABEL_VALUE": "#1f6fd1",
     "SELECT": "#1f6fd1", "SELECT_HALO": "#d3e4f8", "HOVER": "#7fb0ea", "PIN_OPEN": "#d93025",
@@ -34,12 +34,12 @@ DARK = {
     "WARN": "#ffa94d", "BLOWN": "#8b939e",
 }
 
-# wire colours by voltage: 0 V blue → green → amber → red at the highest supply voltage; below 0 V violet
+# colores de cable por voltaje: 0 V azul → verde → ámbar → rojo en el voltaje de alimentación más alto; por debajo de 0 V violeta
 VOLT_STOPS = [(-1.0, "#9b5de5"), (0.0, "#2f7bff"), (0.33, "#12b886"), (0.66, "#f59f00"), (1.0, "#f03e3e")]
 
 
 def volt_colour(v: float, vmax: float):
-    """Colour for a voltage, as a QColor (imported lazily so this module stays Qt-free)."""
+    """Color para un voltaje, como QColor (importado perezosamente para que este módulo siga sin Qt)."""
     from PySide6.QtGui import QColor
     f = 0.0 if vmax <= 0 else max(-1.0, min(1.0, v / vmax))
     for (f0, c0), (f1, c1) in zip(VOLT_STOPS, VOLT_STOPS[1:]):
@@ -51,7 +51,7 @@ def volt_colour(v: float, vmax: float):
     return QColor(VOLT_STOPS[-1][1])
 
 
-# exports and prints always use the light "paper" colours
+# las exportaciones e impresiones siempre usan los colores "papel" claros
 PAPER = {k: LIGHT[k] for k in ("CANVAS", "INK", "WIRE", "LABEL", "LABEL_VALUE")}
 
 MODE = "light"

@@ -33,9 +33,12 @@ PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 ChangesAssociations=yes
 
+[Languages]
+Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
+
 [Tasks]
-Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Shortcuts:"
-Name: "assoc"; Description: "Open .wirely circuit files with Wirely"; GroupDescription: "Files:"
+Name: "desktopicon"; Description: "Crear un acceso directo en el &escritorio"; GroupDescription: "Accesos directos:"
+Name: "assoc"; Description: "Abrir archivos de circuito .wirely con Wirely"; GroupDescription: "Archivos:"
 
 [InstallDelete]
 ; installing over an older version: clear out its libraries first, so no stale files are left behind
@@ -52,9 +55,9 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\Wirely.exe"; Tasks: desktopic
 ; .wirely circuits (and .spark, from before the name change)
 Root: HKA; Subkey: "Software\Classes\.wirely"; ValueType: string; ValueName: ""; ValueData: "Wirely.Circuit"; Flags: uninsdeletevalue; Tasks: assoc
 Root: HKA; Subkey: "Software\Classes\.spark"; ValueType: string; ValueName: ""; ValueData: "Wirely.Circuit"; Flags: uninsdeletevalue; Tasks: assoc
-Root: HKA; Subkey: "Software\Classes\Wirely.Circuit"; ValueType: string; ValueName: ""; ValueData: "Wirely circuit"; Flags: uninsdeletekey; Tasks: assoc
+Root: HKA; Subkey: "Software\Classes\Wirely.Circuit"; ValueType: string; ValueName: ""; ValueData: "Circuito de Wirely"; Flags: uninsdeletekey; Tasks: assoc
 Root: HKA; Subkey: "Software\Classes\Wirely.Circuit\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\_internal\wirely\assets\wirely_doc.ico"; Tasks: assoc
 Root: HKA; Subkey: "Software\Classes\Wirely.Circuit\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Wirely.exe"" ""%1"""; Tasks: assoc
 
 [Run]
-Filename: "{app}\Wirely.exe"; Description: "Start Wirely now"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Wirely.exe"; Description: "Iniciar Wirely ahora"; Flags: nowait postinstall skipifsilent

@@ -1,4 +1,4 @@
-"""The things you see on the circuit sheet: parts (ComponentItem) and wires (WireItem)."""
+"""Las cosas que se ven en la hoja del circuito: componentes (ComponentItem) y cables (WireItem)."""
 from __future__ import annotations
 
 from PySide6.QtCore import QPointF, QRectF, Qt
@@ -50,8 +50,8 @@ def _r(v, k=2):
 
 
 def live_look_key(live, kind, anim_t):
-    """The parts of a part's live readings that change how it looks: while it's running, a part is only drawn again
-    when this changes (otherwise its ready-drawn picture is reused). The browser version uses it the same way."""
+    """Las partes de las lecturas en vivo de un componente que cambian su aspecto: mientras se ejecuta, un componente solo se dibuja de nuevo
+    cuando esto cambia (si no, se reutiliza su imagen ya dibujada). La versión del navegador lo usa igual."""
     if not live:
         return None
     k = (live.get("blown"), bool(live.get("warn")), live.get("reading"))
@@ -70,7 +70,7 @@ def live_look_key(live, kind, anim_t):
 
 
 class ComponentItem(QGraphicsItem):
-    """One part on the sheet. Its position is the part's centre; rotation is applied when drawing."""
+    """Un componente en la hoja. Su posición es el centro del componente; la rotación se aplica al dibujar."""
 
     def __init__(self, comp: Component, ghost=False):
         super().__init__()
@@ -83,18 +83,18 @@ class ComponentItem(QGraphicsItem):
         if ghost:
             self.setOpacity(0.55)
         else:
-            # keep a ready-drawn picture: redrawn only when the part changes (see CircuitScene.refresh_look)
+            # mantener una imagen ya dibujada: redibujada solo cuando el componente cambia (ver CircuitScene.refresh_look)
             self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
         self.look = None
         self.sync()
 
-    # ---- geometry
+    # ---- geometría
     def sync(self):
-        """Call after the model component changed (moved, rotated, values edited)."""
+        """Llamar después de que el componente del modelo cambió (movido, rotado, valores editados)."""
         self.prepareGeometryChange()
         self.setPos(self.comp.x, self.comp.y)
         self._body = S.local_bounds(self.comp.kind, self.comp.rot, self.comp.flip)
-        if self.comp.kind == "note":            # a note is as big as its text
+        if self.comp.kind == "note":            # una nota es tan grande como su texto
             fm = QFontMetricsF(_font_px(12))
             lines = S.note_lines(self.comp.props)
             w = max(fm.horizontalAdvance(t) for t in lines) + 12
@@ -107,12 +107,12 @@ class ComponentItem(QGraphicsItem):
         self._sym = r
         self._label = self._label_layout()
         b = r.united(self._label[0]) if self._label[1] else QRectF(r)
-        # room for glows, warnings and meter readouts while the simulation runs
+        # espacio para resplandores, advertencias y lecturas de medidores mientras se ejecuta la simulación
         self._bounds = b.adjusted(-30, -30, 30, 30).united(self._readout_rect().adjusted(-4, -4, 4, 4))
         self.update()
 
     def _readout_rect(self):
-        """Where a meter shows its reading (under the symbol, always level)."""
+        """Dónde muestra un medidor su lectura (debajo del símbolo, siempre nivelada)."""
         return QRectF(self._sym.center().x() - 34, self._sym.bottom() + 5, 68, 17)
 
     def _pin_local(self, name):
@@ -131,14 +131,14 @@ class ComponentItem(QGraphicsItem):
         right = any(pt.x() > b.right() + 1 for pt in pins)
         above = any(pt.y() < b.top() - 1 for pt in pins)
         below = any(pt.y() > b.bottom() + 1 for pt in pins)
-        if b.width() >= b.height() or (right and not above):   # lying flat, or pins on the right: label above
+        if b.width() >= b.height() or (right and not above):   # acostado, o pines a la derecha: etiqueta arriba
             side = "above"
-        elif right and not below:                              # pins on the right and above: label below
+        elif right and not below:                              # pines a la derecha y arriba: etiqueta abajo
             side = "below"
-        else:                                                  # standing up: label on the right
+        else:                                                  # de pie: etiqueta a la derecha
             side = "right"
-        # … unless pins come out of that side (a chip turned round, a regulator upside down): use a clear one,
-        # or the outside top-right corner, where pins never are
+        # … a menos que salgan pines por ese lado (un chip girado, un regulador al revés): usar uno libre,
+        # o la esquina superior derecha exterior, donde nunca hay pines
         clear = {"above": not above, "below": not below, "right": not right}
         if not clear[side]:
             side = next((s_ for s_ in ("above", "below", "right") if clear[s_]), "corner")
@@ -164,7 +164,7 @@ class ComponentItem(QGraphicsItem):
         path.addRect(self._body.adjusted(-3, -3, 3, 3))
         return path
 
-    # ---- drawing
+    # ---- dibujo
     def paint(self, p: QPainter, _opt, _w=None):
         p.setRenderHint(QPainter.Antialiasing)
         sc = self.scene()
@@ -205,22 +205,22 @@ class ComponentItem(QGraphicsItem):
                            align | Qt.AlignVCenter, t)
                 y += LABEL_PX + 2
 
-    # ---- live simulation extras
+    # ---- extras de simulación en vivo
     def _paint_glow(self, p: QPainter, live):
         g = live.get("_glow", 0.0)
         if g <= 0.02 or live.get("blown"):
             return
         led = "_rgb" in live or self.comp.kind == "led"
-        if "_rgb" in live:                  # bi-colour and RGB LEDs: the colours they're mixing
+        if "_rgb" in live:                  # LEDs bicolor y RGB: los colores que están mezclando
             col = QColor(live["_rgb"])
         elif self.comp.kind == "led":
             col = QColor(S.LED_RGB.get(self.comp.value("colour"), "#ff3b30"))
         else:
             col = QColor(255, 205, 40)
         radius = (22 + 22 * g) if led else (18 + 18 * g)
-        c = QPointF(0, 0)       # the LED / lamp itself sits at the part's centre (its box also covers the arrows)
+        c = QPointF(0, 0)       # el LED / lámpara está en el centro del componente (su caja también cubre las flechas)
         grad = QRadialGradient(c, radius)
-        core = QColor(col).lighter(160) if led else QColor(col)      # a bright, almost white centre
+        core = QColor(col).lighter(160) if led else QColor(col)      # un centro brillante, casi blanco
         core.setAlphaF(min(1.0, 0.95 * g + 0.05) if led else 0.75 * g)
         inner = QColor(col)
         inner.setAlphaF(min(1.0, 0.85 * g) if led else 0.75 * g)
@@ -240,7 +240,7 @@ class ComponentItem(QGraphicsItem):
         kind = self.comp.kind
         c = self._body.center()
         if live.get("blown"):
-            # a puff of smoke and a cross
+            # una nube de humo y una cruz
             p.setPen(Qt.NoPen)
             smoke = QColor(theme.BLOWN)
             smoke.setAlpha(110)
@@ -272,7 +272,7 @@ class ComponentItem(QGraphicsItem):
             p.setPen(pen)
             p.setBrush(Qt.NoBrush)
             phase = (self.scene().anim_t * 6) % 1.0 if self.scene() else 0
-            left = self._label[2] == Qt.AlignLeft          # label on the right: waves go left
+            left = self._label[2] == Qt.AlignLeft          # etiqueta a la derecha: las ondas van a la izquierda
             cx = c.x() - 12 if left else c.x() + 12
             start = 140 if left else -40
             pen.setWidthF(2.0)
@@ -341,7 +341,7 @@ class WireItem(QGraphicsItem):
         return self._shape
 
     def segment_at(self, pos: QPointF) -> int:
-        """Index of the segment nearest to pos."""
+        """Índice del segmento más cercano a pos."""
         best, best_d = 0, 1e18
         for i, ((x1, y1), (x2, y2)) in enumerate(self.wire.segments()):
             px, py = pos.x(), pos.y()
@@ -378,7 +378,7 @@ class WireItem(QGraphicsItem):
         p.setPen(pen)
         p.setBrush(Qt.NoBrush)
         p.drawPath(self._path)
-        if selected:       # show the corner points you can drag
+        if selected:       # mostrar los puntos de esquina que puede arrastrar
             p.setPen(QPen(QColor(theme.SELECT), 1.2))
             p.setBrush(QColor(theme.CANVAS))
             for x, y in self.wire.points:
@@ -394,7 +394,7 @@ class WireItem(QGraphicsItem):
 
 
 class DraftWire(QGraphicsItem):
-    """The wire you are drawing at the moment (dashed until you finish it)."""
+    """El cable que está dibujando en este momento (a trazos hasta que lo termine)."""
 
     def __init__(self):
         super().__init__()

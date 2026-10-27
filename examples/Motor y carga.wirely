@@ -1,0 +1,136 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Motor y carga",
+ "components": [
+  {
+   "id": "f595b1e5",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 6
+   }
+  },
+  {
+   "id": "085802ab",
+   "kind": "switch",
+   "ref": "S1",
+   "x": 90,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "ee1df3f4",
+   "kind": "ammeter",
+   "ref": "AM1",
+   "x": 190,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "98c6cdda",
+   "kind": "motor",
+   "ref": "M1",
+   "x": 280,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 6,
+    "load": "Ninguna"
+   }
+  },
+  {
+   "id": "1495513c",
+   "kind": "note",
+   "ref": "T1",
+   "x": 140,
+   "y": 350,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Encienda: el motor consume una corriente alta al arrancar,\ny menos después. Haga doble clic en M1 para cambiar su carga."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "13c5bce8",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     60,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "347698d7",
+   "points": [
+    [
+     120,
+     0
+    ],
+    [
+     160,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "feb124f5",
+   "points": [
+    [
+     220,
+     0
+    ],
+    [
+     280,
+     0
+    ],
+    [
+     280,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "892e36a3",
+   "points": [
+    [
+     280,
+     180
+    ],
+    [
+     280,
+     300
+    ],
+    [
+     0,
+     300
+    ],
+    [
+     0,
+     180
+    ]
+   ]
+  }
+ ]
+}

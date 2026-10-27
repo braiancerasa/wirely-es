@@ -38,7 +38,7 @@ class Scale:
 
     def text(self, v):
         if self.kind == "ldr":
-            word = "dark" if v < 5 else "dim" if v < 100 else "room" if v < 1000 else "bright"
+            word = "oscuro" if v < 5 else "tenue" if v < 100 else "habitación" if v < 1000 else "brillante"
             return f"{fmt(v, 'lux')} · {word}"
         if self.kind == "thermistor":
             return f"{v:g} °C"
@@ -58,7 +58,7 @@ class SliderItem(QGraphicsItem):
         self.setZValue(15)
         self.setAcceptHoverEvents(True)
         self.setCursor(Qt.PointingHandCursor)
-        self.setToolTip("Drag to change it while the circuit runs (or use the mouse wheel)")
+        self.setToolTip("Arrástrelo para cambiarlo mientras el circuito se ejecuta (o use la rueda del mouse)")
         self._drag = False
         self.place()
 

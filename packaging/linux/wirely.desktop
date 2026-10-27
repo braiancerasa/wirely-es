@@ -1,12 +1,12 @@
 [Desktop Entry]
 Type=Application
 Name=Wirely
-GenericName=Circuit simulator
-Comment=Draw a circuit, press play, watch it work
+GenericName=Simulador de circuitos
+Comment=Dibuje un circuito, presione Ejecutar y véalo funcionar
 Exec=Wirely %F
 Icon=wirely
 Terminal=false
 Categories=Electronics;Engineering;Education;Science;
 MimeType=application/x-wirely;
-Keywords=circuit;electronics;simulation;schematic;SPICE;LED;555;engineering;education;
+Keywords=circuito;electrónica;simulación;esquemático;SPICE;LED;555;ingeniería;educación;
 StartupWMClass=Wirely

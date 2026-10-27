@@ -3,7 +3,7 @@
 #   bash packaging/linux/install-desktop.sh /path/to/Wirely-<version>-x86_64.AppImage
 # (for your user only — nothing needs sudo). Run it again after moving the AppImage.
 set -euo pipefail
-APPIMAGE="$(readlink -f "${1:?give the path to the Wirely AppImage}")"
+APPIMAGE="$(readlink -f "${1:?indique la ruta del AppImage de Wirely}")"
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 DATA="${XDG_DATA_HOME:-$HOME/.local/share}"
 mkdir -p "$DATA/applications" "$DATA/mime/packages" "$DATA/icons/hicolor/256x256/apps" \
@@ -16,4 +16,4 @@ update-mime-database "$DATA/mime" >/dev/null 2>&1 || true
 update-desktop-database "$DATA/applications" >/dev/null 2>&1 || true
 xdg-mime default wirely.desktop application/x-wirely 2>/dev/null || true
 gtk-update-icon-cache "$DATA/icons/hicolor" >/dev/null 2>&1 || true
-echo "Wirely is now in your app menu, and .wirely files open with it."
+echo "Wirely ya está en el menú de aplicaciones, y los archivos .wirely se abren con él."

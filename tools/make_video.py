@@ -535,7 +535,7 @@ w.set_theme("light")
 card(card_image([("Wirely", 110, "#f5f7fa", True),
                  ("Free and open source (GPL-3)", 48, "#aabac6", False),
                  ("Windows  ·  Mac  ·  Linux", 48, "#aabac6", False),
-                 ("github.com/richiewillmott/Wirely", 50, "#ffc83c", True)],
+                 ("github.com/wirely-app/wirely-app.github.io", 50, "#ffc83c", True)],
                 sub="62 parts  ·  22 example circuits  ·  no account, runs on your own computer"),
      4.5)
 

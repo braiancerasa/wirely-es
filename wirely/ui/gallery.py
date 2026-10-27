@@ -1,4 +1,4 @@
-"""The parts gallery down the left side: categories of parts you click or drag onto the sheet."""
+"""La galería de componentes en el lado izquierdo: categorías de componentes en las que hace clic o arrastra a la hoja."""
 from __future__ import annotations
 
 from PySide6.QtCore import QByteArray, QMimeData, QPoint, Qt, Signal
@@ -24,8 +24,8 @@ class PartTile(QWidget):
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setFixedSize(TILE_W, TILE_H)
         self.setCursor(Qt.OpenHandCursor)
-        self.setToolTip(f"<b>{part.name}</b><br>{part.description}<br><i>Click, then click on the sheet — "
-                        f"or drag it there.</i>")
+        self.setToolTip(f"<b>{part.name}</b><br>{part.description}<br><i>Haga clic, luego clic en la hoja — "
+                        f"o arrástrelo allí.</i>")
         lay = QVBoxLayout(self)
         lay.setContentsMargins(3, 6, 3, 3)
         lay.setSpacing(2)
@@ -87,7 +87,7 @@ class Category(QWidget):
         self.header.setObjectName("categoryHeader")
         self.header.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.header.setArrowType(Qt.DownArrow)
-        self.header.setText(name.replace("&", "&&"))   # a single & would vanish on Windows
+        self.header.setText(name.replace("&", "&&"))   # un solo & desaparecería en Windows
         self.header.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.header.clicked.connect(self.toggle)
         lay.addWidget(self.header)
@@ -146,12 +146,12 @@ class Gallery(QWidget):
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(0)
-        h = QLabel("Parts")
+        h = QLabel("Componentes")
         h.setObjectName("sectionHeader")
         lay.addWidget(h)
         self.search = QLineEdit()
         self.search.setObjectName("filter")
-        self.search.setPlaceholderText("Search parts (e.g. LED, 555, switch)")
+        self.search.setPlaceholderText("Buscar componentes (p. ej. LED, 555, interruptor)")
         self.search.setClearButtonEnabled(True)
         self.search.textChanged.connect(self._filter)
         lay.addWidget(self.search)
@@ -167,7 +167,7 @@ class Gallery(QWidget):
             cat = Category(name, parts, self.picked.emit)
             self.categories.append(cat)
             v.addWidget(cat)
-        self.empty = QLabel("No parts match.")
+        self.empty = QLabel("No hay componentes que coincidan.")
         self.empty.setObjectName("hint")
         self.empty.setAlignment(Qt.AlignCenter)
         self.empty.hide()

@@ -1,7 +1,7 @@
-"""Start Wirely. On the first run this installs everything it needs automatically.
+"""Inicia Wirely. En la primera ejecución instala automáticamente todo lo que necesita.
 
-    python start.py                   (or double-click run_wirely.bat on Windows)
-    python start.py my_circuit.wirely
+    python start.py                   (o haga doble clic en run_wirely.bat en Windows)
+    python start.py mi_circuito.wirely
 """
 import os
 import sys

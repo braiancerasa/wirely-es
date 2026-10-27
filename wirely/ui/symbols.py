@@ -17,8 +17,8 @@ from ..model.circuit import transform
 LW = 2.0          # line width in sheet units
 
 LED_RGB = {
-    "Red": "#ff3b30", "Green": "#2fd158", "Yellow": "#ffd60a", "Blue": "#2f7bff",
-    "White": "#f4f6ff", "Orange": "#ff9f0a",
+    "Rojo": "#ff3b30", "Verde": "#2fd158", "Amarillo": "#ffd60a", "Azul": "#2f7bff",
+    "Blanco": "#f4f6ff", "Naranja": "#ff9f0a",
 }
 
 
@@ -391,7 +391,7 @@ def led_fill(col, glow):
 
 
 def _led(c):
-    col = QColor(LED_RGB.get(c.props.get("colour", "Red"), "#ff3b30"))
+    col = QColor(LED_RGB.get(c.props.get("colour", "Rojo"), "#ff3b30"))
     glow = c.props.get("_glow", 0.0)            # set by the simulator from r2 on
     _diode_body(c, led_fill(col, glow))
     c.arrow(-1, -13, 7, -23, 4.5, 1.5)
@@ -510,14 +510,14 @@ def _signal_gen(c):
     c.circle(0, 0, 16, c.paper)
     c.p.save()
     c.unrotate()
-    w = c.props.get("waveform", "Square")
+    w = c.props.get("waveform", "Cuadrada")
     path = QPainterPath()
-    if w == "Square":
+    if w == "Cuadrada":
         pts = [(-9, 4), (-9, -5), (0, -5), (0, 5), (9, 5), (9, -4)]
         path.moveTo(*pts[0])
         for pt in pts[1:]:
             path.lineTo(*pt)
-    elif w == "Triangle":
+    elif w == "Triangular":
         path.moveTo(-9, 4)
         path.lineTo(-4.5, -5)
         path.lineTo(4.5, 5)
@@ -709,7 +709,7 @@ def _sevenseg(c):
     p.setPen(c.pen())
     p.setBrush(QColor("#1b1d21"))
     p.drawRoundedRect(QRectF(-30, -50, 60, 100), 5, 5)
-    col = QColor(LED_RGB.get(c.props.get("colour", "Red"), "#ff3b30"))
+    col = QColor(LED_RGB.get(c.props.get("colour", "Rojo"), "#ff3b30"))
     lit = c.props.get("_segs") or [0.0] * 7
     for i, s in enumerate("abcdefg"):
         x0, y0, x1, y1 = SEG_GEOM[s]

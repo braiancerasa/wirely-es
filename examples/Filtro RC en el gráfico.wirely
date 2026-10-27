@@ -1,0 +1,139 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Filtro RC en el gráfico",
+ "components": [
+  {
+   "id": "c6fc70a4",
+   "kind": "signal_gen",
+   "ref": "SG1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "waveform": "Cuadrada",
+    "frequency": 5,
+    "amplitude": 2.5,
+    "offset": 2.5,
+    "duty": 50.0
+   }
+  },
+  {
+   "id": "a940e2eb",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 130,
+   "y": 60,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 10000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "bb51e386",
+   "kind": "capacitor",
+   "ref": "C1",
+   "x": 220,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "capacitance": 4.7e-06
+   }
+  },
+  {
+   "id": "4f5792e4",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 240,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "47facdad",
+   "kind": "scope_probe",
+   "ref": "P1",
+   "x": 50,
+   "y": 60,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "channel": "A"
+   }
+  },
+  {
+   "id": "dae02b7b",
+   "kind": "scope_probe",
+   "ref": "P2",
+   "x": 220,
+   "y": 100,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "channel": "B"
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "7164f164",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     0,
+     60
+    ],
+    [
+     100,
+     60
+    ]
+   ]
+  },
+  {
+   "id": "c949369a",
+   "points": [
+    [
+     160,
+     60
+    ],
+    [
+     220,
+     60
+    ],
+    [
+     220,
+     130
+    ]
+   ]
+  },
+  {
+   "id": "2af6fdff",
+   "points": [
+    [
+     0,
+     180
+    ],
+    [
+     0,
+     240
+    ],
+    [
+     220,
+     240
+    ],
+    [
+     220,
+     170
+    ]
+   ]
+  }
+ ]
+}

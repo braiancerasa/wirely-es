@@ -1,4 +1,4 @@
-"""The Wirely main window: top bar with menus, toolbar, parts gallery, circuit sheet and status bar."""
+"""La ventana principal de Wirely: barra superior con menús, barra de herramientas, galería de componentes, hoja de circuito y barra de estado."""
 from __future__ import annotations
 
 import glob
@@ -24,11 +24,11 @@ from .view import CircuitView
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 EXAMPLES = os.path.join(ROOT, "examples")
-FILE_FILTER = f"Wirely circuits (*{FILE_EXT} *.spark)"
+FILE_FILTER = f"Circuitos Wirely (*{FILE_EXT} *.spark)"
 
 
 class Snapshot(QUndoCommand):
-    """One undo step: the whole circuit before and after (circuits are small, so this is simple and safe)."""
+    """Un paso de deshacer: todo el circuito antes y después (los circuitos son pequeños, así que esto es simple y seguro)."""
 
     def __init__(self, win, before, after, label):
         super().__init__(label)
@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
         self._autosave_timer.timeout.connect(self.autosave)
         self._autosave_timer.start()
 
-    # ================================================================== layout
+    # ================================================================== diseño
     def _build_ui(self):
         central = QWidget()
         central.setObjectName("central")
@@ -156,65 +156,65 @@ class MainWindow(QMainWindow):
 
     def _make_actions(self):
         A = self._act
-        self.a_new = A("New circuit", self.new_file, "Ctrl+N", "new")
-        self.a_open = A("Open…", self.open_file, "Ctrl+O", "open")
-        self.a_save = A("Save", self.save, "Ctrl+S", "save")
-        self.a_save_as = A("Save as…", self.save_as, "Ctrl+Shift+S")
-        self.a_export = A("Export diagram…", self.export_diagram, "Ctrl+E", "export",
-                          "Export the circuit diagram as PNG, SVG or PDF")
-        self.a_bom = A("Bill of materials…", self.show_bom, None, "bom", "Parts list for this circuit")
-        self.a_quit = A("Quit", self.close, "Ctrl+Q")
-        self.a_undo = A("Undo", self.undo.undo, "Ctrl+Z", "undo")
-        self.a_redo = A("Redo", self.undo.redo, ["Ctrl+Y", "Ctrl+Shift+Z"], "redo")
-        self.a_cut = A("Cut", self.cut, "Ctrl+X")
-        self.a_copy = A("Copy", self.copy, "Ctrl+C")
-        self.a_paste = A("Paste", self.paste, "Ctrl+V")
-        self.a_dup = A("Duplicate", self.duplicate, "Ctrl+D")
-        self.a_copy_pic = A("Copy diagram as picture", self.copy_picture, "Ctrl+Shift+C",
-                            tip="Copy the diagram so you can paste it into Word, PowerPoint …")
-        self.a_delete = A("Delete", self.delete, ["Delete", "Backspace"], "delete")
-        self.a_select_all = A("Select all", self.scene.select_all, "Ctrl+A")
-        self.a_rotate = A("Rotate", lambda: self.scene.rotate_selected(True), "R", "rotate", "Rotate clockwise")
-        self.a_rotate_ccw = A("Rotate anticlockwise", lambda: self.scene.rotate_selected(False), "Shift+R",
+        self.a_new = A("Nuevo circuito", self.new_file, "Ctrl+N", "new")
+        self.a_open = A("Abrir…", self.open_file, "Ctrl+O", "open")
+        self.a_save = A("Guardar", self.save, "Ctrl+S", "save")
+        self.a_save_as = A("Guardar como…", self.save_as, "Ctrl+Shift+S")
+        self.a_export = A("Exportar diagrama…", self.export_diagram, "Ctrl+E", "export",
+                          "Exportar el diagrama del circuito como PNG, SVG o PDF")
+        self.a_bom = A("Lista de materiales…", self.show_bom, None, "bom", "Lista de componentes de este circuito")
+        self.a_quit = A("Salir", self.close, "Ctrl+Q")
+        self.a_undo = A("Deshacer", self.undo.undo, "Ctrl+Z", "undo")
+        self.a_redo = A("Rehacer", self.undo.redo, ["Ctrl+Y", "Ctrl+Shift+Z"], "redo")
+        self.a_cut = A("Cortar", self.cut, "Ctrl+X")
+        self.a_copy = A("Copiar", self.copy, "Ctrl+C")
+        self.a_paste = A("Pegar", self.paste, "Ctrl+V")
+        self.a_dup = A("Duplicar", self.duplicate, "Ctrl+D")
+        self.a_copy_pic = A("Copiar diagrama como imagen", self.copy_picture, "Ctrl+Shift+C",
+                            tip="Copiar el diagrama para pegarlo en Word, PowerPoint …")
+        self.a_delete = A("Eliminar", self.delete, ["Delete", "Backspace"], "delete")
+        self.a_select_all = A("Seleccionar todo", self.scene.select_all, "Ctrl+A")
+        self.a_rotate = A("Rotar", lambda: self.scene.rotate_selected(True), "R", "rotate", "Rotar en sentido horario")
+        self.a_rotate_ccw = A("Rotar en sentido antihorario", lambda: self.scene.rotate_selected(False), "Shift+R",
                               "rotate_ccw")
-        self.a_flip = A("Flip", self.scene.flip_selected, "F", "flip", "Flip left-to-right")
-        self.a_props = A("Properties…", self.edit_selected, ["Return", "Enter"], None, "Change the part's values")
-        self.a_select = A("Select", lambda: self.scene.set_mode("select"), None, "select",
-                          "Select and move  (Esc)", checkable=True)
-        self.a_wire = A("Wire", lambda: self.scene.set_mode("wire"), "W", "wire",
-                        "Draw wires — also branch off existing wires", checkable=True)
+        self.a_flip = A("Voltear", self.scene.flip_selected, "F", "flip", "Voltear de izquierda a derecha")
+        self.a_props = A("Propiedades…", self.edit_selected, ["Return", "Enter"], None, "Cambiar los valores del componente")
+        self.a_select = A("Seleccionar", lambda: self.scene.set_mode("select"), None, "select",
+                          "Seleccionar y mover  (Esc)", checkable=True)
+        self.a_wire = A("Cable", lambda: self.scene.set_mode("wire"), "W", "wire",
+                        "Dibujar cables — también ramificar desde cables existentes", checkable=True)
         self.a_select.setChecked(True)
-        self.a_zoom_in = A("Zoom in", lambda: self.view.zoom_by(1.25), ["Ctrl+=", "+", "="], "zoom_in")
-        self.a_zoom_out = A("Zoom out", lambda: self.view.zoom_by(0.8), ["Ctrl+-", "-"], "zoom_out")
-        self.a_fit = A("Zoom to fit", self.zoom_fit, "Ctrl+0", "zoom_fit", "Show the whole circuit")
-        self.a_grid = A("Show grid", self.toggle_grid, "G", "grid", checkable=True)
-        self.a_dark = A("Dark theme", self.toggle_theme, None, "theme", "Switch between light and dark",
+        self.a_zoom_in = A("Acercar", lambda: self.view.zoom_by(1.25), ["Ctrl+=", "+", "="], "zoom_in")
+        self.a_zoom_out = A("Alejar", lambda: self.view.zoom_by(0.8), ["Ctrl+-", "-"], "zoom_out")
+        self.a_fit = A("Ajustar zoom", self.zoom_fit, "Ctrl+0", "zoom_fit", "Mostrar todo el circuito")
+        self.a_grid = A("Mostrar cuadrícula", self.toggle_grid, "G", "grid", checkable=True)
+        self.a_dark = A("Tema oscuro", self.toggle_theme, None, "theme", "Cambiar entre claro y oscuro",
                         checkable=True)
         self.a_dark.setChecked(theme.MODE == "dark")
-        self.a_us = A("US symbols", self.toggle_symbols, None, None,
-                      "Draw parts the American way (zigzag resistors) instead of the British way", checkable=True)
+        self.a_us = A("Símbolos EE. UU.", self.toggle_symbols, None, None,
+                      "Dibujar componentes al estilo americano (resistencias en zigzag) en lugar del británico", checkable=True)
         self.a_us.setChecked(S.STYLE == "us")
-        self.a_help = A("Mouse and keyboard…", lambda: ShortcutsDialog(self).exec(), "F1")
-        self.a_about = A(f"About {APP_NAME}", self.about)
-        self.a_play = A("Run", self.sim_run, "F5", "play", "Run the circuit — watch it work")
-        self.a_pause = A("Pause", self.sim_pause, "F6", "pause", "Pause the simulation")
-        self.a_stop = A("Stop", self.sim_stop, ["Shift+F5", "F7"], "stop", "Stop and go back to editing")
-        self.a_volts = A("Voltage colours", self._toggle_volts, None, "volts",
-                         "Colour the wires by voltage while running", checkable=True)
-        self.a_readings = A("Readings", self._toggle_readings, None, "readings",
-                            "Show the voltage and current on every wire and part while running — or click one "
-                            "wire or part to pin just its reading", checkable=True)
-        self.a_copy_readings = A("Copy readings", self.copy_readings, None, None,
-                                 "Copy every part's voltage, current and power as a table — paste it into a "
-                                 "spreadsheet or your write-up")
+        self.a_help = A("Mouse y teclado…", lambda: ShortcutsDialog(self).exec(), "F1")
+        self.a_about = A(f"Acerca de {APP_NAME}", self.about)
+        self.a_play = A("Ejecutar", self.sim_run, "F5", "play", "Ejecutar el circuito — verlo funcionar")
+        self.a_pause = A("Pausar", self.sim_pause, "F6", "pause", "Pausar la simulación")
+        self.a_stop = A("Detener", self.sim_stop, ["Shift+F5", "F7"], "stop", "Detener y volver a editar")
+        self.a_volts = A("Colores de voltaje", self._toggle_volts, None, "volts",
+                         "Colorear los cables por voltaje durante la ejecución", checkable=True)
+        self.a_readings = A("Lecturas", self._toggle_readings, None, "readings",
+                            "Mostrar el voltaje y la corriente en cada cable y componente durante la ejecución — o haga clic en un "
+                            "cable o componente para fijar solo su lectura", checkable=True)
+        self.a_copy_readings = A("Copiar lecturas", self.copy_readings, None, None,
+                                 "Copiar el voltaje, la corriente y la potencia de cada componente como tabla — péguela en una "
+                                 "hoja de cálculo o en su informe")
         self.a_copy_readings.setEnabled(False)
-        self.a_flow = A("Current flow", self._toggle_flow, None, "flow",
-                        "Show current flowing along the wires while running", checkable=True)
-        self.a_sound = A("Sound", self._toggle_sound, None, "sound", "Buzzers, speakers, motors and relays make "
-                         "sound while running", checkable=True)
+        self.a_flow = A("Flujo de corriente", self._toggle_flow, None, "flow",
+                        "Mostrar la corriente fluyendo por los cables durante la ejecución", checkable=True)
+        self.a_sound = A("Sonido", self._toggle_sound, None, "sound", "Zumbadores, parlantes, motores y relés emiten "
+                         "sonido durante la ejecución", checkable=True)
         self.a_sound.setChecked(self.settings.value("sound", "true") == "true")
-        self.a_graph = A("Graph", self._graph_toggled, "Ctrl+G", "graph",
-                         "Show the graph of the voltages at the graph probes", checkable=True)
+        self.a_graph = A("Gráfico", self._graph_toggled, "Ctrl+G", "graph",
+                         "Mostrar el gráfico de los voltajes en las sondas de gráfico", checkable=True)
         self.a_volts.setChecked(self.settings.value("volts", "true") == "true")
         self.a_flow.setChecked(self.settings.value("flow", "true") == "true")
         self.a_readings.setChecked(self.settings.value("readings", "false") == "true")
@@ -252,25 +252,25 @@ class MainWindow(QMainWindow):
         h.addSpacing(18)
         self.menus = {}
         for name, acts in (
-            ("File", [self.a_new, self.a_open, "recent", "examples", None, self.a_save, self.a_save_as, None,
+            ("Archivo", [self.a_new, self.a_open, "recent", "examples", None, self.a_save, self.a_save_as, None,
                       self.a_export, self.a_copy_pic, self.a_bom, None, self.a_quit]),
-            ("Edit", [self.a_undo, self.a_redo, None, self.a_cut, self.a_copy, self.a_paste, self.a_dup,
+            ("Editar", [self.a_undo, self.a_redo, None, self.a_cut, self.a_copy, self.a_paste, self.a_dup,
                       self.a_delete, self.a_select_all, None, self.a_rotate, self.a_rotate_ccw, self.a_flip,
                       None, self.a_props]),
-            ("Simulate", [self.a_play, self.a_pause, self.a_stop, None, self.a_volts, self.a_flow, self.a_readings, self.a_copy_readings,
+            ("Simular", [self.a_play, self.a_pause, self.a_stop, None, self.a_volts, self.a_flow, self.a_readings, self.a_copy_readings,
                           self.a_graph, self.a_sound]),
-            ("View", [self.a_zoom_in, self.a_zoom_out, self.a_fit, None, self.a_grid, self.a_dark, self.a_us]),
-            ("Help", [self.a_help, self.a_about]),
+            ("Ver", [self.a_zoom_in, self.a_zoom_out, self.a_fit, None, self.a_grid, self.a_dark, self.a_us]),
+            ("Ayuda", [self.a_help, self.a_about]),
         ):
             m = QMenu(self)
             for a in acts:
                 if a is None:
                     m.addSeparator()
                 elif a == "examples":
-                    self.examples_menu = m.addMenu("Open example")
+                    self.examples_menu = m.addMenu("Abrir ejemplo")
                     self._fill_examples()
                 elif a == "recent":
-                    self.recent_menu = m.addMenu("Open recent")
+                    self.recent_menu = m.addMenu("Abrir reciente")
                     self.recent_menu.aboutToShow.connect(self._fill_recent)
                 else:
                     m.addAction(a)
@@ -282,11 +282,11 @@ class MainWindow(QMainWindow):
             h.addWidget(b)
             self.menus[name] = m
         h.addSpacing(18)
-        self.docname = QLabel("Untitled")
+        self.docname = QLabel("Sin título")
         self.docname.setObjectName("docname")
         h.addWidget(self.docname)
         h.addStretch(1)
-        tip = QLabel("Wheel: zoom · Middle-drag: pan · Double-click a part to change it")
+        tip = QLabel("Rueda: zoom · Arrastrar con botón central: panorámica · Doble clic en un componente para cambiarlo")
         tip.setObjectName("muted")
         h.addWidget(tip)
         return bar
@@ -311,7 +311,7 @@ class MainWindow(QMainWindow):
         for a in (self.a_rotate, self.a_flip, self.a_delete):
             h.addWidget(T(a))
         h.addStretch(1)
-        # simulation controls in the middle
+        # controles de simulación en el centro
         sim = QWidget()
         sh = QHBoxLayout(sim)
         sh.setContentsMargins(0, 0, 0, 0)
@@ -320,10 +320,10 @@ class MainWindow(QMainWindow):
             sh.addWidget(T(a))
         sh.addSpacing(6)
         self.speed_box = QComboBox()
-        self.speed_box.setToolTip("Simulation speed")
+        self.speed_box.setToolTip("Velocidad de simulación")
         for name, _v in SPEEDS:
             self.speed_box.addItem(name)
-        self.speed_box.setCurrentText("Real time")
+        self.speed_box.setCurrentText("Tiempo real")
         self.speed_box.currentIndexChanged.connect(lambda i: self.simc.set_speed(SPEEDS[i][1]))
         sh.addWidget(self.speed_box)
         self.time_label = QLabel("")
@@ -346,7 +346,7 @@ class MainWindow(QMainWindow):
         h.addWidget(T(self.a_dark))
         return bar
 
-    # ================================================================== undo / state
+    # ================================================================== deshacer / estado
     def _on_edited(self, label):
         now = self.circuit.to_dict()
         if now != self._last:
@@ -363,7 +363,7 @@ class MainWindow(QMainWindow):
         self._update_counts()
 
     def _update_title(self, *_):
-        name = os.path.splitext(os.path.basename(self.path))[0] if self.path else "Untitled"
+        name = os.path.splitext(os.path.basename(self.path))[0] if self.path else "Sin título"
         dirty = not self.undo.isClean()
         self.docname.setText(name + ("  •" if dirty else ""))
         self.setWindowTitle(f"{name}{' *' if dirty else ''} – {APP_NAME}")
@@ -371,7 +371,7 @@ class MainWindow(QMainWindow):
     def _update_actions(self):
         try:
             comps, wires = self.scene.selected_ids()
-        except RuntimeError:        # the window is closing
+        except RuntimeError:        # la ventana se está cerrando
             return
         has = bool(comps or wires)
         running = hasattr(self, "simc") and self.simc.active()
@@ -385,8 +385,8 @@ class MainWindow(QMainWindow):
         self.a_props.setEnabled(len(comps) == 1)
         self.a_undo.setEnabled(self.undo.canUndo() and not running)
         self.a_redo.setEnabled(self.undo.canRedo() and not running)
-        self.a_undo.setToolTip(f"Undo {self.undo.undoText()}  (Ctrl+Z)" if self.undo.canUndo() else "Undo")
-        self.a_redo.setToolTip(f"Redo {self.undo.redoText()}  (Ctrl+Y)" if self.undo.canRedo() else "Redo")
+        self.a_undo.setToolTip(f"Deshacer {self.undo.undoText()}  (Ctrl+Z)" if self.undo.canUndo() else "Deshacer")
+        self.a_redo.setToolTip(f"Rehacer {self.undo.redoText()}  (Ctrl+Y)" if self.undo.canRedo() else "Rehacer")
 
     def _on_undo_index(self, _i):
         self._update_actions()
@@ -394,10 +394,10 @@ class MainWindow(QMainWindow):
 
     def _update_counts(self):
         n, w = len(self.circuit.components), len(self.circuit.wires)
-        self.count_label.setText(f"{n} part{'s' * (n != 1)} · {w} wire{'s' * (w != 1)}")
+        self.count_label.setText(f"{n} componente{'s' if n != 1 else ''} · {w} cable{'s' if w != 1 else ''}")
 
     def _hint(self, text):
-        self.hint.setText(text or "Pick a part from the gallery, or drag from a pin to draw a wire.")
+        self.hint.setText(text or "Elija un componente de la galería, o arrastre desde un pin para dibujar un cable.")
 
     def _on_mode(self, mode):
         self.a_select.setChecked(mode != "wire")
@@ -407,16 +407,16 @@ class MainWindow(QMainWindow):
 
     def _pick_part(self, kind):
         if self.simc.active():
-            self.view.toast("Press Stop to go back to editing, then add the part.", "info")
+            self.view.toast("Presione Detener para volver a editar, luego agregue el componente.", "info")
             return
         self.scene.start_placing(kind, keep=bool(QApplication.keyboardModifiers() & Qt.ShiftModifier))
         self.view.setFocus()
 
-    # ================================================================== files
+    # ================================================================== archivos
     def _confirm_discard(self) -> bool:
         if self.undo.isClean():
             return True
-        r = QMessageBox.question(self, APP_NAME, "Save changes to this circuit first?",
+        r = QMessageBox.question(self, APP_NAME, "¿Guardar los cambios en este circuito primero?",
                                  QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel, QMessageBox.Save)
         if r == QMessageBox.Save:
             return self.save()
@@ -435,7 +435,7 @@ class MainWindow(QMainWindow):
         self._update_title()
         self._update_counts()
         self._fit_contents(animate=False)
-        QTimer.singleShot(0, lambda: self._fit_contents(animate=False))   # again once the window has its size
+        QTimer.singleShot(0, lambda: self._fit_contents(animate=False))   # de nuevo cuando la ventana tiene su tamaño
 
     def new_file(self):
         self.sim_stop()
@@ -447,13 +447,13 @@ class MainWindow(QMainWindow):
         if not path:
             if not self._confirm_discard():
                 return
-            path, _ = QFileDialog.getOpenFileName(self, "Open circuit", self.settings.value("dir", ""), FILE_FILTER)
+            path, _ = QFileDialog.getOpenFileName(self, "Abrir circuito", self.settings.value("dir", ""), FILE_FILTER)
             if not path:
                 return
         try:
             c = Circuit.load(path)
-        except Exception as e:      # noqa: BLE001 - show any problem to the user
-            QMessageBox.warning(self, APP_NAME, f"Couldn't open {os.path.basename(path)}:\n{e}")
+        except Exception as e:      # noqa: BLE001 - mostrar cualquier problema al usuario
+            QMessageBox.warning(self, APP_NAME, f"No se pudo abrir {os.path.basename(path)}:\n{e}")
             return
         self._set_circuit(c, path)
         self._add_recent(path)
@@ -464,17 +464,17 @@ class MainWindow(QMainWindow):
         try:
             self.circuit.save(self.path)
         except OSError as e:
-            QMessageBox.warning(self, APP_NAME, f"Couldn't save:\n{e}")
+            QMessageBox.warning(self, APP_NAME, f"No se pudo guardar:\n{e}")
             return False
         self.undo.setClean()
         self._update_title()
         self.clear_autosave()
-        self.statusBar().showMessage(f"Saved {os.path.basename(self.path)}", 3000)
+        self.statusBar().showMessage(f"Guardado {os.path.basename(self.path)}", 3000)
         return True
 
     def save_as(self) -> bool:
         start = os.path.join(self.settings.value("dir", ""), self.docname.text().strip(" •") + FILE_EXT)
-        path, _ = QFileDialog.getSaveFileName(self, "Save circuit", start, FILE_FILTER)
+        path, _ = QFileDialog.getSaveFileName(self, "Guardar circuito", start, FILE_FILTER)
         if not path:
             return False
         if not path.lower().endswith(FILE_EXT):
@@ -494,7 +494,7 @@ class MainWindow(QMainWindow):
         self.recent_menu.clear()
         rec = [p for p in (self.settings.value("recent") or []) if os.path.exists(p)]
         if not rec:
-            self.recent_menu.addAction("(nothing yet)").setEnabled(False)
+            self.recent_menu.addAction("(nada aún)").setEnabled(False)
         for p in rec:
             self.recent_menu.addAction(os.path.basename(p), lambda p=p: self._open_checked(p))
 
@@ -508,19 +508,19 @@ class MainWindow(QMainWindow):
             name = os.path.splitext(os.path.basename(p))[0]
             self.examples_menu.addAction(name, lambda p=p: self._open_checked(p))
 
-    # ================================================================== export
+    # ================================================================== exportar
     def _title_for_export(self):
         return self.docname.text().strip(" •")
 
     def export_diagram(self):
         if self.circuit.is_empty():
-            QMessageBox.information(self, APP_NAME, "There's nothing to export yet — add some parts first.")
+            QMessageBox.information(self, APP_NAME, "Aún no hay nada que exportar — agregue algunos componentes primero.")
             return
         last = self.settings.value("export_ext", ".png")
         start = os.path.join(self.settings.value("dir", ""), self._title_for_export() + last)
-        filters = "PNG picture (*.png);;SVG drawing (*.svg);;PDF page (*.pdf)"
-        sel = {".png": "PNG picture (*.png)", ".svg": "SVG drawing (*.svg)", ".pdf": "PDF page (*.pdf)"}[last]
-        path, chosen = QFileDialog.getSaveFileName(self, "Export circuit diagram", start, filters, sel)
+        filters = "Imagen PNG (*.png);;Dibujo SVG (*.svg);;Página PDF (*.pdf)"
+        sel = {".png": "Imagen PNG (*.png)", ".svg": "Dibujo SVG (*.svg)", ".pdf": "Página PDF (*.pdf)"}[last]
+        path, chosen = QFileDialog.getSaveFileName(self, "Exportar diagrama del circuito", start, filters, sel)
         if not path:
             return
         ext = os.path.splitext(path)[1].lower()
@@ -530,28 +530,28 @@ class MainWindow(QMainWindow):
         try:
             EX.export(self.scene, path, self._title_for_export())
         except Exception as e:      # noqa: BLE001
-            QMessageBox.warning(self, APP_NAME, f"Couldn't export:\n{e}")
+            QMessageBox.warning(self, APP_NAME, f"No se pudo exportar:\n{e}")
             return
         self.settings.setValue("export_ext", ext)
-        self.statusBar().showMessage(f"Exported {os.path.basename(path)}", 4000)
+        self.statusBar().showMessage(f"Exportado {os.path.basename(path)}", 4000)
 
     def copy_picture(self):
         if self.circuit.is_empty():
             return
         QApplication.clipboard().setImage(EX.render_image(self.scene, 3.0))
-        self.statusBar().showMessage("Diagram copied — paste it into your document", 3000)
+        self.statusBar().showMessage("Diagrama copiado — péguelo en su documento", 3000)
 
     def show_bom(self):
         BomDialog(self.circuit, self).exec()
 
-    # ================================================================== editing
+    # ================================================================== edición
     def edit_part(self, cid):
         comp = self.circuit.components.get(cid)
         if not comp:
             return
         dlg = PropertiesDialog(comp, self.circuit, self)
         if dlg.exec():
-            if self.simc.active():          # change it live: the circuit carries on running
+            if self.simc.active():          # cambiarlo en vivo: el circuito sigue ejecutándose
                 for k, v in dlg.values.items():
                     if comp.value(k) != v:
                         self.simc.set_value(cid, k, v)
@@ -562,7 +562,7 @@ class MainWindow(QMainWindow):
                 self.scene.update_component(cid, dlg.values, dlg.new_ref)
 
     def _context_menu(self, pos):
-        """What a right-click offers: depends on what's under the mouse and whether the circuit is running."""
+        """Lo que ofrece un clic derecho: depende de lo que haya bajo el mouse y de si el circuito se está ejecutando."""
         from .items import ComponentItem, WireItem
         item = self.scene.item_at(pos)
         m = QMenu(self)
@@ -593,7 +593,7 @@ class MainWindow(QMainWindow):
         self._update_actions()
         return m
 
-    # ================================================================== autosave
+    # ================================================================== autoguardado
     def _autosave_paths(self):
         from PySide6.QtCore import QStandardPaths
         d = QStandardPaths.writableLocation(QStandardPaths.AppDataLocation) or os.path.expanduser("~/.wirely")
@@ -601,7 +601,7 @@ class MainWindow(QMainWindow):
         return os.path.join(d, "autosave" + FILE_EXT), os.path.join(d, "autosave.json")
 
     def autosave(self):
-        """Every minute, keep a copy of unsaved work in case the computer or program crashes."""
+        """Cada minuto, guardar una copia del trabajo no guardado por si el computadora o el programa se cuelga."""
         if self.undo.isClean() or self.circuit.is_empty():
             return
         try:
@@ -621,12 +621,12 @@ class MainWindow(QMainWindow):
                 pass
 
     def offer_recovery(self):
-        """At start-up: if Wirely didn't close properly last time, offer the unsaved circuit back."""
+        """Al inicio: si Wirely no se cerró correctamente la última vez, ofrecer de vuelta el circuito no guardado."""
         data, meta = self._autosave_paths()
         if not os.path.exists(data):
             return False
-        r = QMessageBox.question(self, APP_NAME, "Wirely didn't close properly last time.\n"
-                                 "Do you want to get back the circuit you hadn't saved?",
+        r = QMessageBox.question(self, APP_NAME, "Wirely no se cerró correctamente la última vez.\n"
+                                 "¿Quiere recuperar el circuito que no había guardado?",
                                  QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if r == QMessageBox.Yes:
             try:
@@ -635,7 +635,7 @@ class MainWindow(QMainWindow):
                 with open(meta, encoding="utf-8") as fh:
                     path = json.load(fh).get("path") or None
                 self._set_circuit(c, path)
-                self.undo.resetClean()             # not saved yet: show it as changed
+                self.undo.resetClean()             # aún no guardado: mostrarlo como cambiado
                 self._update_title()
                 return True
             except (OSError, ValueError):
@@ -643,16 +643,16 @@ class MainWindow(QMainWindow):
         self.clear_autosave()
         return False
 
-    # ================================================================== simulation
+    # ================================================================== simulación
     def sim_run(self):
         if self.simc.state == "paused":
             self.simc.resume()
             return
         if self.simc.state == "running":
-            self.simc.pause()           # F5 toggles
+            self.simc.pause()           # F5 alterna
             return
         if self.circuit.is_empty():
-            self.view.toast("Add some parts and wire them up first — then press Play.", "info")
+            self.view.toast("Agregue algunos componentes y conéctalos primero — luego presione Ejecutar.", "info")
             return
         self.scene.cancel()
         self.scene.set_mode("select")
@@ -663,9 +663,9 @@ class MainWindow(QMainWindow):
                                          getattr(self, "_graph_by_hand", False)))
         try:
             self.simc.start(self.circuit)
-        except Exception as e:      # noqa: BLE001 - never crash the editor because of a bad circuit
+        except Exception as e:      # noqa: BLE001 - nunca bloquear el editor por un circuito defectuoso
             self.simc.stop()
-            QMessageBox.warning(self, APP_NAME, f"The simulation couldn't start:\n{e}")
+            QMessageBox.warning(self, APP_NAME, f"La simulación no pudo iniciarse:\n{e}")
 
     def sim_pause(self):
         self.simc.pause()
@@ -683,7 +683,7 @@ class MainWindow(QMainWindow):
         elif state == "stopped":
             self.sound.stop()
         self.a_play.setEnabled(state != "running")
-        self.a_play.setToolTip("Resume  (F5)" if state == "paused" else "Run the circuit — watch it work  (F5)")
+        self.a_play.setToolTip("Reanudar  (F5)" if state == "paused" else "Ejecutar el circuito — verlo funcionar  (F5)")
         self.a_pause.setEnabled(running)
         self.a_stop.setEnabled(state != "stopped")
         self.a_copy_readings.setEnabled(state != "stopped")
@@ -692,15 +692,15 @@ class MainWindow(QMainWindow):
         if state == "stopped":
             self.time_label.setText("")
             self.view.clear_toasts()
-            # switch positions and slider settings changed while running are kept, without an undo step
+            # las posiciones de interruptores y ajustes de deslizadores cambiados durante la ejecución se mantienen, sin un paso de deshacer
             if getattr(self, "_sim_dirty", False) or self.circuit.to_dict() != self._last:
                 self._last = self.circuit.to_dict()
             self._sim_dirty = False
             self.scene.refresh_connections()
             self._hint("")
         else:
-            self._hint("Running — click switches, drag sliders, hover over wires to read voltages." if running
-                       else "Paused — press Play to carry on, or Stop to edit.")
+            self._hint("Ejecutando — haga clic en interruptores, arrastre deslizadores, pase el mouse sobre los cables para leer voltajes." if running
+                       else "Pausado — presione Ejecutar para continuar, o Detener para editar.")
         self.scene.update()
 
     def _graph_toggled(self):
@@ -722,14 +722,15 @@ class MainWindow(QMainWindow):
         t = self.simc.live.t
         txt = f"t = {t:.2f} s" if t < 100 else f"t = {t:.0f} s"
         if self.simc.behind and self.simc.state == "running":
-            txt += "  · slowed"
-            self.time_label.setToolTip("This circuit is too busy to simulate in real time, so it runs slower.")
+            txt += "  · ralentizado"
+            self.time_label.setToolTip("Este circuito es demasiado complejo para simularlo en tiempo real, así que se ejecuta más lento.")
         else:
-            self.time_label.setToolTip("Simulated time since you pressed Play")
+            self.time_label.setToolTip("Tiempo simulado desde que presionó Ejecutar")
         self.time_label.setText(txt)
 
     def _on_sim_message(self, cid, text):
-        self.view.toast(text, "error" if ("popped" in text or "blew" in text or "burnt" in text) else "warn")
+        self.view.toast(text, "error" if ("quemó" in text or "fundió" in text or "reventó" in text
+                                          or "destruido" in text) else "warn")
 
     def _toggle_volts(self):
         self.scene.show_volts = self.a_volts.isChecked()
@@ -745,13 +746,13 @@ class MainWindow(QMainWindow):
     def _sound_availability(self, ok):
         if not ok:
             self.a_sound.setEnabled(False)
-            self.a_sound.setToolTip("No working sound output was found on this computer")
+            self.a_sound.setToolTip("No se encontró una salida de sonido funcional en esta computadora")
 
     def copy_readings(self):
         text = self.scene.readings_text()
         if text:
             QApplication.clipboard().setText(text)
-            self.statusBar().showMessage("Readings copied — paste them into a spreadsheet or document", 4000)
+            self.statusBar().showMessage("Lecturas copiadas — péguelas en una hoja de cálculo o documento", 4000)
 
     def _toggle_readings(self):
         self.scene.show_readings = self.a_readings.isChecked()
@@ -769,7 +770,7 @@ class MainWindow(QMainWindow):
             self.edit_part(comps[0].id)
 
     def delete(self):
-        if self.scene._wiring is not None:      # Backspace while drawing a wire: undo the last corner
+        if self.scene._wiring is not None:      # Retroceso mientras se dibuja un cable: deshacer la última esquina
             self.scene.undo_corner()
             return
         self.scene.delete_selected()
@@ -799,7 +800,7 @@ class MainWindow(QMainWindow):
         if data:
             self.scene.paste_data(data, (20, 20))
 
-    # ================================================================== view
+    # ================================================================== vista
     def _fit_contents(self, animate=True):
         r = EX.diagram_rect(self.scene) if not self.circuit.is_empty() else None
         self.view.fit(r, animate=animate, max_zoom=2.2 if r is not None else 1.6)
@@ -838,12 +839,13 @@ class MainWindow(QMainWindow):
         self.view.viewport().update()
 
     def about(self):
-        QMessageBox.about(self, f"About {APP_NAME}",
+        QMessageBox.about(self, f"Acerca de {APP_NAME}",
                           f"<h3>{APP_NAME} {__version__}</h3>"
-                          f"<p>Version {__version__}</p>"
-                          "<p>Draw a circuit, press play, watch it work.<br>"
-                          "Free and open source under the GNU GPL v3.</p>"
-                          "<p>By Richard Willmott, built with help from Claude.</p>")
+                          f"<p>Versión {__version__}</p>"
+                          "<p>Dibuje un circuito, presione Ejecutar, véalo funcionar.<br>"
+                          "Libre y de código abierto bajo la GNU GPL v3.</p>"
+                          "<p>Por Richard Willmott, construido con ayuda de Claude.<br>"
+                          "Traducido al español por Braian Cerasa.</p>")
 
     def showEvent(self, e):
         super().showEvent(e)

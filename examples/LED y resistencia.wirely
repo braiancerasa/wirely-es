@@ -1,0 +1,127 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "LED y resistencia",
+ "components": [
+  {
+   "id": "1aed3c1b",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 80,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "cf0c5d3e",
+   "kind": "switch",
+   "ref": "S1",
+   "x": 70,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "fda2514a",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 170,
+   "y": 0,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "d3b7b8e5",
+   "kind": "led",
+   "ref": "LED1",
+   "x": 240,
+   "y": 80,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Rojo",
+    "max_current": 0.03
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "e45afd7a",
+   "points": [
+    [
+     0,
+     50
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     40,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "291799b0",
+   "points": [
+    [
+     100,
+     0
+    ],
+    [
+     140,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "ff59fc5d",
+   "points": [
+    [
+     200,
+     0
+    ],
+    [
+     240,
+     0
+    ],
+    [
+     240,
+     50
+    ]
+   ]
+  },
+  {
+   "id": "67f83079",
+   "points": [
+    [
+     240,
+     110
+    ],
+    [
+     240,
+     160
+    ],
+    [
+     0,
+     160
+    ],
+    [
+     0,
+     110
+    ]
+   ]
+  }
+ ]
+}

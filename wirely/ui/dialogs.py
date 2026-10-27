@@ -1,4 +1,4 @@
-"""Dialogs: part properties (double-click a part), bill of materials, keyboard shortcuts."""
+"""Diálogos: propiedades de componentes (doble clic en un componente), lista de materiales, atajos de teclado."""
 from __future__ import annotations
 
 import csv
@@ -23,7 +23,7 @@ def _plain_number(text) -> bool:
 
 
 class PropertiesDialog(QDialog):
-    """Change a part's reference and values. Values are typed the normal way: 10k, 4k7, 100n …"""
+    """Cambiar la referencia y los valores de un componente. Los valores se escriben de la forma habitual: 10k, 4k7, 100n …"""
 
     def __init__(self, comp: Component, circuit: Circuit, parent=None):
         super().__init__(parent)
@@ -55,8 +55,8 @@ class PropertiesDialog(QDialog):
         form.setHorizontalSpacing(12)
         form.setVerticalSpacing(8)
         self.ref = QLineEdit(comp.ref)
-        self.ref.setToolTip("The label on the diagram, e.g. R1")
-        form.addRow("Label", self.ref)
+        self.ref.setToolTip("La etiqueta en el diagrama, p. ej. R1")
+        form.addRow("Etiqueta", self.ref)
         self.fields = {}
         self.unit_boxes = {}
         for p in part.props:
@@ -83,16 +83,16 @@ class PropertiesDialog(QDialog):
                         if describe(ch):
                             w.setItemData(ix, describe(ch), Qt.ToolTipRole)
             elif has_unit_box(p.unit):
-                # the number, with a box beside it for its size: Ω / kΩ / MΩ, pF / nF / µF …
+                # el número, con un cuadro al lado para su escala: Ω / kΩ / MΩ, pF / nF / µF …
                 num, choice = split(float(v), p.unit)
                 w = QLineEdit(num)
                 dnum, dchoice = split(float(p.default), p.unit)
-                w.setPlaceholderText(f"e.g. {dnum}")
-                w.setToolTip(p.help or "Type the number and pick its size — or type it all, like 4k7 or 100n")
+                w.setPlaceholderText(f"p. ej. {dnum}")
+                w.setToolTip(p.help or "Escriba el número y elija su escala — o escríbalo todo, como 4k7 o 100n")
                 box = QComboBox()
                 box.addItems(unit_choices(p.unit))
                 box.setCurrentText(choice)
-                box.setToolTip("Ω, kΩ (thousand), MΩ (million) … or pF, nF, µF …")
+                box.setToolTip("Ω, kΩ (mil), MΩ (millón) … o pF, nF, µF …")
                 w.textChanged.connect(self._validate)
                 box.currentTextChanged.connect(self._validate)
                 w.editingFinished.connect(lambda p=p, w=w, box=box: self._tidy(p, w, box))
@@ -108,14 +108,14 @@ class PropertiesDialog(QDialog):
                 continue
             else:
                 w = QLineEdit(fmt(v, p.unit))
-                w.setPlaceholderText(f"e.g. {fmt(p.default, p.unit)}")
-                tip = p.help or "Type values like 10k, 4k7, 2M2, 100n, 4.7µ"
+                w.setPlaceholderText(f"p. ej. {fmt(p.default, p.unit)}")
+                tip = p.help or "Escriba valores como 10k, 4k7, 2M2, 100n, 4.7µ"
                 w.setToolTip(tip)
                 w.textChanged.connect(self._validate)
             self.fields[p.key] = (p, w)
             form.addRow(p.label, w)
             if p.kind == "choice" and p.key == "model":
-                # what this type is good for — so you can tell why you'd pick one over another
+                # para qué sirve este tipo — así puede ver por qué elegiría uno sobre otro
                 info = QLabel(describe(w.currentText()))
                 info.setObjectName("hint")
                 info.setWordWrap(True)
@@ -131,9 +131,9 @@ class PropertiesDialog(QDialog):
 
         btns = QHBoxLayout()
         btns.addStretch(1)
-        cancel = QPushButton("Cancel")
+        cancel = QPushButton("Cancelar")
         cancel.clicked.connect(self.reject)
-        self.ok = QPushButton("OK")
+        self.ok = QPushButton("Aceptar")
         self.ok.setObjectName("primary")
         self.ok.setDefault(True)
         self.ok.clicked.connect(self._accept)
@@ -143,7 +143,7 @@ class PropertiesDialog(QDialog):
         self.values = {}
 
     def _tidy(self, p, w, box):
-        """Someone typed the whole value (4k7, 100n): show it as a number and its size in the box instead."""
+        """Alguien escribió el valor completo (4k7, 100n): mostrarlo como un número y su escala en el cuadro."""
         try:
             v = join(w.text(), box.currentText(), p.unit)
         except ValueError:
@@ -169,9 +169,9 @@ class PropertiesDialog(QDialog):
                     else:
                         v = parse(w.text(), p.unit)
                     if p.min is not None and v < p.min:
-                        raise ValueError(f"{p.label} must be at least {fmt(p.min, p.unit)}")
+                        raise ValueError(f"{p.label} debe ser al menos {fmt(p.min, p.unit)}")
                     if p.max is not None and v > p.max:
-                        raise ValueError(f"{p.label} can be at most {fmt(p.max, p.unit)}")
+                        raise ValueError(f"{p.label} puede ser como máximo {fmt(p.max, p.unit)}")
                     out[key] = v
                     w.setProperty("invalid", "false")
                 except ValueError as e:
@@ -181,9 +181,9 @@ class PropertiesDialog(QDialog):
                 w.style().polish(w)
         ref = self.ref.text().strip()
         if not ref:
-            problems.append("The label can't be empty")
+            problems.append("La etiqueta no puede estar vacía")
         elif any(c.ref == ref and c.id != self.comp.id for c in self.circuit.components.values()):
-            problems.append(f"Another part is already called {ref}")
+            problems.append(f"Ya hay otro componente llamado {ref}")
         return out, ref, problems
 
     def _validate(self):
@@ -203,15 +203,15 @@ class PropertiesDialog(QDialog):
 class BomDialog(QDialog):
     def __init__(self, circuit: Circuit, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Bill of materials")
+        self.setWindowTitle("Lista de materiales")
         self.resize(560, 420)
         self.rows = circuit.bill_of_materials()
         lay = QVBoxLayout(self)
-        title = QLabel(f"Parts list — {sum(r['qty'] for r in self.rows)} parts")
+        title = QLabel(f"Lista de componentes — {sum(r['qty'] for r in self.rows)} componentes")
         title.setObjectName("dialogTitle")
         lay.addWidget(title)
         t = QTableWidget(len(self.rows), 3)
-        t.setHorizontalHeaderLabels(["Qty", "Part", "Labels"])
+        t.setHorizontalHeaderLabels(["Cant.", "Componente", "Etiquetas"])
         t.verticalHeader().hide()
         t.setEditTriggers(QTableWidget.NoEditTriggers)
         t.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
@@ -225,11 +225,11 @@ class BomDialog(QDialog):
             t.setItem(i, 2, QTableWidgetItem(", ".join(r["refs"])))
         lay.addWidget(t, 1)
         btns = QHBoxLayout()
-        copy = QPushButton("Copy")
+        copy = QPushButton("Copiar")
         copy.clicked.connect(self._copy)
-        save = QPushButton("Save as CSV…")
+        save = QPushButton("Guardar como CSV…")
         save.clicked.connect(self._save)
-        close = QPushButton("Close")
+        close = QPushButton("Cerrar")
         close.setObjectName("primary")
         close.clicked.connect(self.accept)
         btns.addWidget(copy)
@@ -239,54 +239,54 @@ class BomDialog(QDialog):
         lay.addLayout(btns)
 
     def _copy(self):
-        text = "Qty\tPart\tLabels\n" + "\n".join(f"{r['qty']}\t{r['description']}\t{', '.join(r['refs'])}"
+        text = "Cant.\tComponente\tEtiquetas\n" + "\n".join(f"{r['qty']}\t{r['description']}\t{', '.join(r['refs'])}"
                                                    for r in self.rows)
         QApplication.clipboard().setText(text)
 
     def _save(self):
-        path, _ = QFileDialog.getSaveFileName(self, "Save parts list", "parts list.csv", "CSV files (*.csv)")
+        path, _ = QFileDialog.getSaveFileName(self, "Guardar lista de componentes", "lista de componentes.csv", "Archivos CSV (*.csv)")
         if not path:
             return
         with open(path, "w", newline="", encoding="utf-8") as fh:
             w = csv.writer(fh)
-            w.writerow(["Qty", "Part", "Labels"])
+            w.writerow(["Cant.", "Componente", "Etiquetas"])
             for r in self.rows:
                 w.writerow([r["qty"], r["description"], " ".join(r["refs"])])
 
 
 SHORTCUTS = [
-    ("Place a part", "Click it in the gallery, then click on the sheet (or drag it across)"),
-    ("Draw a wire", "Drag from one pin to another — or click a pin, click corners, click the end pin"),
-    ("Branch off a wire", "W (wire tool), then press on the wire"),
-    ("Move a wire", "Drag the wire sideways; drag a loose end to reconnect it"),
-    ("Change a value", "Double-click the part (or select it and press Enter)"),
-    ("Rotate / flip", "R  /  Shift+R  /  F"),
-    ("Delete", "Delete or Backspace"),
-    ("Copy / paste / duplicate", "Ctrl+C  /  Ctrl+V  /  Ctrl+D"),
-    ("Undo / redo", "Ctrl+Z  /  Ctrl+Y"),
-    ("Run / pause / stop", "F5  /  F6  /  Shift+F5 (or the buttons in the middle of the toolbar)"),
-    ("While running", "Click switches, hold push switches, drag the sliders, hover to read voltages"),
-    ("Graph (oscilloscope)", "Put graph probes (A–D) on wires, press Play; Ctrl+G shows / hides the graph"),
-    ("Readings", "While running, the Readings button shows the voltage and current on every wire and part — "
-                 "or click any wire or part to pin just its reading (click again to unpin). Drag a reading to "
-                 "move it out of the way"),
-    ("Logic probe", "Touch it on a wire: H = high, L = low"),
-    ("Sound", "Buzzers, speakers, motors and relays make sound while running — the speaker button turns it off"),
-    ("Right-click", "A menu for whatever's under the mouse (rotate, delete, properties …)"),
-    ("Notes", "Add a Text note (Labels) to explain your circuit; double-click to edit it"),
-    ("Zoom", "Mouse wheel, or + and −;  Fit everything: Ctrl+0"),
-    ("Pan", "Middle-drag, or hold Space and drag"),
-    ("Stop what you're doing", "Esc (or right-click)"),
+    ("Colocar un componente", "Haga clic en él en la galería, luego clic en la hoja (o arrástrelo)"),
+    ("Dibujar un cable", "Arrastre de un pin a otro — o haga clic en un pin, clic en las esquinas, clic en el pin final"),
+    ("Ramificar un cable", "W (herramienta cable), luego presione sobre el cable"),
+    ("Mover un cable", "Arrastre el cable hacia un lado; arrastre un extremo suelto para reconectarlo"),
+    ("Cambiar un valor", "Doble clic en el componente (o selecciónelo y presione Intro)"),
+    ("Rotar / voltear", "R  /  Mayús+R  /  F"),
+    ("Eliminar", "Supr o Retroceso"),
+    ("Copiar / pegar / duplicar", "Ctrl+C  /  Ctrl+V  /  Ctrl+D"),
+    ("Deshacer / rehacer", "Ctrl+Z  /  Ctrl+Y"),
+    ("Ejecutar / pausar / detener", "F5  /  F6  /  Mayús+F5 (o los botones en el centro de la barra de herramientas)"),
+    ("Durante la ejecución", "Haga clic en interruptores, mantenga presionados los pulsadores, arrastre los deslizadores, pase el mouse para leer voltajes"),
+    ("Gráfico (osciloscopio)", "Coloque sondas de gráfico (A–D) en los cables, presione Ejecutar; Ctrl+G muestra / oculta el gráfico"),
+    ("Lecturas", "Durante la ejecución, el botón Lecturas muestra el voltaje y la corriente en cada cable y componente — "
+                 "o haga clic en cualquier cable o componente para fijar solo su lectura (clic de nuevo para desfijar). Arrastre una lectura para "
+                 "moverla fuera del camino"),
+    ("Sonda lógica", "Tóquela en un cable: H = alto, L = bajo"),
+    ("Sonido", "Zumbadores, parlantes, motores y relés emiten sonido durante la ejecución — el botón de sonido lo desactiva"),
+    ("Clic derecho", "Un menú para lo que esté bajo el mouse (rotar, eliminar, propiedades …)"),
+    ("Notas", "Agregue una nota de texto (Etiquetas) para explicar su circuito; doble clic para editarla"),
+    ("Zoom", "Rueda del mouse, o + y −;  Ajustar zoom: Ctrl+0"),
+    ("Panorámica", "Arrastrar con el botón central, o mantener Espacio y arrastrar"),
+    ("Detener lo que está haciendo", "Esc (o clic derecho)"),
 ]
 
 
 class ShortcutsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("How to use Wirely")
+        self.setWindowTitle("Cómo usar Wirely")
         lay = QVBoxLayout(self)
         lay.setContentsMargins(20, 16, 20, 14)
-        title = QLabel("Mouse and keyboard")
+        title = QLabel("Mouse y teclado")
         title.setObjectName("dialogTitle")
         lay.addWidget(title)
         form = QFormLayout()
@@ -300,7 +300,7 @@ class ShortcutsDialog(QDialog):
         w = QWidget()
         w.setLayout(form)
         lay.addWidget(w)
-        ok = QPushButton("Close")
+        ok = QPushButton("Cerrar")
         ok.setObjectName("primary")
         ok.clicked.connect(self.accept)
         h = QHBoxLayout()

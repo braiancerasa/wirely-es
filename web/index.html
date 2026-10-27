@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en-GB">
+<html lang="es-AR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Wirely — circuit simulator</title>
-<meta name="description" content="Wirely: draw a circuit, press play, watch it work. A free circuit simulator for D&amp;T and GCSE electronics that runs in your browser — no install needed.">
+<title>Wirely — simulador de circuitos</title>
+<meta name="description" content="Wirely: dibuje un circuito, presione Ejecutar y véalo funcionar. Un simulador de circuitos gratuito de electrónica que funciona en su navegador — sin instalación.">
 <meta name="theme-color" content="#1f6fd1">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/wirely-64.png" type="image/png">
@@ -16,88 +16,88 @@
 
   <!-- top bar: logo, file name, menus -->
   <header id="topbar">
-    <div id="logo"><canvas id="logoMark" width="26" height="26"></canvas><span>wirely</span><span id="ver" title="Wirely version"></span></div>
+    <div id="logo"><canvas id="logoMark" width="26" height="26"></canvas><span>wirely</span><span id="ver" title="Versión de Wirely"></span></div>
     <nav id="menus">
-      <button class="menuBtn" data-menu="file">File</button>
-      <button class="menuBtn" data-menu="edit">Edit</button>
-      <button class="menuBtn" data-menu="simulate">Simulate</button>
-      <button class="menuBtn" data-menu="view">View</button>
-      <button class="menuBtn" data-menu="help">Help</button>
+      <button class="menuBtn" data-menu="file">Archivo</button>
+      <button class="menuBtn" data-menu="edit">Editar</button>
+      <button class="menuBtn" data-menu="simulate">Simular</button>
+      <button class="menuBtn" data-menu="view">Ver</button>
+      <button class="menuBtn" data-menu="help">Ayuda</button>
     </nav>
-    <div id="docname" title="The name of this circuit">Untitled</div>
+    <div id="docname" title="El nombre de este circuito">Sin título</div>
     <div class="spacer"></div>
-    <a id="getDesktop" href="https://github.com/richiewillmott/Wirely/releases/latest" target="_blank" rel="noopener"
-       title="Wirely also comes as a free app for Windows, Mac and Linux">Desktop app</a>
+    <a id="getDesktop" href="https://github.com/wirely-app/wirely-app.github.io/releases/latest" target="_blank" rel="noopener"
+       title="Wirely también está disponible como app gratuita para Windows, Mac y Linux">App de escritorio</a>
   </header>
 
   <!-- toolbar -->
   <div id="toolbar" role="toolbar">
-    <button class="tool" data-act="new" title="New circuit"></button>
-    <button class="tool" data-act="open" title="Open a circuit from your computer  (Ctrl+O)"></button>
-    <button class="tool" data-act="save" title="Save the circuit to your computer  (Ctrl+S)"></button>
+    <button class="tool" data-act="new" title="Circuito nuevo"></button>
+    <button class="tool" data-act="open" title="Abrir un circuito desde su computadora  (Ctrl+O)"></button>
+    <button class="tool" data-act="save" title="Guardar el circuito en su computadora  (Ctrl+S)"></button>
     <span class="sep"></span>
-    <button class="tool" data-act="undo" title="Undo  (Ctrl+Z)"></button>
-    <button class="tool" data-act="redo" title="Redo  (Ctrl+Y)"></button>
+    <button class="tool" data-act="undo" title="Deshacer  (Ctrl+Z)"></button>
+    <button class="tool" data-act="redo" title="Rehacer  (Ctrl+Y)"></button>
     <span class="sep"></span>
-    <button class="tool" data-act="select" data-check="1" title="Select and move  (Esc)"></button>
-    <button class="tool" data-act="wire" data-check="1" title="Wire: draw wires — also branch off existing wires  (W)"></button>
+    <button class="tool" data-act="select" data-check="1" title="Seleccionar y mover  (Esc)"></button>
+    <button class="tool" data-act="wire" data-check="1" title="Cablear: dibujar cables — también derivar de cables existentes  (W)"></button>
     <span class="sep"></span>
-    <button class="tool" data-act="rotate" title="Rotate clockwise  (R)"></button>
-    <button class="tool" data-act="flip" title="Flip left-to-right  (F)"></button>
-    <button class="tool" data-act="delete" title="Delete  (Delete)"></button>
+    <button class="tool" data-act="rotate" title="Rotar en sentido horario  (R)"></button>
+    <button class="tool" data-act="flip" title="Voltear de izquierda a derecha  (F)"></button>
+    <button class="tool" data-act="delete" title="Eliminar  (Supr)"></button>
     <span class="stretch"></span>
-    <button class="tool play" data-act="play" title="Run the circuit — watch it work  (F5)"><span class="label">Run</span></button>
-    <button class="tool" data-act="pause" title="Pause the simulation  (F6)"></button>
-    <button class="tool" data-act="stop" title="Stop and go back to editing  (F7)"></button>
-    <select id="speed" title="Simulation speed"></select>
-    <span id="timeLabel" title="Simulated time since you pressed Run"></span>
+    <button class="tool play" data-act="play" title="Ejecutar el circuito — véalo funcionar  (F5)"><span class="label">Ejecutar</span></button>
+    <button class="tool" data-act="pause" title="Pausar la simulación  (F6)"></button>
+    <button class="tool" data-act="stop" title="Detener y volver a la edición  (F7)"></button>
+    <select id="speed" title="Velocidad de simulación"></select>
+    <span id="timeLabel" title="Tiempo simulado desde que presionó Ejecutar"></span>
     <span class="sep"></span>
-    <button class="tool" data-act="volts" data-check="1" title="Voltage colours: colour the wires by voltage while running"></button>
-    <button class="tool" data-act="flow" data-check="1" title="Current flow: show current flowing along the wires while running"></button>
-    <button class="tool" data-act="readings" data-check="1" title="Readings: show the voltage and current on every wire and part while running — or click one wire or part to pin just its reading"></button>
-    <button class="tool" data-act="graph" data-check="1" title="Graph: show the voltages at the graph probes  (Ctrl+G)"></button>
-    <button class="tool" data-act="sound" data-check="1" title="Sound: buzzers, speakers, motors and relays make sound while running"></button>
+    <button class="tool" data-act="volts" data-check="1" title="Colores de voltaje: colorear los cables según el voltaje mientras ejecuta"></button>
+    <button class="tool" data-act="flow" data-check="1" title="Flujo de corriente: mostrar la corriente que circula por los cables mientras ejecuta"></button>
+    <button class="tool" data-act="readings" data-check="1" title="Lecturas: mostrar el voltaje y la corriente en cada cable y componente mientras ejecuta — o haga clic en un cable o componente para fijar solo su lectura"></button>
+    <button class="tool" data-act="graph" data-check="1" title="Gráfico: mostrar los voltajes en las sondas del gráfico  (Ctrl+G)"></button>
+    <button class="tool" data-act="sound" data-check="1" title="Sonido: parlantes, zumbadores, motores y relés emiten sonido mientras ejecuta"></button>
     <span class="stretch"></span>
-    <button class="tool" data-act="zoom_out" title="Zoom out  (−)"></button>
-    <button class="tool" data-act="zoom_in" title="Zoom in  (+)"></button>
-    <button class="tool" data-act="zoom_fit" title="Zoom to fit: show the whole circuit  (Ctrl+0)"></button>
+    <button class="tool" data-act="zoom_out" title="Alejar  (−)"></button>
+    <button class="tool" data-act="zoom_in" title="Acercar  (+)"></button>
+    <button class="tool" data-act="zoom_fit" title="Ajustar zoom: mostrar todo el circuito  (Ctrl+0)"></button>
     <span class="sep"></span>
-    <button class="tool" data-act="bom" title="Bill of materials: parts list for this circuit"></button>
-    <button class="tool" data-act="export" title="Save a picture of the diagram (PNG)  (Ctrl+E)"></button>
-    <button class="tool" data-act="dark" title="Switch between light and dark"></button>
+    <button class="tool" data-act="bom" title="Lista de materiales: lista de componentes de este circuito"></button>
+    <button class="tool" data-act="export" title="Guardar una imagen del diagrama (PNG)  (Ctrl+E)"></button>
+    <button class="tool" data-act="dark" title="Cambiar entre claro y oscuro"></button>
   </div>
 
   <div id="main">
     <!-- parts gallery -->
     <aside id="gallery">
-      <div class="sectionHeader">Parts <button id="galleryToggle" title="Hide the parts list">‹</button></div>
-      <input id="filter" type="search" placeholder="Search parts…" autocomplete="off" spellcheck="false">
+      <div class="sectionHeader">Componentes <button id="galleryToggle" title="Ocultar la lista de componentes">‹</button></div>
+      <input id="filter" type="search" placeholder="Buscar componentes…" autocomplete="off" spellcheck="false">
       <div id="galleryList"></div>
     </aside>
 
     <section id="centre">
       <div id="sheetWrap">
-        <canvas id="sheet" tabindex="0" aria-label="Circuit sheet"></canvas>
+        <canvas id="sheet" tabindex="0" aria-label="Hoja del circuito"></canvas>
         <div id="emptyHint" hidden>
-          <b>Your circuit sheet is empty</b>
-          <span>Drag parts here from the gallery on the left,<br>then drag from pin to pin to wire them up.<br>
-          Or open an example from the File menu.</span>
+          <b>Su hoja de circuito está vacía</b>
+          <span>Arrastre componentes aquí desde la galería de la izquierda,<br>luego arrastre de pin a pin para conectarlos.<br>
+          O abra un ejemplo desde el menú Archivo.</span>
         </div>
         <div id="legend" hidden><div id="legendBar"></div><div class="legendText"><span>0 V</span><span id="legendMid"></span><span id="legendMax"></span></div></div>
         <div id="bubble" hidden></div>
         <div id="toasts"></div>
-        <button id="showGallery" title="Show the parts list" hidden>Parts ›</button>
+        <button id="showGallery" title="Mostrar la lista de componentes" hidden>Componentes ›</button>
       </div>
       <div id="graphPanel" hidden>
         <div class="graphTop">
-          <span class="sectionHeader">Graph</span>
-          <span id="chips" class="muted">Put a graph probe (Meters &amp; probes) on a wire, then press Run.</span>
-          <label>Time <select id="tbox" title="Time per square across"></select></label>
-          <label>Volts <select id="vbox" title="Volts per square up"></select></label>
-          <button id="graphClear">Clear</button>
-          <button id="graphPic" title="Save the graph as a picture">Save picture</button>
-          <button id="graphCsv" title="Save the readings as a spreadsheet (CSV)">Save data</button>
-          <button id="graphClose" title="Hide the graph">✕</button>
+          <span class="sectionHeader">Gráfico</span>
+          <span id="chips" class="muted">Coloque una sonda de gráfico (Medidores y sondas) sobre un cable y presione Ejecutar.</span>
+          <label>Tiempo <select id="tbox" title="Tiempo por cuadro horizontal"></select></label>
+          <label>Voltios <select id="vbox" title="Voltios por cuadro vertical"></select></label>
+          <button id="graphClear">Limpiar</button>
+          <button id="graphPic" title="Guardar el gráfico como imagen">Guardar imagen</button>
+          <button id="graphCsv" title="Guardar las lecturas como planilla de cálculo (CSV)">Guardar datos</button>
+          <button id="graphClose" title="Ocultar el gráfico">✕</button>
         </div>
         <canvas id="plot"></canvas>
       </div>
@@ -110,9 +110,9 @@
   <div id="splash">
     <canvas id="splashMark" width="96" height="96"></canvas>
     <h1>Wirely</h1>
-    <p>Draw a circuit, press play, watch it work.</p>
+    <p>Dibuje un circuito, presione Ejecutar y véalo funcionar.</p>
     <div id="progress"><div id="progressBar"></div></div>
-    <p id="loadText">Loading…</p>
+    <p id="loadText">Cargando…</p>
   </div>
 </div>
 

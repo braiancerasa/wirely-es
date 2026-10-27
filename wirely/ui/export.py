@@ -77,16 +77,16 @@ def render_image(scene, scale: float = 4.0) -> QImage:
 def export_png(scene, path: str, scale: float = 4.0):
     img = render_image(scene, scale)
     if not img.save(path, "PNG"):
-        raise OSError(f"Couldn't write {path}")
+        raise OSError(f"No se pudo escribir {path}")
 
 
-def export_svg(scene, path: str, title: str = "Circuit"):
+def export_svg(scene, path: str, title: str = "Circuito"):
     with paper_mode(scene):
         src = diagram_rect(scene)
         gen = QSvgGenerator()
         gen.setFileName(path)
         gen.setTitle(title)
-        gen.setDescription("Circuit diagram drawn with Wirely")
+        gen.setDescription("Diagrama de circuito dibujado con Wirely")
         gen.setSize(QSize(int(src.width()), int(src.height())))
         gen.setViewBox(QRectF(0, 0, src.width(), src.height()))
         p = QPainter(gen)
@@ -95,7 +95,7 @@ def export_svg(scene, path: str, title: str = "Circuit"):
         scene.render(p, QRectF(0, 0, src.width(), src.height()), src)
         p.end()
     if not os.path.exists(path):
-        raise OSError(f"Couldn't write {path}")
+        raise OSError(f"No se pudo escribir {path}")
 
 
 def export_pdf(scene, path: str, title: str = ""):
@@ -103,7 +103,7 @@ def export_pdf(scene, path: str, title: str = ""):
     with paper_mode(scene):
         src = diagram_rect(scene)
         w = QPdfWriter(path)
-        w.setTitle(title or "Circuit diagram")
+        w.setTitle(title or "Diagrama de circuito")
         w.setCreator("Wirely")
         w.setResolution(300)
         orient = QPageLayout.Landscape if src.width() >= src.height() else QPageLayout.Portrait
@@ -111,7 +111,7 @@ def export_pdf(scene, path: str, title: str = ""):
                                     QPageLayout.Millimeter))
         p = QPainter(w)
         if not p.isActive():
-            raise OSError(f"Couldn't write {path}")
+            raise OSError(f"No se pudo escribir {path}")
         p.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
         page = QRectF(0, 0, w.width(), w.height())
         head = 0.0
@@ -137,7 +137,7 @@ def export_pdf(scene, path: str, title: str = ""):
         p.setFont(f)
         p.setPen(QColor("#8a929c"))
         p.drawText(QRectF(0, page.height() - foot, page.width(), foot), Qt.AlignRight | Qt.AlignVCenter,
-                   "Drawn with Wirely")
+                   "Dibujado con Wirely")
         p.end()
 
 
@@ -146,8 +146,8 @@ def export(scene, path: str, title: str = ""):
     if ext == ".png":
         export_png(scene, path)
     elif ext == ".svg":
-        export_svg(scene, path, title or "Circuit")
+        export_svg(scene, path, title or "Circuito")
     elif ext == ".pdf":
         export_pdf(scene, path, title)
     else:
-        raise ValueError("Choose a .png, .svg or .pdf file name")
+        raise ValueError("Elija un nombre de archivo .png, .svg o .pdf")

@@ -11,19 +11,19 @@ PY="${PYTHON:-python3}"
 REV="$("$PY" -c 'import wirely; print(wirely.__revision__)')"
 OUT="dist/Wirely-$REV-x86_64.AppImage"
 
-echo "[Wirely] Packing Wirely with PyInstaller (a few minutes)..."
+echo "[Wirely] Empaquetando Wirely con PyInstaller (unos minutos)..."
 "$PY" -m PyInstaller packaging/wirely.spec --noconfirm --clean --distpath build/linux-dist --workpath build/linux-work
 
-echo "[Wirely] Checking the packed app..."
+echo "[Wirely] Verificando la app empaquetada..."
 rm -f build/selftest.txt
 QT_QPA_PLATFORM=offscreen build/linux-dist/Wirely/Wirely --self-test "$ROOT/build/selftest.txt" || true
 if ! grep -q '^OK' build/selftest.txt 2>/dev/null; then
   cat build/selftest.txt 2>/dev/null || true
-  echo "[Wirely] The packed app failed its self-test." >&2
+  echo "[Wirely] La app empaquetada no pasó su autoprueba." >&2
   exit 1
 fi
 
-echo "[Wirely] Making the AppDir..."
+echo "[Wirely] Creando el AppDir..."
 APPDIR=build/Wirely.AppDir
 rm -rf "$APPDIR"
 mkdir -p "$APPDIR/usr/lib" "$APPDIR/usr/share/applications" "$APPDIR/usr/share/icons/hicolor/256x256/apps" \
@@ -45,13 +45,13 @@ ln -sf wirely.png "$APPDIR/.DirIcon"
 
 TOOL=build/appimagetool-x86_64.AppImage
 if [ ! -x "$TOOL" ]; then
-  echo "[Wirely] Downloading appimagetool..."
+  echo "[Wirely] Descargando appimagetool..."
   curl -fL -o "$TOOL" https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
   chmod +x "$TOOL"
 fi
-echo "[Wirely] Building $OUT..."
+echo "[Wirely] Creando $OUT..."
 mkdir -p dist
 rm -f "$OUT"
 ARCH=x86_64 APPIMAGE_EXTRACT_AND_RUN=1 "$TOOL" --comp zstd "$APPDIR" "$OUT"
 chmod +x "$OUT"
-echo "[Wirely] Done: $OUT"
+echo "[Wirely] Listo: $OUT"

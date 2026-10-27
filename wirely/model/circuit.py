@@ -15,6 +15,14 @@ from . import parts as P
 FILE_VERSION = 1
 FILE_EXT = ".wirely"
 
+# Choice values used by files saved before the Spanish translation: map them to the new ones on load.
+_OLD_CHOICES = {
+    "colour": {"Red": "Rojo", "Green": "Verde", "Yellow": "Amarillo", "Blue": "Azul",
+               "White": "Blanco", "Orange": "Naranja"},
+    "load": {"None": "Ninguna", "Light": "Ligera", "Medium": "Media", "Heavy": "Pesada"},
+    "waveform": {"Square": "Cuadrada", "Sine": "Senoidal", "Triangle": "Triangular"},
+}
+
 Point = tuple  # (x, y) integers in sheet units
 
 
@@ -75,6 +83,10 @@ class Component:
         # fill in values added to the part since the file was saved
         for k, v in c.part.defaults().items():
             c.props.setdefault(k, v)
+        # older files store the English choice values
+        for k, table in _OLD_CHOICES.items():
+            if c.props.get(k) in table:
+                c.props[k] = table[c.props[k]]
         return c
 
 
@@ -404,9 +416,9 @@ class Circuit:
         with open(path, "r", encoding="utf-8") as fh:
             d = json.load(fh)
         if d.get("app") not in ("Wirely", "Sparkbench"):        # Sparkbench was Wirely's working name
-            raise ValueError("This isn't a Wirely circuit file.")
+            raise ValueError("Este no es un archivo de circuito de Wirely.")
         if int(d.get("version", 1)) > FILE_VERSION:
-            raise ValueError("This file was saved by a newer version of Wirely — please update.")
+            raise ValueError("Este archivo se guardó con una versión más reciente de Wirely — actualice el programa.")
         return cls.from_dict(d)
 
     def bounds(self):

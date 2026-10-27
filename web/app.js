@@ -222,14 +222,14 @@ function loadScript(src) {
     const s = document.createElement("script");
     s.src = src;
     s.onload = resolve;
-    s.onerror = () => reject(new Error("couldn't load " + src));
+    s.onerror = () => reject(new Error("no se pudo cargar " + src));
     document.head.appendChild(s);
   });
 }
 
 async function boot() {
   try {
-    setProgress(0.05, "Loading Python (the first time takes a little while)…");
+    setProgress(0.05, "Cargando Python (la primera vez tarda un poco)…");
     let base = "pyodide/";
     try {
       await loadScript(base + "pyodide.js");
@@ -237,9 +237,9 @@ async function boot() {
       base = PYODIDE_CDN;
       await loadScript(base + "pyodide.js");
     }
-    setProgress(0.35, "Starting Python…");
+    setProgress(0.35, "Iniciando Python…");
     py = await loadPyodide({ indexURL: base, stdout: (s) => console.log(s), stderr: (s) => console.warn(s) });
-    setProgress(0.55, "Loading the maths library…");
+    setProgress(0.55, "Cargando la biblioteca matemática…");
     let haveNumpy = false;
     if (params.get("numpy") !== "lite") {
       try {
@@ -250,10 +250,10 @@ async function boot() {
         console.warn("numpy didn't load; using Wirely's built-in fallback", e);
       }
     }
-    numpyKind = haveNumpy ? "numpy" : "built-in maths";
-    setProgress(0.75, "Loading Wirely…");
+    numpyKind = haveNumpy ? "numpy" : "matemática integrada";
+    setProgress(0.75, "Cargando Wirely…");
     const zipResp = await fetch("wirely-py.zip", { cache: "no-cache" });
-    if (!zipResp.ok) throw new Error("couldn't load wirely-py.zip (" + zipResp.status + ")");
+    if (!zipResp.ok) throw new Error("no se pudo cargar wirely-py.zip (" + zipResp.status + ")");
     py.unpackArchive(await zipResp.arrayBuffer(), "zip", { extractDir: "/home/pyodide/wirely_app" });
     py.runPython(`
 import sys
@@ -261,7 +261,7 @@ sys.path.insert(0, "/home/pyodide/wirely_app")
 if ${haveNumpy ? "False" : "True"}:
     sys.path.insert(0, "/home/pyodide/wirely_app/fallback")
 `);
-    setProgress(0.9, "Getting the parts ready…");
+    setProgress(0.9, "Preparando los componentes…");
     app = py.runPython("import wirely_web\nwirely_web.App()");
     $("ver").textContent = "v" + app.version();
     await setupUI();
@@ -273,9 +273,9 @@ if ${haveNumpy ? "False" : "True"}:
   } catch (e) {
     console.error(e);
     $("loadText").classList.add("error");
-    $("loadText").innerHTML = "Sorry — Wirely couldn't start in this browser.<br>" + escapeHtml(String(e && e.message || e)) +
-      "<br><br>Try reloading the page. Wirely works in recent versions of Chrome, Edge, Firefox and Safari." +
-      ' You can also <a href="https://github.com/richiewillmott/Wirely/releases/latest">download the desktop app</a>.';
+    $("loadText").innerHTML = "Lo sentimos — Wirely no pudo iniciarse en este navegador.<br>" + escapeHtml(String(e && e.message || e)) +
+      "<br><br>Intente recargar la página. Wirely funciona en versiones recientes de Chrome, Edge, Firefox y Safari." +
+      ' También puede <a href="https://github.com/wirely-app/wirely-app.github.io/releases/latest">descargar la app de escritorio</a>.';
   }
 }
 
@@ -479,8 +479,8 @@ function afterTick() {
   showToasts();
   if (!info) { refreshUI(); return; }
   $("timeLabel").textContent = info.time;
-  $("timeLabel").title = info.behind ? "This circuit is too busy to simulate in real time, so it runs slower."
-    : "Simulated time since you pressed Run";
+  $("timeLabel").title = info.behind ? "Este circuito está demasiado ocupado para simularse en tiempo real, así que avanza más lento."
+    : "Tiempo simulado desde que presionó Ejecutar";
   updateLegend(info);
   Sound.update(info.sound, info.clicks);
   if (graphShown()) drawGraph();
@@ -695,8 +695,8 @@ const ACTIONS = {
   copy: () => { const t = app.action("copy"); if (t) clipboardWrite(t); },
   copy_readings: () => {
     const t = app.action("copy_readings");
-    if (t) { clipboardWrite(t); toast("Readings copied — paste them into a spreadsheet or document.", "ok", null, 3000); }
-    else toast("Press Run first — then copy the readings.", "info");
+    if (t) { clipboardWrite(t); toast("Lecturas copiadas — péguelas en una planilla de cálculo o en un documento.", "ok", null, 3000); }
+    else toast("Presione Ejecutar primero — luego copie las lecturas.", "info");
   },
   cut: () => { const t = app.action("cut"); if (t) clipboardWrite(t); },
   paste: () => pasteFromClipboard(),
@@ -786,8 +786,8 @@ function refreshUI() {
   en("flip", (ui.comps > 0 || ui.mode === "place") && !running);
   en("delete", ui.sel && !running);
   en("play", ui.sim !== "running"); en("pause", ui.sim === "running"); en("stop", !stopped);
-  tb.play.title = ui.sim === "paused" ? "Resume  (F5)" : "Run the circuit — watch it work  (F5)";
-  tb.play.querySelector(".label").textContent = ui.sim === "paused" ? "Resume" : "Run";
+  tb.play.title = ui.sim === "paused" ? "Reanudar  (F5)" : "Ejecutar el circuito — véalo funcionar  (F5)";
+  tb.play.querySelector(".label").textContent = ui.sim === "paused" ? "Reanudar" : "Ejecutar";
   chk("volts", ui.volts); chk("flow", ui.flow); chk("readings", ui.readings); chk("sound", ui.sound); chk("graph", ui.graph); chk("dark", ui.dark);
   $("gallery").classList.toggle("disabled", !stopped);
   $("hint").textContent = ui.status;
@@ -814,44 +814,44 @@ function refreshStatus() {
 
 const MENUS = {
   file: () => [
-    ["New circuit", "new", "", !ui.running],
-    ["Open…", "open", "Ctrl+O", !ui.running],
-    ["Open example", "examples", "▸", !ui.running],
+    ["Nuevo circuito", "new", "", !ui.running],
+    ["Abrir…", "open", "Ctrl+O", !ui.running],
+    ["Abrir ejemplo", "examples", "▸", !ui.running],
     null,
-    ["Save", "save", "Ctrl+S"],
-    ["Save as…", "save_as", "Ctrl+Shift+S"],
+    ["Guardar", "save", "Ctrl+S"],
+    ["Guardar como…", "save_as", "Ctrl+Shift+S"],
     null,
-    ["Save picture (PNG)…", "export", "Ctrl+E"],
-    ["Copy picture", "copy_picture", "Ctrl+Shift+C"],
-    ["Copy a link to this circuit", "share", ""],
-    ["Bill of materials…", "bom", ""],
+    ["Guardar imagen (PNG)…", "export", "Ctrl+E"],
+    ["Copiar imagen", "copy_picture", "Ctrl+Shift+C"],
+    ["Copiar un enlace a este circuito", "share", ""],
+    ["Lista de materiales…", "bom", ""],
   ],
   edit: () => [
-    ["Undo", "undo", "Ctrl+Z", ui.undo], ["Redo", "redo", "Ctrl+Y", ui.redo], null,
-    ["Cut", "cut", "Ctrl+X", ui.sel && !ui.running], ["Copy", "copy", "Ctrl+C", ui.sel],
-    ["Paste", "paste", "Ctrl+V", !ui.running], ["Duplicate", "duplicate", "Ctrl+D", ui.sel && !ui.running],
-    ["Delete", "delete", "Del", ui.sel && !ui.running], ["Select all", "select_all", "Ctrl+A", !ui.running], null,
-    ["Rotate", "rotate", "R", ui.comps > 0 && !ui.running], ["Rotate anticlockwise", "rotate_ccw", "Shift+R", ui.comps > 0 && !ui.running],
-    ["Flip", "flip", "F", ui.comps > 0 && !ui.running], ["Properties…", "props", "Enter", ui.comps === 1],
+    ["Deshacer", "undo", "Ctrl+Z", ui.undo], ["Rehacer", "redo", "Ctrl+Y", ui.redo], null,
+    ["Cortar", "cut", "Ctrl+X", ui.sel && !ui.running], ["Copiar", "copy", "Ctrl+C", ui.sel],
+    ["Pegar", "paste", "Ctrl+V", !ui.running], ["Duplicar", "duplicate", "Ctrl+D", ui.sel && !ui.running],
+    ["Eliminar", "delete", "Del", ui.sel && !ui.running], ["Seleccionar todo", "select_all", "Ctrl+A", !ui.running], null,
+    ["Rotar", "rotate", "R", ui.comps > 0 && !ui.running], ["Rotar en sentido antihorario", "rotate_ccw", "Shift+R", ui.comps > 0 && !ui.running],
+    ["Voltear", "flip", "F", ui.comps > 0 && !ui.running], ["Propiedades…", "props", "Enter", ui.comps === 1],
   ],
   simulate: () => [
-    [ui.sim === "paused" ? "Resume" : "Run", "play", "F5", ui.sim !== "running"], ["Pause", "pause", "F6", ui.sim === "running"],
-    ["Stop", "stop", "F7", ui.sim !== "stopped"], null,
-    [check(ui.volts) + "Voltage colours", "volts", ""], [check(ui.flow) + "Current flow", "flow", ""],
-    [check(ui.readings) + "Readings", "readings", ""], ["Copy readings", "copy_readings", "", ui.sim !== "stopped"],
-    [check(ui.graph) + "Graph", "graph", "Ctrl+G"], [check(ui.sound) + "Sound", "sound", ""],
+    [ui.sim === "paused" ? "Reanudar" : "Ejecutar", "play", "F5", ui.sim !== "running"], ["Pausar", "pause", "F6", ui.sim === "running"],
+    ["Detener", "stop", "F7", ui.sim !== "stopped"], null,
+    [check(ui.volts) + "Colores de voltaje", "volts", ""], [check(ui.flow) + "Flujo de corriente", "flow", ""],
+    [check(ui.readings) + "Lecturas", "readings", ""], ["Copiar lecturas", "copy_readings", "", ui.sim !== "stopped"],
+    [check(ui.graph) + "Gráfico", "graph", "Ctrl+G"], [check(ui.sound) + "Sonido", "sound", ""],
   ],
   view: () => [
-    ["Zoom in", "zoom_in", "+"], ["Zoom out", "zoom_out", "−"], ["Zoom to fit", "zoom_fit", "Ctrl+0"], null,
-    [check(ui.grid) + "Show grid", "grid", "G"], [check(ui.dark) + "Dark theme", "dark", ""],
-    [check(ui.us) + "US symbols", "us_symbols", ""],
+    ["Acercar", "zoom_in", "+"], ["Alejar", "zoom_out", "−"], ["Ajustar zoom", "zoom_fit", "Ctrl+0"], null,
+    [check(ui.grid) + "Mostrar cuadrícula", "grid", "G"], [check(ui.dark) + "Tema oscuro", "dark", ""],
+    [check(ui.us) + "Símbolos EE. UU.", "us_symbols", ""],
   ],
   help: () => [
-    ["Mouse and keyboard…", "help", "F1"],
-    ["Get the desktop app", "desktop", ""],
-    ["Wirely on GitHub", "github", ""],
+    ["Mouse y teclado…", "help", "F1"],
+    ["Obtener la app de escritorio", "desktop", ""],
+    ["Wirely en GitHub", "github", ""],
     null,
-    ["About Wirely", "about", ""],
+    ["Acerca de Wirely", "about", ""],
   ],
 };
 function check(on) { return on ? "✓ " : " "; }
@@ -886,8 +886,8 @@ function showPopup(items, x, y, onPick) {
 
 function pickMenu(act) {
   if (act === "examples") { showExamplesMenu(); return; }
-  if (act === "desktop") { window.open("https://github.com/richiewillmott/Wirely/releases/latest", "_blank", "noopener"); closeMenus(); return; }
-  if (act === "github") { window.open("https://github.com/richiewillmott/Wirely", "_blank", "noopener"); closeMenus(); return; }
+  if (act === "desktop") { window.open("https://github.com/wirely-app/wirely-app.github.io/releases/latest", "_blank", "noopener"); closeMenus(); return; }
+  if (act === "github") { window.open("https://github.com/wirely-app/wirely-app.github.io", "_blank", "noopener"); closeMenus(); return; }
   doAction(act);
 }
 
@@ -933,7 +933,7 @@ function setupGallery() {
       t.className = "tile";
       t.dataset.kind = p.key;
       t.dataset.search = (p.name + " " + p.tile + " " + p.keywords + " " + cat.name).toLowerCase();
-      t.title = `${p.name}\n${p.description}\nClick, then click on the sheet — or drag it there.`;
+      t.title = `${p.name}\n${p.description}\nHaga clic y luego haga clic en la hoja — o arrástrelo hasta allí.`;
       const c = document.createElement("canvas");
       opsCanvas(c, p.icon, 62, 40);
       const s = document.createElement("span");
@@ -1070,7 +1070,7 @@ function editPart(cid) {
   if (!form) return;
   let html = `<div class="dlgTop"><canvas id="dlgIcon"></canvas><div><div class="dlgTitle">${escapeHtml(form.name)}</div>
     <div class="hint">${escapeHtml(form.description)}</div></div></div><div class="form">
-    <label for="f__ref">Label</label><input type="text" id="f__ref" value="${escapeHtml(form.ref)}" title="The label on the diagram, e.g. R1">`;
+    <label for="f__ref">Etiqueta</label><input type="text" id="f__ref" value="${escapeHtml(form.ref)}" title="La etiqueta en el diagrama, p. ej. R1">`;
   for (const f of form.fields) {
     const id = "f_" + f.key;
     html += `<label for="${id}">${escapeHtml(f.label)}</label>`;
@@ -1083,13 +1083,13 @@ function editPart(cid) {
       if (f.info) html += `<div class="hint info" id="${id}_info"></div>`;
     } else if (f.units) {           // the number, with its size beside it: Ω / kΩ / MΩ, pF / nF / µF …
       const opts = f.units.map((u) => `<option ${u === f.unit ? "selected" : ""}>${escapeHtml(u)}</option>`).join("");
-      html += `<div class="unitRow"><input type="text" id="${id}" value="${escapeHtml(f.value)}" placeholder="${escapeHtml(f.placeholder || "")}" title="${escapeHtml(f.help || "")}" spellcheck="false" autocomplete="off" inputmode="decimal"><select id="${id}__unit" title="Ω, kΩ (thousand), MΩ (million) … or pF, nF, µF …">${opts}</select></div>`;
+      html += `<div class="unitRow"><input type="text" id="${id}" value="${escapeHtml(f.value)}" placeholder="${escapeHtml(f.placeholder || "")}" title="${escapeHtml(f.help || "")}" spellcheck="false" autocomplete="off" inputmode="decimal"><select id="${id}__unit" title="Ω, kΩ (mil), MΩ (millón) … o pF, nF, µF …">${opts}</select></div>`;
     } else {
       html += `<input type="text" id="${id}" value="${escapeHtml(f.value)}" placeholder="${escapeHtml(f.placeholder || "")}" title="${escapeHtml(f.help || "")}" spellcheck="false" autocomplete="off">`;
     }
   }
   html += `</div><div class="dlgError" id="dlgError"></div>
-    <div class="dlgButtons"><button class="btn" id="dlgCancel">Cancel</button><button class="btn primary" id="dlgOk">OK</button></div>`;
+    <div class="dlgButtons"><button class="btn" id="dlgCancel">Cancelar</button><button class="btn primary" id="dlgOk">Aceptar</button></div>`;
   openDialog(html, (d) => {
     opsCanvas(d.querySelector("#dlgIcon"), form.icon, 76, 50);
     const read = () => {
@@ -1154,16 +1154,16 @@ function showBom() {
   const rows = J(app.bom());
   const n = rows.reduce((a, r) => a + r.qty, 0);
   const body = rows.map((r) => `<tr><td>${r.qty}</td><td>${escapeHtml(r.description)}</td><td>${escapeHtml(r.refs.join(", "))}</td></tr>`).join("");
-  openDialog(`<div class="dlgTitle">Parts list — ${n} part${n === 1 ? "" : "s"}</div>
-    <table class="bom"><tr><th>Qty</th><th>Part</th><th>Labels</th></tr>${body}</table>
-    <div class="dlgButtons"><button class="btn" id="bomCopy">Copy</button><button class="btn" id="bomCsv">Save as CSV…</button>
-    <span class="spacer"></span><button class="btn primary" id="bomClose">Close</button></div>`, (d) => {
+  openDialog(`<div class="dlgTitle">Lista de materiales — ${n} componente${n === 1 ? "" : "s"}</div>
+    <table class="bom"><tr><th>Cant.</th><th>Componente</th><th>Etiquetas</th></tr>${body}</table>
+    <div class="dlgButtons"><button class="btn" id="bomCopy">Copiar</button><button class="btn" id="bomCsv">Guardar como CSV…</button>
+    <span class="spacer"></span><button class="btn primary" id="bomClose">Cerrar</button></div>`, (d) => {
     d.querySelector("#bomClose").addEventListener("click", closeDialog);
     d.querySelector("#bomCopy").addEventListener("click", () => {
-      clipboardWrite("Qty\tPart\tLabels\n" + rows.map((r) => `${r.qty}\t${r.description}\t${r.refs.join(", ")}`).join("\n"));
-      toast("Parts list copied.", "ok", null, 2500);
+      clipboardWrite("Cant.\tComponente\tEtiquetas\n" + rows.map((r) => `${r.qty}\t${r.description}\t${r.refs.join(", ")}`).join("\n"));
+      toast("Lista de materiales copiada.", "ok", null, 2500);
     });
-    d.querySelector("#bomCsv").addEventListener("click", () => download(new Blob([app.bom_csv()], { type: "text/csv" }), "parts list.csv"));
+    d.querySelector("#bomCsv").addEventListener("click", () => download(new Blob([app.bom_csv()], { type: "text/csv" }), "lista de materiales.csv"));
   });
 }
 
@@ -1172,27 +1172,27 @@ function showHelp() {
 import json
 from wirely.ui.dialogs import SHORTCUTS
 json.dumps(SHORTCUTS)`));
-  const web = [["On a Chromebook or touchpad", "Two-finger scroll pans; pinch (or Ctrl + scroll) zooms"],
-    ["On a touch screen", "Drag the sheet with one finger to pan, pinch to zoom; double-tap a part to change it"],
-    ["Save your work", "Ctrl+S saves a .wirely file you can open again here or in the desktop app"]];
+  const web = [["En un Chromebook o touchpad", "El desplazamiento con dos dedos mueve la vista; el pellizco (o Ctrl + rueda) hace zoom"],
+    ["En una pantalla táctil", "Arrastre la hoja con un dedo para moverla y pellizque para hacer zoom; haga doble toque en un componente para cambiarlo"],
+    ["Guarde su trabajo", "Ctrl+S guarda un archivo .wirely que puede volver a abrir aquí o en la app de escritorio"]];
   const html = rows.concat(web).map(([a, b]) => `<b>${escapeHtml(a)}</b><span>${escapeHtml(b)}</span>`).join("");
-  openDialog(`<div class="dlgTitle">Mouse and keyboard</div><div class="keys">${html}</div>
-    <div class="dlgButtons"><button class="btn primary" id="hClose">Close</button></div>`,
+  openDialog(`<div class="dlgTitle">Mouse y teclado</div><div class="keys">${html}</div>
+    <div class="dlgButtons"><button class="btn primary" id="hClose">Cerrar</button></div>`,
     (d) => d.querySelector("#hClose").addEventListener("click", closeDialog));
 }
 
 function showAbout() {
   const v = app.version();
-  openDialog(`<div class="about"><div class="dlgTop"><canvas id="abMark"></canvas><div><div class="dlgTitle">Wirely ${escapeHtml(v)} — web version</div>
-    <div class="hint">Draw a circuit, press play, watch it work.</div></div></div>
-    <p>Free and open source under the GNU GPL v3. By Richard Willmott, built with help from Claude.</p>
-    <p>This is the same Wirely as the desktop app — the same parts, drawings and simulator — running in your browser
-    with <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> (Python for the web). Nothing is uploaded:
-    your circuits stay on your computer.</p>
-    <p><a href="https://github.com/richiewillmott/Wirely" target="_blank" rel="noopener">Wirely on GitHub</a> ·
-    <a href="https://github.com/richiewillmott/Wirely/releases/latest" target="_blank" rel="noopener">Desktop app for Windows, Mac and Linux</a></p>
-    <p class="hint">Maths: ${escapeHtml(numpyKind)}</p></div>
-    <div class="dlgButtons"><button class="btn primary" id="aClose">Close</button></div>`, (d) => {
+  openDialog(`<div class="about"><div class="dlgTop"><canvas id="abMark"></canvas><div><div class="dlgTitle">Wirely ${escapeHtml(v)} — versión web</div>
+    <div class="hint">Dibuje un circuito, presione Ejecutar y véalo funcionar.</div></div></div>
+    <p>Gratuito y de código abierto bajo la GNU GPL v3. Por Richard Willmott, creado con ayuda de Claude.</p>
+    <p>Este es el mismo Wirely que la app de escritorio — los mismos componentes, dibujos y simulador — ejecutándose en su navegador
+    con <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> (Python para la web). No se sube nada:
+    sus circuitos permanecen en su computadora.</p>
+    <p><a href="https://github.com/wirely-app/wirely-app.github.io" target="_blank" rel="noopener">Wirely en GitHub</a> ·
+    <a href="https://github.com/wirely-app/wirely-app.github.io/releases/latest" target="_blank" rel="noopener">App de escritorio para Windows, Mac y Linux</a></p>
+    <p class="hint">Matemática: ${escapeHtml(numpyKind)}</p></div>
+    <div class="dlgButtons"><button class="btn primary" id="aClose">Cerrar</button></div>`, (d) => {
     opsCanvas(d.querySelector("#abMark"), J(app.logo_ops()), 50, 50, 50 / 32);
     d.querySelector("#aClose").addEventListener("click", closeDialog);
   });
@@ -1200,10 +1200,10 @@ function showAbout() {
 
 function confirmDiscard(then) {
   if (!ui.dirty || ui.empty) { then(); return; }
-  openDialog(`<div class="dlgTitle">Save changes to this circuit first?</div>
-    <p class="hint">If you don't save, your changes to “${escapeHtml(ui.name)}” will be lost.</p>
-    <div class="dlgButtons"><button class="btn" id="cdDiscard">Don't save</button><span class="spacer"></span>
-    <button class="btn" id="cdCancel">Cancel</button><button class="btn primary" id="cdSave">Save</button></div>`, (d) => {
+  openDialog(`<div class="dlgTitle">¿Guardar los cambios de este circuito primero?</div>
+    <p class="hint">Si no guarda, se perderán los cambios en «${escapeHtml(ui.name)}».</p>
+    <div class="dlgButtons"><button class="btn" id="cdDiscard">No guardar</button><span class="spacer"></span>
+    <button class="btn" id="cdCancel">Cancelar</button><button class="btn primary" id="cdSave">Guardar</button></div>`, (d) => {
     d.querySelector("#cdCancel").addEventListener("click", closeDialog);
     d.querySelector("#cdDiscard").addEventListener("click", () => { closeDialog(); then(); });
     d.querySelector("#cdSave").addEventListener("click", async () => {
@@ -1223,7 +1223,7 @@ function download(blob, name) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 
-function safeName(s) { return (s || "circuit").replace(/[\\/:*?"<>|]+/g, "-").trim() || "circuit"; }
+function safeName(s) { return (s || "circuito").replace(/[\\/:*?"<>|]+/g, "-").trim() || "circuito"; }
 function baseName(s) { return s.replace(/\.(wirely|spark|json)$/i, ""); }
 
 const Files = {
@@ -1231,7 +1231,7 @@ const Files = {
   async open() {
     if (window.showOpenFilePicker) {
       try {
-        const [h] = await window.showOpenFilePicker({ types: [{ description: "Wirely circuit", accept: { "application/json": [".wirely", ".spark"] } }] });
+        const [h] = await window.showOpenFilePicker({ types: [{ description: "Circuito de Wirely", accept: { "application/json": [".wirely", ".spark"] } }] });
         const file = await h.getFile();
         if (this.load(await file.text(), file.name)) this.handle = h;
         return;
@@ -1250,13 +1250,13 @@ const Files = {
     return true;
   },
   async save(asNew) {
-    const name = safeName(ui.name === "Untitled" ? "circuit" : ui.name) + ".wirely";
+    const name = safeName(ui.name === "Sin título" ? "circuito" : ui.name) + ".wirely";
     const text = app.save_text();
     if (window.showSaveFilePicker) {
       try {
         if (!this.handle || asNew) {
           this.handle = await window.showSaveFilePicker({ suggestedName: name,
-            types: [{ description: "Wirely circuit", accept: { "application/json": [".wirely"] } }] });
+            types: [{ description: "Circuito de Wirely", accept: { "application/json": [".wirely"] } }] });
         }
         const w = await this.handle.createWritable();
         await w.write(text);
@@ -1264,7 +1264,7 @@ const Files = {
         app.mark_saved(baseName(this.handle.name));
         Autosave.clear();
         refreshUI();
-        toast(`Saved ${this.handle.name}`, "ok", null, 2500);
+        toast(`Se guardó ${this.handle.name}`, "ok", null, 2500);
         return true;
       } catch (e) {
         if (e && e.name === "AbortError") return false;
@@ -1276,7 +1276,7 @@ const Files = {
     app.mark_saved();
     Autosave.clear();
     refreshUI();
-    toast(`Saved ${name} to your Downloads.`, "ok", null, 3500);
+    toast(`Se guardó ${name} en sus Descargas.`, "ok", null, 3500);
     return true;
   },
 };
@@ -1311,7 +1311,7 @@ async function loadExampleList() {
 function showExamplesMenu() {
   const pop = $("menuPopup");
   const r = pop.getBoundingClientRect();
-  const items = ["Examples"].concat(examples.map((name) => [name, name, ""]));
+  const items = ["Ejemplos"].concat(examples.map((name) => [name, name, ""]));
   showPopup(items, r.left, r.top, (name) => { closeMenus(); confirmDiscard(() => openExample(name)); });
 }
 async function openExample(name) {
@@ -1323,7 +1323,7 @@ async function openExample(name) {
     Files.handle = null;
     afterOpen();
   } catch (e) {
-    toast(`Couldn't open the example “${name}”.`, "error");
+    toast(`No se pudo abrir el ejemplo «${name}».`, "error");
   }
 }
 
@@ -1345,26 +1345,26 @@ async function decompress(s) {
   return await new Response(new Blob([b]).stream().pipeThrough(ds)).text();
 }
 async function shareLink() {
-  if (ui.empty) { toast("Draw a circuit first — then you can share a link to it.", "info"); return; }
+  if (ui.empty) { toast("Dibuje un circuito primero — luego podrá compartir un enlace a él.", "info"); return; }
   try {
     const d = JSON.parse(app.save_text());
     const text = JSON.stringify(d);
     const code = await compress(text);
-    const name = encodeURIComponent(ui.name || "circuit");
+    const name = encodeURIComponent(ui.name || "circuito");
     const url = location.origin + location.pathname + "#n=" + name + "&c=" + code;
     clipboardWrite(url);
-    openDialog(`<div class="dlgTitle">A link to this circuit</div>
-      <p class="hint">Anyone who opens this link sees a copy of your circuit in Wirely (the circuit is inside the link itself —
-      nothing is uploaded). It has been copied: paste it into Google Classroom, Teams or an email.</p>
+    openDialog(`<div class="dlgTitle">Un enlace a este circuito</div>
+      <p class="hint">Quien abra este enlace verá una copia de su circuito en Wirely (el circuito está dentro del propio enlace —
+      no se sube nada). Ya se copió: péguelo en Google Classroom, Teams o en un correo electrónico.</p>
       <div class="form" style="grid-template-columns:1fr"><input type="text" id="shareUrl" readonly value="${escapeHtml(url)}"></div>
-      <div class="dlgButtons"><button class="btn" id="shCopy">Copy again</button><button class="btn primary" id="shClose">Close</button></div>`, (d) => {
+      <div class="dlgButtons"><button class="btn" id="shCopy">Copiar de nuevo</button><button class="btn primary" id="shClose">Cerrar</button></div>`, (d) => {
       const inp = d.querySelector("#shareUrl");
       setTimeout(() => inp.select(), 0);
-      d.querySelector("#shCopy").addEventListener("click", () => { inp.select(); clipboardWrite(url); toast("Link copied.", "ok", null, 2000); });
+      d.querySelector("#shCopy").addEventListener("click", () => { inp.select(); clipboardWrite(url); toast("Enlace copiado.", "ok", null, 2000); });
       d.querySelector("#shClose").addEventListener("click", closeDialog);
     });
   } catch (e) {
-    toast("Sorry — this browser can't make circuit links.", "error");
+    toast("Lo sentimos — este navegador no puede crear enlaces de circuitos.", "error");
   }
 }
 
@@ -1374,11 +1374,11 @@ async function openLinkCircuit() {
   if (!h.get("c")) return false;
   try {
     const text = await decompress(h.get("c"));
-    const err = app.load(text, h.get("n") || "Shared circuit");
+    const err = app.load(text, h.get("n") || "Circuito compartido");
     if (!err) { app.mark_saved(); Files.handle = null; afterOpen(); return true; }
     toast(err, "error");
   } catch (e) {
-    toast("That circuit link looks damaged — it couldn't be opened. Check the whole link was copied.", "error");
+    toast("Ese enlace de circuito parece dañado — no se pudo abrir. Verifique que se haya copiado completo.", "error");
   }
   return false;
 }
@@ -1392,6 +1392,23 @@ window.addEventListener("hashchange", () => {
   confirmDiscard(() => openLinkCircuit());
 });
 
+// Wirely used to live at richiewillmott.github.io/Wirely. The page left there forwards people here and brings
+// along any unsaved work it had kept (…#carry=…), which goes into this address's own autosave and is offered as usual.
+async function takeCarriedAutosave() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  const carry = h.get("carry");
+  if (!carry) return;
+  try {
+    const d = JSON.parse(await decompress(carry));
+    let mine = null;
+    try { mine = JSON.parse(localStorage.getItem(Autosave.key) || "null"); } catch (e) { mine = null; }
+    if (d && d.text && (!mine || !mine.t || mine.t < d.t)) localStorage.setItem(Autosave.key, JSON.stringify(d));
+  } catch (e) { /* damaged or storage off: nothing to bring across */ }
+  h.delete("carry");
+  const rest = h.toString();
+  history.replaceState(null, "", location.pathname + location.search + (rest ? "#" + rest : ""));
+}
+
 async function openStartCircuit() {
   await loadExampleList();
   if (launchFile) {
@@ -1399,6 +1416,7 @@ async function openStartCircuit() {
     launchFile = null;
     return;
   }
+  await takeCarriedAutosave();
   if (await openLinkCircuit()) return;
   const ex = params.get("example");
   if (ex && examples.includes(ex)) { await openExample(ex); return; }
@@ -1419,9 +1437,9 @@ const Autosave = {
     try { d = JSON.parse(localStorage.getItem(this.key) || "null"); } catch (e) { d = null; }
     if (!d || !d.text) return;
     const when = new Date(d.t).toLocaleString();
-    toast(`Wirely kept a copy of “${d.name}” from ${when} that wasn't saved.`, "info", [
-      ["Open it", () => { if (!app.load(d.text, d.name)) { afterOpen(); app.action("noop"); refreshUI(); } }],
-      ["No thanks", () => this.clear()],
+    toast(`Wirely guardó una copia de «${d.name}» del ${when} que no se guardó.`, "info", [
+      ["Abrirlo", () => { if (!app.load(d.text, d.name)) { afterOpen(); app.action("noop"); refreshUI(); } }],
+      ["No, gracias", () => this.clear()],
     ], 0);
   },
 };
@@ -1432,7 +1450,7 @@ window.addEventListener("beforeunload", (e) => {
 
 // ---- pictures of the diagram
 async function exportPicture(toClipboard) {
-  if (ui.empty) { toast("There's nothing to save yet — add some parts first.", "info"); return; }
+  if (ui.empty) { toast("Todavía no hay nada para guardar — agregue componentes primero.", "info"); return; }
   const f = J(app.export_frame());
   const [x, y, w, h] = f.rect;
   const scale = 3;
@@ -1448,11 +1466,11 @@ async function exportPicture(toClipboard) {
   if (toClipboard) {
     try {
       await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-      toast("Picture copied — paste it into your document.", "ok", null, 3000);
+      toast("Imagen copiada — péguela en su documento.", "ok", null, 3000);
       return;
-    } catch (e) { toast("This browser won't copy pictures, so it has been saved instead.", "info"); }
+    } catch (e) { toast("Este navegador no copia imágenes, así que se guardó como archivo.", "info"); }
   }
-  download(blob, safeName(ui.name === "Untitled" ? "circuit" : ui.name) + ".png");
+  download(blob, safeName(ui.name === "Sin título" ? "circuito" : ui.name) + ".png");
 }
 
 // ============================================================================================ the graph
@@ -1471,8 +1489,8 @@ function setupGraph() {
   $("graphPic").addEventListener("click", () => plot.toBlob((b) => download(b, "graph.png"), "image/png"));
   $("graphCsv").addEventListener("click", () => {
     const csv = app.graph_csv();
-    if (!csv) { toast("No readings yet — put a graph probe on a wire and press Run.", "info"); return; }
-    download(new Blob([csv], { type: "text/csv" }), "graph readings.csv");
+    if (!csv) { toast("Todavía no hay lecturas — coloque una sonda de gráfico sobre un cable y presione Ejecutar.", "info"); return; }
+    download(new Blob([csv], { type: "text/csv" }), "lecturas del gráfico.csv");
   });
   plot.addEventListener("pointermove", (e) => { const r = plot.getBoundingClientRect(); plotMouse = [e.clientX - r.left, e.clientY - r.top]; drawGraph(); });
   plot.addEventListener("pointerleave", () => { plotMouse = null; drawGraph(); });
@@ -1626,7 +1644,7 @@ if ("serviceWorker" in navigator && !params.has("nosw") &&
     if (!hadController || reloading) return;          // the very first visit: nothing older to replace
     const safe = !ready || ((!ui.dirty || ui.empty) && ui.sim === "stopped");
     if (safe) { reloading = true; location.reload(); return; }
-    toast("A new version of Wirely is ready.", "info", [["Reload", () => { reloading = true; location.reload(); }]], 0);
+    toast("Hay una nueva versión de Wirely disponible.", "info", [["Recargar", () => { reloading = true; location.reload(); }]], 0);
   });
 }
 

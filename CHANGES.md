@@ -1,216 +1,264 @@
-# Changes
+# Cambios
 
-## 1.5.2 — US symbols, PWM looks steady even when the simulation can't keep up, and fast switching runs faster
-- **US symbols:** View → US symbols draws parts the American way: zigzag resistors (and variable resistors,
-  potentiometers, thermistors and LDRs), an S-shaped fuse, a curved − plate on electrolytic capacitors and a
-  filament in bulbs. Only the look changes; it's remembered next time.
-- The resistor's description no longer mentions a "realistic view" that doesn't exist.
-- **The website switches to a new version straight away** (or asks if there's unsaved work) instead of only on the
-  next visit.
-- **LEDs on PWM no longer blink when a busy circuit runs slower than real time:** the eye's averaging now covers
-  the right stretch of simulated time for the speed you've chosen, not for how fast the computer keeps up. At a
-  slow-motion speed you still see them flick on and off.
-- **Faster simulation of fast switching** (555s, PWM, the buck converter): after a sudden change the simulator gets
-  back up to speed sooner, and takes bigger steps when little is changing. The *PWM dimmer* runs about 40% faster
-  and the *555 doorbell* nearly twice as fast, with the same accuracy (555 frequencies unchanged).
+## 1.5.2 — Símbolos de EE. UU., el PWM se ve estable incluso cuando la simulación no da abasto, y la conmutación veloz corre más rápido
+- **Nueva dirección: https://wirely-app.github.io/** (código: github.com/wirely-app/wirely-app.github.io). La
+  dirección anterior redirige allí, mantiene funcionando los enlaces compartidos y traslada el trabajo sin guardar
+  que el navegador conservaba.
+- **Símbolos de EE. UU.:** Ver → Símbolos EE. UU. dibuja los componentes al estilo estadounidense: resistencias en
+  zigzag (y resistencias variables, potenciómetros, termistores y LDR), un fusible en forma de S, una placa − curva
+  en los condensadores electrolíticos y un filamento en las lámparas. Solo cambia el aspecto; se recuerda para la
+  próxima vez.
+- La descripción de la resistencia ya no menciona una «vista realista» que no existe.
+- **El sitio web cambia a una versión nueva de inmediato** (o pregunta si hay trabajo sin guardar) en lugar de
+  hacerlo solo en la próxima visita.
+- **Los LEDs con PWM ya no parpadean cuando un circuito cargado se ejecuta más lento que el tiempo real:** el
+  promedio que hace el ojo ahora abarca el tramo correcto de tiempo simulado según la velocidad elegida, y no según
+  lo rápido que logre seguir la computadora. Con una velocidad de cámara lenta todavía se los ve encenderse y
+  apagarse.
+- **Simulación más rápida de la conmutación veloz** (555, PWM, el convertidor reductor): después de un cambio
+  repentino, el simulador recupera la velocidad antes y da pasos más grandes cuando poco está cambiando. El
+  *Regulador de brillo PWM* se ejecuta un 40 % más rápido y el *Timbre con 555* casi al doble de velocidad, con la
+  misma precisión (las frecuencias del 555 no cambian).
 
-## 1.5.1 — PWM dims LEDs and bulbs
-- **LEDs, bulbs and displays look as bright as your eye would see them:** their light is averaged over each
-  moment on screen, so PWM (switching fully on and off faster than you can see) makes them look steadily dimmer,
-  as in real life, instead of flickering at random. Slow the simulation down and you can watch them flick on and off.
-  This works for RGB LEDs (PWM one colour to change the mix) and multiplexed 7-segment displays too.
-- New example: *PWM dimmer (555)* — turn the knob to dim an LED and a bulb.
-- The website shows its version number next to the logo.
-- **Much less CPU while running:** the dotted grid is kept ready-drawn instead of being drawn dot by dot every
-  frame, parts and wires are only redrawn when they change, a frame where nothing looks any different isn't drawn
-  at all, and the current-flow dots and graph do less work. E.g. the Night light went from about 60% of a CPU core
-  to under 10% on the desktop. It looks exactly the same. The browser version gains too.
+## 1.5.1 — El PWM atenúa LEDs y lámparas
+- **Los LEDs, las lámparas y las pantallas se ven tan brillantes como los vería su ojo:** su luz se promedia en cada
+  momento en pantalla, así que el PWM (encender y apagar por completo más rápido de lo que puede ver) los hace ver
+  con un brillo estable y más tenue, como en la vida real, en lugar de parpadear al azar. Baje la velocidad de la
+  simulación y podrá verlos encenderse y apagarse. Esto funciona también con LEDs RGB (aplique PWM a un color para
+  cambiar la mezcla) y con pantallas de 7 segmentos multiplexadas.
+- Nuevo ejemplo: *Regulador de brillo PWM (555)* — gire la perilla para atenuar un LED y una lámpara.
+- El sitio web muestra su número de versión junto al logotipo.
+- **Mucha menos CPU mientras se ejecuta:** la cuadrícula de puntos se mantiene ya dibujada en lugar de dibujarse
+  punto por punto en cada cuadro, los componentes y los cables solo se vuelven a dibujar cuando cambian, un cuadro
+  en el que nada se ve distinto no se dibuja en absoluto, y los puntos del flujo de corriente y el gráfico hacen
+  menos trabajo. Por ejemplo, la Luz nocturna pasó de cerca del 60 % de un núcleo de CPU a menos del 10 % en la app
+  de escritorio. Se ve exactamente igual. La versión para navegador también gana.
 
-## 1.5.0 — new parts, a unit box for values, movable readings and many fixes
-- **A unit box next to values:** in a part's properties, resistance has Ω / kΩ / MΩ beside the number, capacitance
-  pF / nF / µF / mF / F, inductance µH / mH / H and frequency Hz / kHz / MHz. Typing the whole value (4k7, 100n)
-  still works — it's tidied into the number and its size.
-- **Crystal clock:** an exact square-wave clock for logic (set its frequency).
-- **Stepper motor** (48 or 200 steps a turn): its shaft turns one step each time the coils change — drive it with an
-  L293D. You can see the shaft turn.
-- **Rotary switch** (1 pole, 4 ways: click to turn it) and a **12-key keypad** (rows × columns, like a door-lock
-  keypad: hold down a key).
-- **JK flip-flop** (4027) and **Schmitt NAND gate** (4093).
-- New examples: *Stepper motor (crystal clock + L293D)*, *Keypad (which key is pressed)*, *Binary counter (JK flip-flops)*,
-  *Schmitt NAND flasher (4093)* and *Rotary switch (pick an LED)*.
-- **Logic at switch-on:** an input that's simply high from the start no longer counts as a clock edge, so counters
-  and flip-flops start from 0.
-- **Drag a reading** (pinned, or with Readings on) to move it out of the way; a dashed line shows what it belongs to.
+## 1.5.0 — componentes nuevos, un cuadro de unidades para los valores, lecturas móviles y muchas correcciones
+- **Un cuadro de unidades junto a los valores:** en las propiedades de un componente, la resistencia tiene
+  Ω / kΩ / MΩ junto al número, la capacidad pF / nF / µF / mF / F, la inductancia µH / mH / H y la frecuencia
+  Hz / kHz / MHz. Escribir el valor completo (4k7, 100n) sigue funcionando — se ordena en el número y su escala.
+- **Reloj de cuarzo:** un reloj de onda cuadrada exacto para lógica (ajuste su frecuencia).
+- **Motor paso a paso** (48 o 200 pasos por vuelta): su eje gira un paso cada vez que cambian las bobinas —
+  acciónelo con un L293D. Se puede ver girar el eje.
+- **Conmutador rotatorio** (1 polo, 4 posiciones: haga clic para girarlo) y un **teclado de 12 teclas** (filas ×
+  columnas, como el de una cerradura: mantenga presionada una tecla).
+- **Biestable JK** (4027) y **compuerta NAND Schmitt** (4093).
+- Nuevos ejemplos: *Motor paso a paso (reloj de cuarzo + L293D)*, *Teclado (qué tecla se presiona)*, *Contador
+  binario (flip-flops JK)*, *Intermitente con NAND Schmitt (4093)* y *Conmutador rotatorio (elegir un LED)*.
+- **Lógica al encender:** una entrada que simplemente está en alto desde el principio ya no cuenta como flanco de
+  reloj, así que los contadores y los biestables arrancan en 0.
+- **Arrastre una lectura** (fijada, o con Lecturas activado) para apartarla del camino; una línea de puntos muestra
+  a qué pertenece.
 
-Bugs found by checking every example step by step and testing every part in thousands of random circuits:
-- **Wire currents next to 0 V symbols** (hover, Readings, flow dots) could be wrong — e.g. 7.3 mA instead of
-  14.8 mA in the Night light, or in the shift register example. Part readings and voltages were always right.
-- **Readings at the moment something switches:** regulators, 555s, logic chips, relays and motors showed the
-  current for the state they were switching *to* for one step (a 7805 flashed 137 A at switch-on). The 555 also
-  left out the current into its CTRL pin.
-- **Chips and displays show their power** in Readings (they showed 0 W).
-- **Mis-wired parts no longer freeze the simulation:** a voltage regulator with its input and output swapped (or
-  wired any other wrong way), a TL431 upside down or with REF on the supply, an op-amp whose output is held
-  outside its supply, and a burnt-out thyristor.
-- **Voltage regulators** leak back from OUT to IN when wired the wrong way round, like real ones.
-- **Op-amps** are destroyed by a reversed supply, or by their output being forced well outside their supply.
-- **Thyristors** now switch relay coils (and other coils) on: they used to let go while the coil's current was
-  still building up, even with the gate driven.
-- **Thyristors:** too much gate current (gate wired straight to the supply) burns them out, with a message saying
-  to add a gate resistor.
-- **Labels:** part names no longer sit on top of pins when chips and regulators are turned round, the bridge
-  rectifier's label sits clear of its pins, the RGB LED's name no longer has its light arrows through it, and the
-  pin names of a chip turned on its side run along their pins instead of overlapping.
+Errores encontrados al revisar cada ejemplo paso a paso y probar cada componente en miles de circuitos aleatorios:
+- **Las corrientes de los cables junto a los símbolos de 0 V** (al pasar el mouse, en Lecturas y en los puntos de
+  flujo) podían ser incorrectas — p. ej. 7,3 mA en lugar de 14,8 mA en la Luz nocturna, o en el ejemplo del
+  registro de desplazamiento. Las lecturas y los voltajes de los componentes siempre fueron correctos.
+- **Lecturas en el momento en que algo conmuta:** los reguladores, los 555, los chips lógicos, los relés y los
+  motores mostraban durante un paso la corriente del estado al que estaban conmutando *hacia* (un 7805 mostraba
+  137 A al encender). El 555 además omitía la corriente de su pin CTRL.
+- **Los chips y las pantallas muestran su potencia** en Lecturas (mostraban 0 W).
+- **Los componentes mal conectados ya no congelan la simulación:** un regulador de voltaje con la entrada y la
+  salida invertidas (o conectado de cualquier otra forma incorrecta), un TL431 al revés o con REF en la
+  alimentación, un amplificador operacional cuya salida queda fuera de su alimentación, y un tiristor quemado.
+- **Los reguladores de voltaje** dejan pasar corriente de OUT a IN cuando se los conecta al revés, como los reales.
+- **Los amplificadores operacionales** se destruyen por una alimentación invertida, o porque su salida se fuerza
+  muy por fuera de su alimentación.
+- **Los tiristores** ahora encienden bobinas de relé (y otras bobinas): antes se soltaban mientras la corriente de la
+  bobina todavía estaba creciendo, incluso con la compuerta excitada.
+- **Tiristores:** demasiada corriente de compuerta (compuerta conectada directamente a la alimentación) los quema,
+  con un mensaje que indica agregar una resistencia de compuerta.
+- **Etiquetas:** los nombres de los componentes ya no se superponen a los pines cuando los chips y los reguladores
+  están girados, la etiqueta del puente rectificador queda despejada de sus pines, el nombre del LED RGB ya no tiene
+  sus flechas de luz atravesándolo, y los nombres de los pines de un chip girado de costado corren a lo largo de sus
+  pines en lugar de superponerse.
 
-## 1.4.1 — RGB LED fix, brighter LEDs
-- **RGB LEDs:** green is now the same kind of chip as blue (about 3.1 V, like real RGB LEDs), so green and blue
-  on one resistor share the current and mix. (Red, at about 2 V, still takes nearly all the current if it shares
-  a resistor with them — as in a real one; give each colour its own resistor to mix any colours.)
-- **LEDs look brighter when they're on:** a stronger colour and a bigger, brighter glow.
+## 1.4.1 — corrección del LED RGB, LEDs más brillantes
+- **LEDs RGB:** el verde ahora es el mismo tipo de chip que el azul (unos 3,1 V, como los LEDs RGB reales), así que
+  el verde y el azul en una misma resistencia comparten la corriente y se mezclan. (El rojo, de unos 2 V, todavía se
+  lleva casi toda la corriente si comparte una resistencia con ellos — como en uno real; dé a cada color su propia
+  resistencia para mezclar cualquier color.)
+- **Los LEDs se ven más brillantes cuando están encendidos:** un color más intenso y un brillo más grande y luminoso.
 
-## 1.4.0 — Readings, and 16 new parts
-- **Readings:** a new toolbar button shows the voltage and current on every wire, and the voltage, current and
-  power of every part, while the circuit runs. Click any wire or part while it runs to pin just its reading.
-  **Simulate → Copy readings** copies every part's readings as a table to paste into a spreadsheet.
-- **Bi-colour LEDs** (2-leg and 3-leg) and an **RGB LED** that mixes its colours.
-- **Bridge rectifier**, and a **transformer** (set its turns ratio; warns if you give it DC).
-- **Thyristor (SCR):** C106D, 2N5060, TIC106D and BT151 — latches on from a gate pulse and stays on until the
-  current drops below its holding current.
-- **Voltage regulators:** 7805, 7809, 7812, LM1117-3.3 and the adjustable LM317, with dropout, current limit and
-  thermal shutdown (fit a heatsink in its properties).
-- **Comparators:** LM393 and LM311 (open-collector outputs).
-- **L293D motor driver:** four half-H drivers with built-in spike diodes — drive a motor both ways from logic
-  pins, or set its speed with PWM on the enable pin. It shuts down if it gets too hot.
-- **4026** decade counter with 7-segment outputs, and the **4060** counter with its own oscillator.
-- **DPDT switch**, **DPDT relay** (two changeover contacts), **Hall effect sensor** (click to bring the
-  magnet near) and a **solenoid** that clicks.
-- New examples: *Thyristor alarm (latching)*, *5 V power supply (7805)*, *RGB colour mixer*,
-  *Counter (555 + 4026)*, *Reversing a motor (DPDT)*, *Motor driver (L293D)* and *Relay reversing a motor
-  (DPDT)*.
-- Voltage regulators now have a proper dropout (about 1.2 V at light load, 2 V at 1 A for a 78xx), and no
-  longer get stuck when a battery sags under load.
-- The website counts visits with GoatCounter (no cookies, no personal data).
+## 1.4.0 — Lecturas y 16 componentes nuevos
+- **Lecturas:** un botón nuevo en la barra de herramientas muestra el voltaje y la corriente en cada cable, y el
+  voltaje, la corriente y la potencia de cada componente mientras el circuito se ejecuta. Haga clic en cualquier
+  cable o componente mientras se ejecuta para fijar solo su lectura. **Simular → Copiar lecturas** copia las
+  lecturas de cada componente como una tabla para pegarla en una planilla de cálculo.
+- **LEDs bicolor** (de 2 y de 3 patas) y un **LED RGB** que mezcla sus colores.
+- **Puente rectificador** y un **transformador** (ajuste su relación de vueltas; advierte si le aplica DC).
+- **Tiristor (SCR):** C106D, 2N5060, TIC106D y BT151 — se enclavan con un pulso de compuerta y permanecen
+  encendidos hasta que la corriente cae por debajo de su corriente de mantenimiento.
+- **Reguladores de voltaje:** 7805, 7809, 7812, LM1117-3.3 y el LM317 ajustable, con caída de voltaje, límite de
+  corriente y apagado térmico (coloque un disipador en sus propiedades).
+- **Comparadores:** LM393 y LM311 (salidas de colector abierto).
+- **Controlador de motor L293D:** cuatro semipuentes H con diodos de pico incorporados — accione un motor en ambos
+  sentidos desde pines de lógica, o ajuste su velocidad con PWM en el pin de habilitación. Se apaga si se calienta
+  demasiado.
+- **4026** contador de décadas con salidas de 7 segmentos, y el **4060** contador con su propio oscilador.
+- **Interruptor DPDT**, **relé DPDT** (dos contactos conmutados), **sensor de efecto Hall** (haga clic para acercar
+  el imán) y un **solenoide** que hace clic.
+- Nuevos ejemplos: *Alarma con tiristor (enclavada)*, *Fuente de 5 V (7805)*, *Mezclador de color RGB*,
+  *Contador (555 + 4026)*, *Inversión de motor (DPDT)*, *Controlador de motor (L293D)* e *Inversión de motor con
+  relé (DPDT)*.
+- Los reguladores de voltaje ahora tienen una caída de voltaje adecuada (unos 1,2 V con carga liviana y 2 V a 1 A
+  para un 78xx), y ya no se quedan trabados cuando una batería baja bajo carga.
+- El sitio web cuenta las visitas con GoatCounter (sin cookies ni datos personales).
 
-## 1.3.0 — parts requested by users, and Wirely in your web browser
-- **Wirely Web:** the whole app runs in a web browser, so it works on **Chromebooks** and school computers with
-  nothing to install — at https://richiewillmott.github.io/Wirely/. It's the desktop app's own Python code
-  (the sheet, the symbols and the simulator) running in the browser with Pyodide, so it looks and behaves the same.
-- In the browser: open and save `.wirely` files (they work in both versions), all the examples, the graph,
-  sound, PNG pictures, the parts list, **links that carry a circuit** (for Google Classroom / Teams), works
-  **offline** after the first visit, installs as an app, and touch-screen and touchpad gestures.
-- On the graph, a curved trace no longer hides the grid lines and the other traces under it.
-- **Shift registers:** 74HC164 (serial in, parallel out), 74HC595 (with output latch and output enable),
-  74HC165 (parallel in, serial out) and 74HC597 (with input latch). They warn if run above their 6 V limit.
-- **4051 analogue switch** (CD4051B and 74HC4051), with each type's datasheet on-resistance at its supply voltage.
-- **TL431 / TLV431 adjustable shunt references:** Vout = Vref × (1 + R1/R2), with their current and voltage limits.
-- **Solid-state relay (TLP3122A):** photo-MOSFET output that switches AC or DC, turning on over about a millisecond.
-- **2N7002** MOSFET.
-- **Every part type is explained:** choose a type in a part's properties and a line underneath says what it's for.
-- New examples: *TL431 adjustable reference* and *Shift register (74HC595)*.
-- Chip labels sit above the chip instead of over its pins.
+## 1.3.0 — componentes pedidos por usuarios y Wirely en su navegador web
+- **Wirely Web:** toda la app se ejecuta en un navegador web, así que funciona en **Chromebooks** y en computadoras
+  de la escuela sin nada que instalar — en https://wirely-app.github.io/. Es el propio código Python de la app de
+  escritorio (la hoja, los símbolos y el simulador) ejecutándose en el navegador con Pyodide, así que se ve y se
+  comporta igual.
+- En el navegador: abra y guarde archivos `.wirely` (funcionan en ambas versiones), todos los ejemplos, el gráfico,
+  el sonido, las imágenes PNG, la lista de materiales, **enlaces que llevan un circuito** (para Google Classroom /
+  Teams), funciona **sin conexión** después de la primera visita, se instala como app, y admite gestos de pantalla
+  táctil y touchpad.
+- En el gráfico, una traza curva ya no oculta las líneas de la cuadrícula ni las demás trazas que hay debajo.
+- **Registros de desplazamiento:** 74HC164 (entrada serie, salida paralelo), 74HC595 (con registro de salida y
+  habilitación de salida), 74HC165 (entrada paralelo, salida serie) y 74HC597 (con registro de entrada). Advierten
+  si se los usa por encima de su límite de 6 V.
+- **Conmutador analógico 4051** (CD4051B y 74HC4051), con la resistencia de encendido de la hoja de datos de cada
+  tipo según su voltaje de alimentación.
+- **Referencias ajustables en derivación TL431 / TLV431:** Vout = Vref × (1 + R1/R2), con sus límites de corriente
+  y voltaje.
+- **Relé de estado sólido (TLP3122A):** salida de foto-MOSFET que conmuta AC o DC, y se enciende en alrededor de un
+  milisegundo.
+- MOSFET **2N7002**.
+- **Cada tipo de componente está explicado:** elija un tipo en las propiedades de un componente y una línea debajo
+  indica para qué sirve.
+- Nuevos ejemplos: *Referencia ajustable TL431* y *Registro de desplazamiento (74HC595)*.
+- Las etiquetas de los chips quedan encima del chip en lugar de sobre sus pines.
 
-## 1.2.0 — real filament lamps
-- **Filament lamps behave like real ones:** the filament's resistance rises as it heats up, so the current–voltage
-  graph curves (I ∝ V^0.6, as measured on real lamps — the GCSE/A-level required practical), a cold lamp takes a
-  surge of about 11× its running current at switch-on, and it takes a moment to brighten and to fade.
-- **Resistors heat up over about a second** before burning out, so a brief surge (like a lamp's switch-on) is fine
-  but a lasting overload still burns them out.
+## 1.2.0 — lámparas de filamento reales
+- **Las lámparas de filamento se comportan como las reales:** la resistencia del filamento aumenta a medida que se
+  calienta, así que la curva corriente–voltaje se dobla (I ∝ V^0.6, como se mide en lámparas reales — el trabajo
+  práctico obligatorio de secundaria), una lámpara fría recibe una corriente de irrupción de unas 11 veces su
+  corriente de régimen al encenderse, y tarda un momento en iluminarse y en apagarse.
+- **Las resistencias se calientan durante alrededor de un segundo** antes de quemarse, así que un pico breve (como
+  el encendido de una lámpara) está bien, pero una sobrecarga sostenida igual las quema.
 
-## 1.1.0 — more accurate MOSFETs and op-amps
-- **MOSFETs fitted to their datasheets:** threshold voltage and on-resistance at the datasheet's gate voltages,
-  mobility falling at high gate voltage, the body diode, internal gate resistance, and voltage-dependent gate and
-  drain capacitances. Switching now takes real time and shows the Miller plateau; gate charge matches the
-  datasheets (AO3400 6.1 nC vs 6 nC, FQP27P06 32.3 nC vs 33 nC) and switching delays match ngspice.
-- **Op-amps fitted to their datasheets:** open-loop gain, input bias current and resistance, supply current,
-  output swing that depends on the load, separate source/sink limits, and the LM358 swinging to 0 V but not to
-  its top rail. Output current is drawn through the supply pins, and too much supply voltage destroys the chip.
-- Diodes ride out short current surges (as real ones do) instead of popping on a nanosecond spike.
-- **MOSFETs break down above their voltage rating** (avalanche, at about 15 % over): a short spike is absorbed up to
-  the part's avalanche energy rating (power MOSFETs survive a relay coil's spike; a 2N7000 doesn't), but a supply
-  above the rating destroys it, with a message saying why.
-- **Motors burn out** on far more than their rated voltage (a 9 V motor on 150 V spins much too fast and overheats).
-- The simulator is about twice as fast on every circuit (and much faster with MOSFETs).
-- The installer clears out the old version's library files when updating.
-- Linux: prefers X11/XWayland and falls back to Wayland; the automatic build now tests both.
+## 1.1.0 — MOSFET y amplificadores operacionales más precisos
+- **MOSFET ajustados a sus hojas de datos:** voltaje de umbral y resistencia de encendido a los voltajes de
+  compuerta de la hoja de datos, movilidad que cae con un voltaje de compuerta alto, el diodo de cuerpo, resistencia
+  interna de compuerta y capacitancias de compuerta y drenador que dependen del voltaje. La conmutación ahora lleva
+  tiempo real y muestra la meseta de Miller; la carga de compuerta coincide con las hojas de datos (AO3400 6,1 nC
+  contra 6 nC, FQP27P06 32,3 nC contra 33 nC) y los retardos de conmutación coinciden con ngspice.
+- **Amplificadores operacionales ajustados a sus hojas de datos:** ganancia en lazo abierto, corriente y resistencia
+  de polarización de entrada, corriente de alimentación, excursión de salida que depende de la carga, límites
+  separados de fuente y sumidero, y el LM358 que llega a 0 V pero no al riel superior. La corriente de salida se
+  toma realmente de los pines de alimentación, y un exceso de voltaje de alimentación destruye el chip.
+- Los diodos resisten picos breves de corriente (como los reales) en lugar de reventar ante un pico de un
+  nanosegundo.
+- **Los MOSFET se perforan por encima de su voltaje nominal** (avalancha, a alrededor del 15 % por encima): un pico
+  breve se absorbe hasta la energía de avalancha nominal del componente (los MOSFET de potencia sobreviven al pico
+  de una bobina de relé; un 2N7000 no), pero una alimentación por encima de la nominal lo destruye, con un mensaje
+  que explica por qué.
+- **Los motores se queman** con mucho más que su voltaje nominal (un motor de 9 V con 150 V gira demasiado rápido y
+  se sobrecalienta).
+- El simulador es unas dos veces más rápido en todos los circuitos (y mucho más rápido con MOSFET).
+- El instalador limpia los archivos de biblioteca de la versión anterior al actualizar.
+- Linux: prefiere X11/XWayland y recurre a Wayland; la compilación automática ahora prueba ambos.
 
-## 1.0.0 — first official release
-Everything below, together: the circuit editor (r1), live simulation (r2), chips, logic and the graph (r3),
-sound, relays, motors and sensors (r4), and the Wirely name, icons and downloads (r5).
+## 1.0.0 — primera versión oficial
+Todo lo siguiente, junto: el editor de circuitos (r1), la simulación en vivo (r2), los chips, la lógica y el
+gráfico (r3), el sonido, los relés, los motores y los sensores (r4), y el nombre Wirely, los iconos y las descargas
+(r5).
 
-- New part: **optoisolator** (optocoupler) — PC817, 4N25, 4N35, TLP521 and 6N139 (Darlington), with an
-  example circuit. Its two sides are truly separate circuits, each with its own supply.
-- Fixed: a circuit joined to another only through a relay's contacts or an optoisolator now gets its own 0 V
-  reference, so its own supply can be anything (before, a separate DC power supply there could fail to solve).
-- The graph's Auto time setting now follows the fastest repeating signal on any probe (before, it only
-  looked at probe A — so a buck converter, where A is smooth DC, showed a 5-second sweep of a 1 kHz signal).
+- Componente nuevo: **optoacoplador** — PC817, 4N25, 4N35, TLP521 y 6N139 (Darlington), con un
+  circuito de ejemplo. Sus dos lados son circuitos verdaderamente separados, cada uno con su propia alimentación.
+- Corregido: un circuito unido a otro solo a través de los contactos de un relé o de un optoacoplador ahora obtiene
+  su propia referencia de 0 V, así que su propia alimentación puede ser cualquiera (antes, una fuente de DC separada
+  allí podía no resolverse).
+- El ajuste de tiempo Automático del gráfico ahora sigue la señal repetitiva más rápida de cualquier sonda (antes,
+  solo miraba la sonda A — así que un convertidor reductor, donde A es DC suave, mostraba un barrido de 5 segundos
+  de una señal de 1 kHz).
 
-## r5 — Wirely (became 1.0.0)
-- **New name: Wirely** (was Sparkbench). Circuits are now `.wirely` files; old `.spark` files still open.
-- **New logo** (a W drawn as a wire, with current flowing along it) and a **file icon** for `.wirely` circuits.
-- **Splash screen** with the version and revision while Wirely starts.
-- **Downloads built automatically on GitHub**: Windows installer (with `.wirely` file association), Mac `.dmg`
-  (with document icon) and Linux AppImage (plus a script to add it to the app menu and associate `.wirely`).
-  Every push runs the tests.
-- Double-clicking a `.wirely` file in Finder opens it on the Mac; Wirely's own icon on the Windows taskbar.
-- **Signal generator duty cycle** (PWM) for square waves.
-- New example: **buck converter** (12 V → about 6 V). Its output voltage, ripple and inductor current are
-  tested against the textbook formulas and against ngspice (within 0.5 %).
+## r5 — Wirely (se convirtió en 1.0.0)
+- **Nombre nuevo: Wirely** (antes Sparkbench). Los circuitos ahora son archivos `.wirely`; los antiguos `.spark`
+  todavía se abren.
+- **Logotipo nuevo** (una W dibujada como un cable, con corriente que circula por él) y un **icono de archivo** para
+  los circuitos `.wirely`.
+- **Pantalla de inicio** con la versión y la revisión mientras Wirely arranca.
+- **Descargas compiladas automáticamente en GitHub**: instalador de Windows (con asociación de archivos `.wirely`),
+  `.dmg` de Mac (con icono de documento) y AppImage de Linux (más un script para agregarlo al menú de aplicaciones y
+  asociar `.wirely`). Cada push ejecuta las pruebas.
+- Hacer doble clic en un archivo `.wirely` en el Finder lo abre en Mac; el propio icono de Wirely en la barra de
+  tareas de Windows.
+- **Ciclo de trabajo del generador de señales** (PWM) para ondas cuadradas.
+- Ejemplo nuevo: **convertidor reductor** (12 V → unos 6 V). Su voltaje de salida, su rizado y la corriente del
+  inductor se prueban contra las fórmulas de los libros y contra ngspice (dentro del 0,5 %).
 
-## r4 — sound, relays, motors and sensors
-- **Sound:** buzzers buzz, loudspeakers play the simulated signal at its real pitch, motors hum, relays click.
-  Sound button to switch it off. Wirely checks the computer's sound safely first, so a broken sound setup
-  can never crash it.
-- **Relay** (coil + changeover contacts, pull-in 75 %, drop-out 30 %) and **inductor**. Switching a coil with
-  no flyback diode makes a real voltage spike that destroys the transistor — with a message explaining the fix.
-- **Motors** now have back-EMF: big starting current, then less; a *Load* setting slows them and makes them
-  take more current; hover to see their speed in rpm.
-- New sensors: **reed switch** (click to bring the magnet near), **tilt switch**, **moisture sensor** (slider),
-  **phototransistor** (light slider).
-- Many more types: MOSFETs BS170, IRLZ44N (logic level), IRF530, IRF3205, AO3400, IRF9530, FQP27P06,
-  IRLML6402; transistors BC547, BC337, 2N2222, TIP120, BC557, BC327, 2N2907, TIP125; diodes 1N4007, 1N5408,
-  1N5819 (Schottky); op-amp TL071.
-- **Hover readings:** while running, hover over a wire for its voltage and current (with direction).
-- **Text notes** for worksheets, **right-click menus**, **autosave** every minute with recovery after a crash.
-- Fixed: a MOSFET with an unconnected gate turned itself on; LED glow now centred on the LED.
-- Five new examples: relay switching a lamp, motor and load, 555 doorbell, burglar alarm, rain alarm.
+## r4 — sonido, relés, motores y sensores
+- **Sonido:** los zumbadores zumban, los parlantes reproducen la señal simulada a su tono real, los motores zumban,
+  los relés hacen clic. Botón de sonido para apagarlo. Wirely verifica el sonido de la computadora de forma segura
+  primero, así que una configuración de audio rota nunca puede hacerlo fallar.
+- **Relé** (bobina + contactos conmutados, activación al 75 %, desactivación al 30 %) e **inductor**. Conmutar una
+  bobina sin diodo de rueda libre produce un pico de voltaje real que destruye el transistor — con un mensaje que
+  explica la solución.
+- **Los motores** ahora tienen fuerza contraelectromotriz: gran corriente de arranque y luego menos; un ajuste de
+  *Carga* los frena y hace que consuman más corriente; pase el mouse para ver su velocidad en rpm.
+- Sensores nuevos: **interruptor magnético** (haga clic para acercar el imán), **interruptor de inclinación**,
+  **sensor de humedad** (deslizador), **fototransistor** (deslizador de luz).
+- Muchos tipos más: MOSFET BS170, IRLZ44N (nivel lógico), IRF530, IRF3205, AO3400, IRF9530, FQP27P06, IRLML6402;
+  transistores BC547, BC337, 2N2222, TIP120, BC557, BC327, 2N2907, TIP125; diodos 1N4007, 1N5408, 1N5819
+  (Schottky); amplificador operacional TL071.
+- **Lecturas al pasar el mouse:** mientras se ejecuta, pase el mouse sobre un cable para ver su voltaje y su
+  corriente (con sentido).
+- **Notas de texto** para hojas de trabajo, **menús contextuales**, **guardado automático** cada minuto con
+  recuperación tras un bloqueo.
+- Corregido: un MOSFET con la compuerta desconectada se encendía solo; el brillo del LED ahora está centrado en el
+  LED.
+- Cinco ejemplos nuevos: relé que enciende una lámpara, motor y carga, timbre con 555, alarma antirrobo, alarma de
+  lluvia.
 
-## r3 — chips, logic and the graph
-- **Graph (oscilloscope):** put graph probes A–D on wires and press Play. Automatic or fixed time and volts
-  per square, live readings with frequency, hover to read values, save the graph as a picture.
-- **Logic probe:** shows H / L / ? on whatever it touches.
-- New parts: **555 timer**, **op-amp** (741, LM358, rail-to-rail), **NOT / AND / OR / NAND / NOR / XOR /
-  Schmitt NOT gates**, **D-type flip-flop**, **4017 decade counter**, **4511 decoder**, **7-segment display**,
-  **N- and P-channel MOSFETs** (2N7000, IRF540, BS250, IRF9540), **signal generator** (square / sine / triangle).
-- The solver lands exactly on switching moments, so 555 timing matches the textbook formulas (within 1 %).
-- Logic chips and op-amps with unconnected supply pins are powered from the circuit's supply automatically.
-- Seven new examples: 555 LED flasher, LED chaser (555 + 4017), op-amp dark sensor, logic gates, MOSFET motor
-  switch, RC filter on the graph, binary to 7-segment.
-- Sliders find a clear spot next to their part.
+## r3 — chips, lógica y el gráfico
+- **Gráfico (osciloscopio):** coloque sondas de gráfico A–D sobre los cables y presione Ejecutar. Tiempo y voltios
+  por cuadro automáticos o fijos, lecturas en vivo con frecuencia, pase el mouse para leer valores, guarde el
+  gráfico como imagen.
+- **Sonda lógica:** muestra H / L / ? sobre lo que toca.
+- Componentes nuevos: **temporizador 555**, **amplificador operacional** (741, LM358, rail-to-rail), **compuertas
+  NOT / AND / OR / NAND / NOR / XOR / NOT Schmitt**, **biestable tipo D**, **contador de décadas 4017**,
+  **decodificador 4511**, **display de 7 segmentos**, **MOSFET de canal N y P** (2N7000, IRF540, BS250, IRF9540),
+  **generador de señales** (cuadrada / senoidal / triangular).
+- El solucionador cae exactamente en los momentos de conmutación, así que la temporización del 555 coincide con las
+  fórmulas de los libros (dentro del 1 %).
+- Los chips lógicos y los amplificadores operacionales con pines de alimentación desconectados se alimentan
+  automáticamente de la fuente del circuito.
+- Siete ejemplos nuevos: intermitente LED con 555, luces secuenciales (555 + 4017), sensor de oscuridad con
+  amplificador operacional, compuertas lógicas, conmutación de motor con MOSFET, filtro RC en el gráfico, binario a
+  7 segmentos.
+- Los deslizadores encuentran un lugar libre junto a su componente.
 
-## r2 — live simulation
-- **Play / Pause / Stop** (F5 / F6 / Shift+F5) and a speed control (10× faster down to 1/1000 speed).
-- Wirely's own circuit solver: Newton–Raphson for diodes, LEDs and transistors; capacitors over time with
-  automatic step control. Checked against hand-worked answers and ngspice in the tests.
-- LEDs glow in their colour, lamps light up, motors spin, buzzers show sound waves, meters show a reading.
-- Wires coloured by voltage (with a colour key) and animated current flow — both can be switched off.
-- Click switches and changeover switches, hold push switches, drag sliders for LDRs (light level),
-  thermistors (temperature) and variable resistors while it runs. Double-click a part to change its value
-  live.
-- Parts that are overloaded show it: LEDs, diodes, transistors and electrolytics pop, lamps and fuses blow,
-  resistors burn out — with a message saying what happened and how to fix it. Short-circuited batteries are
-  pointed out. Stop mends everything.
-- Hover over a wire or part while running to read voltage, current and power.
-- Two new examples: *Capacitor charging* and *Buzzer and motor*.
-- Fixed: "Diodes & LEDs" lost its "&" on Windows; greyed-out buttons now look greyed out.
+## r2 — simulación en vivo
+- **Ejecutar / Pausar / Detener** (F5 / F6 / Shift+F5) y un control de velocidad (desde 10× más rápido hasta 1/1000
+  de la velocidad).
+- El propio solucionador de circuitos de Wirely: Newton–Raphson para diodos, LEDs y transistores; condensadores en el
+  tiempo con control automático del paso. Verificado contra respuestas calculadas a mano y ngspice en las pruebas.
+- Los LEDs brillan con su color, las lámparas se encienden, los motores giran, los zumbadores muestran ondas de
+  sonido, los medidores muestran una lectura.
+- Cables coloreados por voltaje (con una referencia de colores) y flujo de corriente animado — ambos se pueden
+  desactivar.
+- Haga clic en interruptores y conmutadores, mantenga presionados los pulsadores, arrastre los deslizadores de los
+  LDR (nivel de luz), termistores (temperatura) y resistencias variables mientras se ejecuta. Haga doble clic en un
+  componente para cambiar su valor en vivo.
+- Los componentes sobrecargados lo muestran: LEDs, diodos, transistores y electrolíticos revientan, las lámparas y
+  los fusibles se queman, las resistencias se queman — con un mensaje que dice qué pasó y cómo solucionarlo. Las
+  baterías en cortocircuito se señalan. Detener repara todo.
+- Pase el mouse sobre un cable o componente mientras se ejecuta para leer voltaje, corriente y potencia.
+- Dos ejemplos nuevos: *Carga de un condensador* y *Zumbador y motor*.
+- Corregido: «Diodos y LEDs» perdía su «&» en Windows; los botones deshabilitados ahora se ven deshabilitados.
 
-## r1 — circuit editor (first release)
-- Parts gallery with 29 parts in 9 groups, UK/IEC-style symbols, search box.
-- Place parts by clicking or dragging; rotate (R / Shift+R), flip (F), move, delete.
-- Wires: drag from pin to pin, or click corners; wires stay square, pick the corner that doesn't run
-  through a part, follow parts when you move or rotate them; branch off a wire (W) with a junction dot;
-  drag a wire sideways or move its loose end.
-- Double-click a part to change its values — type them the usual way (10k, 4k7, 100n, 4.7µ).
-- Undo / redo for everything, copy / cut / paste / duplicate.
-- Save and open circuits (.wirely files), recent files, four example circuits.
-- Export the diagram as PNG, SVG or PDF (always black on white), copy it as a picture, bill of materials.
-- Light and dark themes, dot grid, smooth zoom-to-fit.
+## r1 — editor de circuitos (primera versión)
+- Galería de componentes con 29 componentes en 9 grupos, símbolos estilo británico/IEC, cuadro de búsqueda.
+- Coloque componentes haciendo clic o arrastrando; rote (R / Shift+R), voltee (F), mueva, elimine.
+- Cables: arrastre de pin a pin, o haga clic en las esquinas; los cables se mantienen rectos, eligen la esquina que
+  no pasa por un componente y siguen a los componentes cuando los mueve o los rota; derive de un cable (W) con un
+  punto de unión; arrastre un cable hacia un lado o mueva su extremo suelto.
+- Haga doble clic en un componente para cambiar sus valores — escríbalos de la forma habitual (10k, 4k7, 100n,
+  4.7µ).
+- Deshacer / rehacer para todo, copiar / cortar / pegar / duplicar.
+- Guarde y abra circuitos (archivos .wirely), archivos recientes, cuatro circuitos de ejemplo.
+- Exporte el diagrama como PNG, SVG o PDF (siempre negro sobre blanco), cópielo como imagen, lista de materiales.
+- Temas claro y oscuro, cuadrícula de puntos, ajuste de zoom suave.

@@ -1,307 +1,325 @@
 # Wirely
 
-**A free, open-source circuit design and simulation app for Windows, Mac and Linux — and in your web browser.**
-Draw a circuit, press play, and watch it work — LEDs light, motors spin, relays click, meters read and wires
-show their voltage. For the workplace, the classroom and the workbench, all on your own computer, with no cloud
-and no account.
+**Una app gratuita y de código abierto para diseñar y simular circuitos en Windows, Mac y Linux — y en su navegador web.**
+Dibuje un circuito, presione Ejecutar y véalo funcionar — los LEDs se encienden, los motores giran, los relés hacen
+clic, los medidores muestran lecturas y los cables muestran su voltaje. Para el trabajo, el aula y el banco de
+trabajo, todo en su propia computadora, sin nube y sin cuenta.
 
-**▶ [Try it in your browser](https://richiewillmott.github.io/Wirely/)** — nothing to install, and it works on
-Chromebooks. Or [download the app](#download-and-install) for Windows, Mac and Linux.
+**▶ [Pruébelo en su navegador](https://wirely-app.github.io/)** — no hay nada que instalar y funciona en
+Chromebooks. O [descargue la app](#descarga-e-instalación) para Windows, Mac y Linux.
 
-Under the hood is a real circuit solver, using the same method as SPICE, checked against hand calculations and
-against ngspice. So the numbers it shows are the numbers you'd measure.
+Debajo hay un verdadero solucionador de circuitos, que usa el mismo método que SPICE, verificado contra cálculos
+a mano y contra ngspice. Así, los números que muestra son los que mediría.
 
-![Wirely demo: place a battery, switch, resistor and LED, wire them up, press play, switch on and hover a wire to read its voltage and current](docs/images/demo.gif)
+![Demostración de Wirely: coloque una batería, un interruptor, una resistencia y un LED, conéctelos, presione Ejecutar, encienda y pase el mouse sobre un cable para leer su voltaje y corriente](docs/images/demo.gif)
 
-## Why I made it
+## Por qué lo hice
 
-I wanted to try circuits out before building them — at work and at home — in something that's quick and
-friendly to use. The friendly drag-and-drop simulators are mostly paid-for and aimed only at schools, and the
-free professional tools, such as LTspice and ngspice, are powerful but you spend your time on netlists,
-models and graph settings rather than on the circuit.
+Quería probar circuitos antes de construirlos — en el trabajo y en casa — con algo rápido y amigable de usar.
+Los simuladores amigables de arrastrar y soltar son en su mayoría pagos y están orientados solo a escuelas, y las
+herramientas profesionales gratuitas, como LTspice y ngspice, son potentes pero uno termina dedicando el tiempo a
+netlists, modelos y ajustes de gráficos en lugar de al circuito.
 
-I wanted something in between: a simulator that is **as easy as drawing the circuit**, but **free**, **runs
-locally**, and is **accurate enough to trust at work** —
+Quería algo intermedio: un simulador que sea **tan fácil como dibujar el circuito**, pero **gratuito**, que **se
+ejecute localmente** y sea **lo bastante preciso como para confiar en el trabajo** —
 
-- sketch a circuit and **see straight away** whether it works: what lights, what's too hot, what pops,
-- **click switches and drag sliders** while it runs, and **hover over any wire** to read its voltage and current,
-- look at signals on a **graph (oscilloscope)** — 555 timers, filters, PWM, a buck converter,
-- use real part numbers (**BC547, 2N2222, TIP31, IRF540, IRLZ44N, LM358, TL071, PC817, 1N4148, 1N4007 …**),
-- **export** clean diagrams for reports, documentation and worksheets.
+- bosqueje un circuito y **vea de inmediato** si funciona: qué se enciende, qué se calienta demasiado, qué revienta,
+- **haga clic en los interruptores y arrastre los deslizadores** mientras se ejecuta, y **pase el mouse sobre
+  cualquier cable** para leer su voltaje y corriente,
+- mire las señales en un **gráfico (osciloscopio)** — temporizadores 555, filtros, PWM, un convertidor reductor,
+- use números de componente reales (**BC547, 2N2222, TIP31, IRF540, IRLZ44N, LM358, TL071, PC817, 1N4148, 1N4007 …**),
+- **exporte** diagramas limpios para informes, documentación y hojas de trabajo.
 
-So I built Wirely (with a lot of help from Claude, an AI assistant), testing every revision against known
-answers.
+Así que construí Wirely (con mucha ayuda de Claude, un asistente de IA), probando cada revisión contra respuestas
+conocidas.
 
-## What it does
+## Qué hace
 
-- **Schematic editor** — a parts gallery of 84 parts with British (IEC) or US symbols, drag-and-drop, wiring by
-  dragging pin to pin, junctions, rotate and flip, undo/redo, copy/paste, text notes, autosave and crash
-  recovery.
-- **Live simulation** — glowing LEDs and lamps (PWM dims them, as in real life), motors with back-EMF that slow under load, relays that click,
-  buzzers and loudspeakers you can hear, meters with live readouts, voltage-coloured wires and moving current
-  flow.
-- **Interactive** — switches, push buttons, reed and tilt switches, potentiometers, light and temperature
-  sensors: click and drag them while the circuit runs.
-- **Things break, like the real thing** — LEDs without a resistor, overloaded resistors, reversed
-  electrolytics, transistors killed by a coil's voltage spike: they pop and tell you why.
-- **Readings** — one button shows the voltage and current on every wire and the voltage, current and power of
-  every part while it runs; click any wire or part to pin just its reading; or **Copy readings** to paste
-  them all into a spreadsheet.
-- **Graph and logic probe** — up to four probes, frequency read-outs, adjustable time and volts per division.
-- **Chips** — 555 timer, op-amps, comparators (LM393, LM311), the L293D motor driver, logic gates, 4017, 4026 and 4060 counters,
-  4511 decoder, 7-segment display, 7805/7809/7812/LM1117 and LM317 voltage regulators,
-  74HC164/165/595/597 shift registers, the 4051 analogue switch, TL431/TLV431 references,
-  optoisolators (PC817, 4N25, 4N35, TLP521, 6N139), solid-state relays (TLP3122A), MOSFETs,
-  transistors, thyristors (SCRs), relays, signal generator with PWM.
-- **More parts** — bi-colour and RGB LEDs, bridge rectifier, transformer, DPDT switch and relay, Hall effect sensor,
-  solenoid, stepper motor, rotary switch, 12-key keypad, crystal clock, JK flip-flop and Schmitt NAND (4093).
-- **Every part type explained** — double-click a part and choose its type: a line underneath says what it's
-  good for (e.g. why you'd pick an AO3400 over a 2N7002).
-- **Export** — PNG, SVG and PDF (always on white paper), and a parts list you can copy or save as CSV.
-- **Feels modern** — a flat look with light and dark themes, a splash screen, and an installer that makes
-  `.wirely` files open in Wirely with their own icon.
+- **Editor de esquemáticos** — una galería de 84 componentes con símbolos británicos (IEC) o estadounidenses,
+  arrastrar y soltar, cableado arrastrando de pin a pin, uniones, rotar y voltear, deshacer/rehacer, copiar/pegar,
+  notas de texto, guardado automático y recuperación ante bloqueos.
+- **Simulación en vivo** — LEDs y lámparas que brillan (el PWM los atenúa, como en la vida real), motores con
+  fuerza contraelectromotriz que se frenan bajo carga, relés que hacen clic, zumbadores y parlantes que se oyen,
+  medidores con lecturas en vivo, cables coloreados por voltaje y flujo de corriente en movimiento.
+- **Interactivo** — interruptores, pulsadores, interruptores magnéticos e inclinación, potenciómetros, sensores
+  de luz y temperatura: haga clic y arrástrelos mientras el circuito se ejecuta.
+- **Las cosas se rompen, como en la realidad** — LEDs sin resistencia, resistencias sobrecargadas, electrolíticos
+  invertidos, transistores destruidos por el pico de voltaje de una bobina: revientan y le dicen por qué.
+- **Lecturas** — un botón muestra el voltaje y la corriente en cada cable y el voltaje, la corriente y la potencia
+  de cada componente mientras se ejecuta; haga clic en cualquier cable o componente para fijar solo su lectura; o
+  **Copiar lecturas** para pegarlas todas en una planilla de cálculo.
+- **Gráfico y sonda lógica** — hasta cuatro sondas, lecturas de frecuencia, tiempo y voltios por división ajustables.
+- **Chips** — temporizador 555, amplificadores operacionales, comparadores (LM393, LM311), controlador de motor
+  L293D, compuertas lógicas, contadores 4017, 4026 y 4060, decodificador 4511, display de 7 segmentos, reguladores
+  de voltaje 7805/7809/7812/LM1117 y LM317, registros de desplazamiento 74HC164/165/595/597, conmutador analógico
+  4051, referencias TL431/TLV431, optoacopladores (PC817, 4N25, 4N35, TLP521, 6N139), relés de estado sólido
+  (TLP3122A), MOSFET, transistores, tiristores (SCR), relés, generador de señales con PWM.
+- **Más componentes** — LEDs bicolor y RGB, puente rectificador, transformador, conmutador y relé DPDT, sensor de
+  efecto Hall, solenoide, motor paso a paso, conmutador rotatorio, teclado de 12 teclas, reloj de cuarzo, biestable
+  JK y NAND Schmitt (4093).
+- **Cada tipo de componente explicado** — haga doble clic en un componente y elija su tipo: una línea debajo indica
+  para qué sirve (p. ej., por qué elegiría un AO3400 en lugar de un 2N7002).
+- **Exportar** — PNG, SVG y PDF (siempre sobre papel blanco), y una lista de materiales que puede copiar o guardar
+  como CSV.
+- **Se siente moderno** — un aspecto plano con temas claro y oscuro, una pantalla de inicio y un instalador que hace
+  que los archivos `.wirely` se abran en Wirely con su propio icono.
 
-| Editor and parts gallery | Hover to read any wire | Buck converter on the graph | Dark theme |
+| Editor y galería de componentes | Pase el mouse para leer cualquier cable | Convertidor reductor en el gráfico | Tema oscuro |
 |---|---|---|---|
 | ![](docs/images/editor.png) | ![](docs/images/hover_reading.png) | ![](docs/images/buck_converter.png) | ![](docs/images/dark_theme.png) |
 
-## Download and install
+## Descarga e instalación
 
-Get it from the [**latest release**](https://github.com/richiewillmott/Wirely/releases/latest) — no Python or
-anything else needed:
+Descárguelo desde la [**última versión**](https://github.com/wirely-app/wirely-app.github.io/releases/latest) — no
+necesita Python ni nada más:
 
-- **Windows:** `Wirely-Setup-<version>.exe` — run it and follow the installer. It adds Wirely to the Start menu and
-  makes `.wirely` files open in Wirely. Windows SmartScreen may warn the first time because the installer
-  isn't code-signed yet: click **More info → Run anyway**.
-- **Mac (Apple Silicon, M1 or newer):** `Wirely-<version>-mac-arm64.dmg` — open it and drag Wirely into
-  Applications. It isn't signed by Apple yet, so the first time: right-click Wirely in Applications →
-  **Open** → **Open**.
-- **Linux:** `Wirely-<version>-x86_64.AppImage` — make it executable and run it:
+- **Windows:** `Wirely-Setup-<version>.exe` — ejecútelo y siga el instalador. Agrega Wirely al menú Inicio y hace
+  que los archivos `.wirely` se abran en Wirely. Es posible que Windows SmartScreen advierta la primera vez porque
+  el instalador aún no está firmado digitalmente: haga clic en **Más información → Ejecutar de todos modos**.
+- **Mac (Apple Silicon, M1 o posterior):** `Wirely-<version>-mac-arm64.dmg` — ábralo y arrastre Wirely a
+  Aplicaciones. Apple aún no lo ha firmado, así que la primera vez: haga clic derecho en Wirely dentro de
+  Aplicaciones → **Abrir** → **Abrir**.
+- **Linux:** `Wirely-<version>-x86_64.AppImage` — hágalo ejecutable y ejecútelo:
   `chmod +x Wirely-*-x86_64.AppImage && ./Wirely-*-x86_64.AppImage`
-  (or right-click → Properties → "Allow executing as program", then double-click). If it says FUSE is
-  missing, run it with `--appimage-extract-and-run`, or install `libfuse2` (Ubuntu: `sudo apt install libfuse2t64`).
-  To add it to your app menu: `bash packaging/linux/install-desktop.sh Wirely-<version>-x86_64.AppImage`.
+  (o clic derecho → Propiedades → «Permitir ejecutar como programa», y luego doble clic). Si dice que falta FUSE,
+  ejecútelo con `--appimage-extract-and-run`, o instale `libfuse2` (Ubuntu: `sudo apt install libfuse2t64`).
+  Para agregarlo a su menú de aplicaciones: `bash packaging/linux/install-desktop.sh Wirely-<version>-x86_64.AppImage`.
 
-<p align="center"><img src="docs/images/splash.png" width="480" alt="Wirely starting up"></p>
+<p align="center"><img src="docs/images/splash.png" width="480" alt="Wirely iniciándose"></p>
 
-### Or use it in a web browser (Chromebooks, school computers)
+### O úselo en un navegador web (Chromebooks, computadoras de la escuela)
 
-Open **[richiewillmott.github.io/Wirely](https://richiewillmott.github.io/Wirely/)** in Chrome, Edge, Firefox or
-Safari — nothing to install and no account. It's the same Wirely: the same parts, symbols, examples and
-simulator, running inside the browser (the desktop app's own Python code, run by
-[Pyodide](https://pyodide.org)). Your circuits stay on your computer — nothing is uploaded. (The website counts
-visits with [GoatCounter](https://www.goatcounter.com): no cookies and no personal data.)
+Abra **[wirely-app.github.io](https://wirely-app.github.io/)** en Chrome, Edge, Firefox o Safari — no hay nada que
+instalar y no hace falta cuenta. Es el mismo Wirely: los mismos componentes, símbolos, ejemplos y simulador,
+ejecutándose dentro del navegador (el propio código Python de la app de escritorio, ejecutado por
+[Pyodide](https://pyodide.org)). Sus circuitos permanecen en su computadora — no se sube nada. (El sitio cuenta las
+visitas con [GoatCounter](https://www.goatcounter.com): sin cookies ni datos personales.)
 
-- **Save** gives you a `.wirely` file, which opens in the browser version and the desktop app alike.
-- **File → Copy a link to this circuit** makes a link with the circuit inside it — paste it into Google
-  Classroom or Teams and everyone who opens it gets their own copy.
-- After the first visit it **works offline**, and Chrome can **install it as an app** (the install button in the
-  address bar), so it appears in a Chromebook's launcher.
-- On a touchpad, two-finger scroll moves around and pinch zooms; on a touch screen, drag the sheet with one finger.
+- **Guardar** le da un archivo `.wirely`, que se abre tanto en la versión web como en la app de escritorio.
+- **Archivo → Copiar un enlace a este circuito** crea un enlace con el circuito dentro — péguelo en Google
+  Classroom o Teams y cada persona que lo abra obtiene su propia copia.
+- Después de la primera visita **funciona sin conexión**, y Chrome puede **instalarlo como app** (el botón de
+  instalación en la barra de direcciones), así que aparece en el lanzador de un Chromebook.
+- En un touchpad, el desplazamiento con dos dedos mueve la vista y el pellizco hace zoom; en una pantalla táctil,
+  arrastre la hoja con un dedo.
 
-<p align="center"><img src="docs/images/web.png" width="760" alt="Wirely running in a web browser"></p>
+<p align="center"><img src="docs/images/web.png" width="760" alt="Wirely ejecutándose en un navegador web"></p>
 
-The browser version is a little slower than the desktop app, and it can't export SVG or PDF (it saves PNG pictures).
+La versión web es un poco más lenta que la app de escritorio y no puede exportar SVG ni PDF (guarda imágenes PNG).
 
-Want to run it from the source code, change it, or build the installers yourself? See
-**[BUILDING.md](BUILDING.md)**, or the short version under [For developers](#for-developers) below.
+¿Quiere ejecutarlo desde el código fuente, modificarlo o crear los instaladores usted mismo? Consulte
+**[BUILDING.md](BUILDING.md)**, o la versión breve en [Para desarrolladores](#para-desarrolladores), más abajo.
 
-## See it working
+## Véalo en funcionamiento
 
-| A 555 and a 4017 make an LED chaser | Drag the light sensor's slider: the night light comes on |
+| Un 555 y un 4017 hacen un juego de luces secuenciales | Arrastre el deslizador del sensor de luz: se enciende la luz nocturna |
 |---|---|
 | ![](docs/images/chaser.gif) | ![](docs/images/night_light.gif) |
 
-| A motor takes a big current to start, then less | No resistor? The LED pops and says why |
+| Un motor consume una corriente alta al arrancar y menos después | ¿Sin resistencia? El LED revienta y explica por qué |
 |---|---|
 | ![](docs/images/motor.gif) | ![](docs/images/pop.gif) |
 
-![A 555 flasher with graph probes on the output and the timing capacitor](docs/images/graph.gif)
+![Un intermitente con 555 con sondas de gráfico en la salida y en el condensador de temporización](docs/images/graph.gif)
 
-## How it works
+## Cómo funciona
 
-### Drawing a circuit
+### Dibujar un circuito
 
-![The parts gallery and editor](docs/images/editor.png)
+![La galería de componentes y el editor](docs/images/editor.png)
 
-| To… | Do this |
+| Para… | Haga esto |
 |---|---|
-| Add a part | Click it in the gallery, then click on the sheet — or drag it across. Type in the search box to find one (`555`, `LED`, `relay`) |
-| Wire up | Drag from one pin to another. Or click a pin, click to add corners, then click the end pin |
-| Branch off a wire | Press **W** (wire tool), then press on the wire and drag — a junction dot appears |
-| Change a value | Double-click the part and type, e.g. `10k`, `4k7`, `100n`, `4.7µ`, `2M2` |
-| Choose a real part | Double-click a transistor, MOSFET, diode, LED or op-amp and pick its type |
-| Rotate / flip | **R** / **Shift+R** / **F** |
-| Move things | Drag parts (their wires follow), drag a wire sideways, or drag a wire's loose end |
-| Zoom / pan | Mouse wheel / middle-drag (or hold Space and drag). **Ctrl+0** fits the whole circuit |
-| Notes | Add a **Text note** (under *Labels*) to explain your circuit |
-| Right-click | A menu for whatever is under the mouse |
+| Agregar un componente | Haga clic en él en la galería y luego en la hoja — o arrástrelo. Escriba en el cuadro de búsqueda para encontrar uno (`555`, `LED`, `relé`) |
+| Conectar | Arrastre de un pin a otro. O haga clic en un pin, haga clic para agregar esquinas y luego haga clic en el pin final |
+| Derivar un cable | Presione **W** (herramienta de cable), luego presione sobre el cable y arrastre — aparece un punto de unión |
+| Cambiar un valor | Haga doble clic en el componente y escriba, p. ej., `10k`, `4k7`, `100n`, `4.7µ`, `2M2` |
+| Elegir un componente real | Haga doble clic en un transistor, MOSFET, diodo, LED o amplificador operacional y elija su tipo |
+| Rotar / voltear | **R** / **Shift+R** / **F** |
+| Mover cosas | Arrastre componentes (sus cables lo siguen), arrastre un cable hacia un lado o arrastre el extremo suelto de un cable |
+| Zoom / desplazar | Rueda del mouse / arrastrar con el botón central (o mantenga Espacio y arrastre). **Ctrl+0** ajusta todo el circuito |
+| Notas | Agregue una **Nota de texto** (en *Etiquetas*) para explicar su circuito |
+| Clic derecho | Un menú para lo que haya bajo el mouse |
 
-Values understand engineering shorthand: `4k7` is 4.7 kΩ, `2M2` is 2.2 MΩ, `4R7` is 4.7 Ω, `100n` is 100 nF.
+Los valores aceptan la notación de ingeniería: `4k7` son 4,7 kΩ, `2M2` son 2,2 MΩ, `4R7` son 4,7 Ω, `100n` son 100 nF.
 
-| Double-click a part to change it | Parts list (copy it, or save as CSV) |
+| Haga doble clic en un componente para cambiarlo | Lista de materiales (cópiela o guárdela como CSV) |
 |---|---|
 | ![](docs/images/properties.png) | ![](docs/images/parts_list.png) |
 
-### Running it
+### Ejecutarlo
 
-Press **Play** (F5). Wires turn the colour of their voltage (blue at 0 V up to red at the highest supply — the
-scale is in the corner) and dots flow along them to show the current. While it runs:
+Presione **Ejecutar** (F5). Los cables toman el color de su voltaje (azul en 0 V hasta rojo en la alimentación más
+alta — la escala está en la esquina) y circulan puntos por ellos para mostrar la corriente. Mientras se ejecuta:
 
-- **click** switches, and **hold** push switches,
-- **drag the sliders** that appear under potentiometers, variable resistors and sensors (or use the mouse wheel),
-- **hover over any wire or part** to read its voltage, current (with direction) and power,
-- press **Readings** to show them all at once, or **click** a wire or part to pin its reading on the sheet
-  (drag a reading to move it out of the way),
-- change the **speed** — from 10× faster down to 1/1000 speed, for slow motion.
+- **haga clic** en los interruptores y **mantenga presionados** los pulsadores,
+- **arrastre los deslizadores** que aparecen debajo de potenciómetros, resistencias variables y sensores (o use la
+  rueda del mouse),
+- **pase el mouse sobre cualquier cable o componente** para leer su voltaje, corriente (con sentido) y potencia,
+- presione **Lecturas** para mostrarlas todas a la vez, o **haga clic** en un cable o componente para fijar su lectura
+  en la hoja (arrastre una lectura para moverla),
+- cambie la **velocidad** — desde 10× más rápido hasta 1/1000, para cámara lenta.
 
-**Stop** (Shift+F5) goes back to editing, and anything that popped is mended.
+**Detener** (Shift+F5) vuelve a la edición y repara todo lo que haya reventado.
 
-![Hover over a wire to read its voltage and current](docs/images/hover_reading.png)
+![Pase el mouse sobre un cable para leer su voltaje y corriente](docs/images/hover_reading.png)
 
-### The graph
+### El gráfico
 
-Put **graph probes** (A–D, under *Meters & probes*) on wires and press Play — the graph opens underneath, like
-an oscilloscope. Each probe shows its voltage and frequency; set the time and volts per division, or leave them
-on Auto. Hover over the graph to read values, and **Save picture…** to keep it. **Ctrl+G** shows or hides it.
+Coloque **sondas de gráfico** (A–D, en *Medidores y sondas*) sobre los cables y presione Ejecutar — el gráfico se
+abre debajo, como un osciloscopio. Cada sonda muestra su voltaje y frecuencia; ajuste el tiempo y los voltios por
+división, o déjelos en Automático. Pase el mouse sobre el gráfico para leer valores y use **Guardar imagen…** para
+conservarlo. **Ctrl+G** lo muestra u oculta.
 
-| RC low-pass filter | Buck converter (12 V in, about 5.7 V out) |
+| Filtro pasa bajos RC | Convertidor reductor (12 V de entrada, unos 5,7 V de salida) |
 |---|---|
 | ![](docs/images/rc_filter.png) | ![](docs/images/buck_converter.png) |
 
-### Sound
+### Sonido
 
-Buzzers buzz, loudspeakers play the **simulated** signal (a 555 at 690 Hz sounds at 690 Hz even when the
-simulation has to run slower than real time), motors hum and relays click. Turn it off with the speaker button.
+Los zumbadores zumban, los parlantes reproducen la señal **simulada** (un 555 a 690 Hz suena a 690 Hz incluso cuando
+la simulación tiene que ir más lenta que el tiempo real), los motores zumban y los relés hacen clic. Apáguelo con el
+botón de sonido.
 
-### Things that break
+### Cosas que se rompen
 
-Like the real parts, things fail when you push them too far — and Wirely tells you why:
+Como los componentes reales, las cosas fallan cuando se las exige demasiado — y Wirely le dice por qué:
 
-- an LED straight across a battery (too much current — add a resistor),
-- a resistor carrying more than its power rating,
-- an electrolytic capacitor connected the wrong way round,
-- a transistor switching a relay coil without a flyback diode (the voltage spike kills it — a power MOSFET can
-  absorb a small spike by breaking down briefly, as the real ones are rated to, but a small one can't),
-- a MOSFET with more voltage across it than it's rated for, or a motor on far too much voltage,
-- a fuse blowing, or a supply short-circuited.
+- un LED directamente conectado a una batería (demasiada corriente — agregue una resistencia),
+- una resistencia que lleva más que su potencia nominal,
+- un condensador electrolítico conectado al revés,
+- un transistor que conmuta una bobina de relé sin diodo de rueda libre (el pico de voltaje lo destruye — un MOSFET
+  de potencia puede absorber un pico pequeño al entrar brevemente en ruptura, como los reales están especificados para
+  hacerlo, pero uno pequeño no),
+- un MOSFET con más voltaje entre sus terminales del que soporta, o un motor con demasiado voltaje,
+- un fusible que se quema, o una fuente en cortocircuito.
 
-### Logic and chips
+### Lógica y chips
 
-Logic gates, the 4017 counter, 4511 decoder and 7-segment display, the 555 and op-amps all work while it runs.
-**Logic probes** show high and low. Chips and op-amps with their supply pins left unconnected are powered from
-the circuit's highest supply automatically, so quick sketches work.
+Las compuertas lógicas, el contador 4017, el decodificador 4511 y el display de 7 segmentos, el 555 y los
+amplificadores operacionales funcionan mientras se ejecuta. Las **sondas lógicas** muestran alto y bajo. Los chips y
+amplificadores operacionales con sus pines de alimentación sin conectar se alimentan automáticamente de la fuente más
+alta del circuito, para que los bocetos rápidos funcionen.
 
-| Logic gates with logic probes | Binary to 7-segment | Op-amp dark sensor |
+| Compuertas lógicas con sondas lógicas | Binario a 7 segmentos | Sensor de oscuridad con amplificador operacional |
 |---|---|---|
 | ![](docs/images/logic_gates.png) | ![](docs/images/seven_segment.png) | ![](docs/images/opamp.png) |
 
-| Burglar alarm (reed switch) | Rain alarm (moisture sensor) |
+| Alarma antirrobo (interruptor magnético) | Alarma de lluvia (sensor de humedad) |
 |---|---|
 | ![](docs/images/burglar_alarm.png) | ![](docs/images/rain_alarm.png) |
 
-### Exporting
+### Exportar
 
-**File → Export diagram** saves PNG, SVG or PDF — always on white paper, ready for a report or a worksheet —
-and **Copy diagram as picture** (Ctrl+Shift+C) puts it straight on the clipboard. **File → Bill of materials**
-gives the parts list.
+**Archivo → Exportar diagrama…** guarda PNG, SVG o PDF — siempre sobre papel blanco, listo para un informe o una
+hoja de trabajo — y **Copiar diagrama como imagen** (Ctrl+Shift+C) lo pone directamente en el portapapeles.
+**Archivo → Lista de materiales…** muestra la lista de componentes.
 
-![An exported diagram](docs/images/export.png)
+![Un diagrama exportado](docs/images/export.png)
 
-### Examples
+### Ejemplos
 
-**File → Open example** has 22 circuits to open and play with, from an LED and resistor, through 555 timers, logic,
-op-amps, relays and motors, up to a buck converter.
+**Archivo → Abrir ejemplo** tiene 35 circuitos para abrir y probar, desde un LED y una resistencia, pasando por
+temporizadores 555, lógica, amplificadores operacionales, relés y motores, hasta un convertidor reductor.
 
-**Dark mode** — the moon button at the top right. Press **F1** in the app for every mouse and keyboard shortcut.
+**Modo oscuro** — el botón de la luna arriba a la derecha. Presione **F1** en la app para ver todos los atajos de
+mouse y teclado.
 
-## How accurate is it?
+## ¿Qué tan preciso es?
 
-Wirely has its own circuit solver (`wirely/sim`), using the same core method as SPICE: nodal equations,
-Newton–Raphson for diodes, LEDs, transistors and MOSFETs (with SPICE-style limiting), and integration over time
-with automatic step-size control. Chips that switch (the 555, logic, square waves) tell the solver exactly when
-they will switch, so it lands a time step on that moment — that keeps timing accurate.
+Wirely tiene su propio solucionador de circuitos (`wirely/sim`), que usa el mismo método central que SPICE:
+ecuaciones nodales, Newton–Raphson para diodos, LEDs, transistores y MOSFET (con limitación al estilo SPICE), e
+integración en el tiempo con control automático del paso. Los chips que conmutan (el 555, la lógica, las ondas
+cuadradas) le dicen al solucionador exactamente cuándo van a conmutar, de modo que coloca un paso de tiempo justo en
+ese momento — así mantiene la precisión temporal.
 
-**MOSFETs are fitted to their datasheets.** Each type's threshold voltage and on-resistance at the datasheet's
-gate voltages are matched, and each has its body diode, internal gate resistance, and gate–source,
-gate–drain (Miller) and drain–source capacitances that change with voltage as the real ones do. So switching
-takes real time, and the gate shows the Miller plateau:
+**Los MOSFET están ajustados a sus hojas de datos.** Se ajustan el voltaje de umbral y la resistencia de encendido de
+cada tipo a los voltajes de compuerta de la hoja de datos, y cada uno tiene su diodo de cuerpo, resistencia interna
+de compuerta y capacitancias compuerta–fuente, compuerta–drenador (Miller) y drenador–fuente que cambian con el
+voltaje como las reales. Así, la conmutación lleva tiempo real y la compuerta muestra la meseta de Miller:
 
-| | Wirely | Datasheet |
+| | Wirely | Hoja de datos |
 |---|---|---|
-| AO3400 gate charge (to 4.5 V, 15 V, 5.7 A) | 6.1 nC | 6 nC |
-| FQP27P06 gate charge (to −10 V, −48 V, −27 A) | 32.3 nC | 33 nC |
-| On-resistance at each datasheet test point (12 types) | within 2 % (IRLZ44N: 11 %) | |
-| Drain current at Vgs(th) (12 types) | within 3 % of the test current | |
+| Carga de compuerta del AO3400 (a 4,5 V, 15 V, 5,7 A) | 6,1 nC | 6 nC |
+| Carga de compuerta del FQP27P06 (a −10 V, −48 V, −27 A) | 32,3 nC | 33 nC |
+| Resistencia de encendido en cada punto de prueba de la hoja de datos (12 tipos) | dentro del 2 % (IRLZ44N: 11 %) | |
+| Corriente de drenador en Vgs(th) (12 tipos) | dentro del 3 % de la corriente de prueba | |
 
-**Op-amps are fitted to theirs too:** open-loop gain, gain-bandwidth, slew rate, input bias current, input
-resistance, supply current, output swing that falls short further under heavier loads (a 741 on ±15 V: ±14 V
-into 10 kΩ, ±13 V into 2 kΩ), the LM358 reaching 0 V but not the top rail, and current limits. The output
-current really comes from the supply pins, and too much supply voltage destroys the chip.
+**Los amplificadores operacionales también están ajustados a las suyas:** ganancia en lazo abierto, ancho de banda de
+ganancia, velocidad de subida (slew rate), corriente de polarización de entrada, resistencia de entrada, corriente de
+alimentación, excursión de salida que se queda más corta con cargas más pesadas (un 741 con ±15 V: ±14 V en 10 kΩ,
+±13 V en 2 kΩ), el LM358 que llega a 0 V pero no al riel superior, y límites de corriente. La corriente de salida
+proviene realmente de los pines de alimentación, y un exceso de voltaje de alimentación destruye el chip.
 
-The automatic tests (425 of them) check it against answers worked out by hand — voltage dividers, the diode
-equation, LED current, transistor gain and saturation, Zener regulation, RC and RL curves, a half-wave
-rectifier, 555 astable and monostable timing, op-amp gains, bandwidth, slew rate and bias currents, a
-Schmitt-trigger oscillator, logic truth tables and counters — against the datasheets above, and against
-**ngspice** running the same models. For example:
+Las pruebas automáticas (425) lo verifican contra resultados calculados a mano — divisores de voltaje, la ecuación del
+diodo, corriente de LED, ganancia y saturación de transistores, regulación Zener, curvas RC y RL, un rectificador de
+media onda, temporización astable y monoestable del 555, ganancias, ancho de banda, velocidad de subida y corrientes
+de polarización de amplificadores operacionales, un oscilador con disparador Schmitt, tablas de verdad lógicas y
+contadores —, contra las hojas de datos anteriores y contra **ngspice** ejecutando los mismos modelos. Por ejemplo:
 
 | | Wirely | ngspice |
 |---|---|---|
-| Buck converter output voltage | 5.750 V | 5.759 V |
-| Buck converter output ripple | 0.391 V | 0.391 V |
-| Buck converter inductor ripple current | 0.315 A | 0.315 A |
-| IRF540 switching: turn-on / turn-off delay (100 Ω gate resistor) | 122 / 569 ns | 122 / 566 ns |
+| Voltaje de salida del convertidor reductor | 5,750 V | 5,759 V |
+| Rizado de salida del convertidor reductor | 0,391 V | 0,391 V |
+| Corriente de rizado del inductor del convertidor reductor | 0,315 A | 0,315 A |
+| Conmutación del IRF540: retardo de encendido / apagado (resistencia de compuerta de 100 Ω) | 122 / 569 ns | 122 / 566 ns |
 
-Filament lamps get hotter and their resistance rises with the voltage, so their current–voltage graph curves
-over (current ∝ V^0.6, as real lamps measure) — and a cold lamp takes a surge of about 11× its running current
-when switched on. Motors have back-EMF, relays have a coil with inductance that pulls in at 75 % and lets go at 30 % of its
-rated current, and switching an inductive load without a flyback diode makes a real voltage spike.
+Las lámparas de filamento se calientan y su resistencia aumenta con el voltaje, por lo que su curva corriente–voltaje
+se dobla (corriente ∝ V^0.6, como miden las lámparas reales) — y una lámpara fría recibe una corriente de irrupción de
+unas 11 veces su corriente de régimen al encenderse. Los motores tienen fuerza contraelectromotriz, los relés tienen
+una bobina con inductancia que se activa al 75 % y se suelta al 30 % de su corriente nominal, y conmutar una carga
+inductiva sin diodo de rueda libre produce un pico de voltaje real.
 
-## Honest limits
+## Límites honestos
 
-Wirely is for trying circuits out quickly and seeing how they behave. It isn't a replacement for a full SPICE
-package or for testing the real thing:
+Wirely sirve para probar circuitos rápidamente y ver cómo se comportan. No reemplaza un paquete SPICE completo ni la
+prueba del circuito real:
 
-- **No PCB or breadboard layout** — it's for the schematic and the simulation.
-- **No SPICE model import or netlist export yet.** Parts use built-in models of common real parts (you choose
-  from a list), fitted to typical datasheet values. There are no temperature effects, op-amp offset voltage
-  or noise, and op-amps have a single pole (so no ringing with capacitive loads).
-- **No AC (frequency-sweep), noise or Monte-Carlo analysis** — the graph is time-based, like an oscilloscope.
-- **Logic is simple** — gates, the 4017, the 4511 and D flip-flops; no microcontrollers.
-- Fast-switching circuits (like the buck converter at 1 kHz) run **slower than real time** — the time label
-  says "slowed". The answers are still right; they just take longer to arrive.
-- Sound depends on your computer's sound system; if it can't be opened, Wirely simply stays quiet.
-- The browser version needs a recent browser, takes a few seconds to start the first time (it downloads about
-  14 MB), and saves pictures as PNG only.
+- **Sin diseño de PCB ni protoboard** — es para el esquemático y la simulación.
+- **Todavía no importa modelos SPICE ni exporta netlists.** Los componentes usan modelos incorporados de componentes
+  reales comunes (se eligen de una lista), ajustados a valores típicos de hoja de datos. No hay efectos de
+  temperatura, voltaje de offset ni ruido en los amplificadores operacionales, y los amplificadores operacionales
+  tienen un solo polo (así que no hay oscilación con cargas capacitivas).
+- **Sin análisis de AC (barrido de frecuencia), ruido ni Monte Carlo** — el gráfico es en el tiempo, como un
+  osciloscopio.
+- **La lógica es simple** — compuertas, el 4017, el 4511 y biestables D; sin microcontroladores.
+- Los circuitos de conmutación rápida (como el convertidor reductor a 1 kHz) se ejecutan **más lento que el tiempo
+  real** — la etiqueta de tiempo dice «ralentizada». Los resultados siguen siendo correctos; solo tardan más en
+  llegar.
+- El sonido depende del sistema de audio de su computadora; si no se puede abrir, Wirely simplemente queda en
+  silencio.
+- La versión web necesita un navegador reciente, tarda unos segundos en iniciar la primera vez (descarga unos 14 MB)
+  y guarda las imágenes solo como PNG.
 
-## For developers
+## Para desarrolladores
 
 ```
 python -m pip install PySide6 numpy pytest
-python -m pytest tests              # model, solver and editor tests (no screen needed)
-python -m wirely "examples/Night light.wirely"
+python -m pytest tests              # pruebas del modelo, del solucionador y del editor (no hace falta pantalla)
+python -m wirely "examples/Luz nocturna.wirely"
 ```
 
-Or double-click `run_wirely.bat` (Windows) / run `./run_wirely.sh` (Mac and Linux) — the first start sets up
-its own Python environment. If Windows *Smart App Control* blocks the `.bat`, double-click **`start.py`**
-instead.
+O haga doble clic en `run_wirely.bat` (Windows) / ejecute `./run_wirely.sh` (Mac y Linux) — el primer inicio configura
+su propio entorno de Python. Si Smart App Control de Windows bloquea el `.bat`, haga doble clic en **`start.py`** en su
+lugar.
 
-The circuit model (`wirely/model`) and the solver (`wirely/sim`) are plain Python with no Qt, so they can be
-tested on their own; the user interface is in `wirely/ui`. The README pictures are made by
-`tools/readme_media.py`. The browser version lives in `web/`: `web/py/qtshim.py` stands in for the parts of Qt the
-sheet and drawing code use (recording the drawing for the page to replay on a canvas), and
-`python tools/build_web.py` builds the site (see BUILDING.md). See [BUILDING.md](BUILDING.md) for building the installers and how the automatic
-GitHub builds work, and [CHANGES.md](CHANGES.md) for what's new.
+El modelo de circuito (`wirely/model`) y el solucionador (`wirely/sim`) son Python puro sin Qt, así que se pueden
+probar por separado; la interfaz de usuario está en `wirely/ui`. Las imágenes del README se generan con
+`tools/readme_media.py`. La versión web vive en `web/`: `web/py/qtshim.py` reemplaza las partes de Qt que usan el
+código de la hoja y de dibujo (registrando el dibujo para que la página lo reproduzca en un canvas), y
+`python tools/build_web.py` compila el sitio (consulte BUILDING.md). Consulte [BUILDING.md](BUILDING.md) para crear
+los instaladores y saber cómo funcionan las compilaciones automáticas de GitHub, y [CHANGES.md](CHANGES.md) para ver
+las novedades.
 
-## Licence
+## Licencia
 
-Wirely is free software: you can redistribute it and/or modify it under the terms of the
-**GNU General Public License version 3** (or any later version) — see [LICENSE](LICENSE).
-In short: use it for anything, including at work, share it, change it — and if you share a changed version,
-share its source code under the GPL too.
+Wirely es software libre: puede redistribuirlo y/o modificarlo bajo los términos de la **Licencia Pública General de
+GNU, versión 3** (o cualquier versión posterior) — consulte [LICENSE](LICENSE).
+En resumen: úselo para lo que quiera, incluso en el trabajo; compártalo, modifíquelo — y si comparte una versión
+modificada, comparta también su código fuente bajo la GPL.
 
 Copyright © 2026 Richard Willmott.
 
-It is built on open-source libraries — Qt / PySide6 (LGPL) and numpy (BSD); see
-[THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt). All icons and symbols were drawn for Wirely. Wirely is an
-independent project and isn't connected to any other circuit simulator or its makers.
+Está construido sobre bibliotecas de código abierto — Qt / PySide6 (LGPL) y numpy (BSD); consulte
+[THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt). Todos los iconos y símbolos fueron dibujados para Wirely. Wirely
+es un proyecto independiente y no está vinculado con ningún otro simulador de circuitos ni con sus creadores.

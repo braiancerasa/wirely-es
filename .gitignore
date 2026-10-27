@@ -8,3 +8,6 @@ selftest.txt
 _site/
 web-smoke/
 pyodide-dl/
+*.zip
+actualizacion/
+tools/actualizar/datos/en-curso.json

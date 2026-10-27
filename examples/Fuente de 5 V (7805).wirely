@@ -1,0 +1,370 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Fuente de 5 V (7805)",
+ "components": [
+  {
+   "id": "05c7f643",
+   "kind": "ac_supply",
+   "ref": "AC1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 325,
+    "frequency": 50
+   }
+  },
+  {
+   "id": "a958c0ef",
+   "kind": "transformer",
+   "ref": "T1",
+   "x": 120,
+   "y": 150,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "ratio": 20,
+    "rating": 5
+   }
+  },
+  {
+   "id": "a3ced578",
+   "kind": "bridge",
+   "ref": "BR1",
+   "x": 260,
+   "y": 160,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "rating": 1.0
+   }
+  },
+  {
+   "id": "63ce86aa",
+   "kind": "electrolytic",
+   "ref": "C1",
+   "x": 340,
+   "y": 230,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "capacitance": 0.001,
+    "max_voltage": 25
+   }
+  },
+  {
+   "id": "0553748f",
+   "kind": "reg_fixed",
+   "ref": "IC1",
+   "x": 450,
+   "y": 160,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "model": "7805",
+    "heatsink": false
+   }
+  },
+  {
+   "id": "263c518e",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 570,
+   "y": 160,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 220,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "a7a9f8bb",
+   "kind": "led",
+   "ref": "LED1",
+   "x": 640,
+   "y": 230,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Verde",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "e69bd945",
+   "kind": "voltmeter",
+   "ref": "VM1",
+   "x": 720,
+   "y": 230,
+   "rot": 1,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "99096ecb",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 220,
+   "y": 300,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "9ab02278",
+   "kind": "scope_probe",
+   "ref": "P1",
+   "x": 320,
+   "y": 160,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "channel": "A"
+   }
+  },
+  {
+   "id": "cc7120ed",
+   "kind": "scope_probe",
+   "ref": "P2",
+   "x": 520,
+   "y": 160,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "channel": "B"
+   }
+  },
+  {
+   "id": "422328f0",
+   "kind": "note",
+   "ref": "T2",
+   "x": 360,
+   "y": 40,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Red eléctrica (¡simulada!) → el transformador la reduce → el puente la rectifica →\nC1 la suaviza → el 7805 entrega 5 V estables. El gráfico muestra A y B."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "90645e7d",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     80,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "6148796a",
+   "points": [
+    [
+     0,
+     180
+    ],
+    [
+     80,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "c544505d",
+   "points": [
+    [
+     160,
+     120
+    ],
+    [
+     260,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "61366f4e",
+   "points": [
+    [
+     160,
+     180
+    ],
+    [
+     160,
+     220
+    ],
+    [
+     260,
+     220
+    ],
+    [
+     260,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "4c808c5b",
+   "points": [
+    [
+     300,
+     160
+    ],
+    [
+     340,
+     160
+    ],
+    [
+     340,
+     210
+    ]
+   ]
+  },
+  {
+   "id": "6ac65507",
+   "points": [
+    [
+     340,
+     160
+    ],
+    [
+     400,
+     160
+    ]
+   ]
+  },
+  {
+   "id": "a35aed57",
+   "points": [
+    [
+     500,
+     160
+    ],
+    [
+     540,
+     160
+    ]
+   ]
+  },
+  {
+   "id": "286dcb51",
+   "points": [
+    [
+     600,
+     160
+    ],
+    [
+     640,
+     160
+    ],
+    [
+     640,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "e579c9c4",
+   "points": [
+    [
+     640,
+     160
+    ],
+    [
+     720,
+     160
+    ],
+    [
+     720,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "0acd7514",
+   "points": [
+    [
+     220,
+     160
+    ],
+    [
+     220,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "bf560b50",
+   "points": [
+    [
+     340,
+     250
+    ],
+    [
+     340,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "4bc8768a",
+   "points": [
+    [
+     450,
+     190
+    ],
+    [
+     450,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "b4495a4a",
+   "points": [
+    [
+     640,
+     260
+    ],
+    [
+     640,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "60b16242",
+   "points": [
+    [
+     720,
+     260
+    ],
+    [
+     720,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "0ecd57bf",
+   "points": [
+    [
+     220,
+     300
+    ],
+    [
+     720,
+     300
+    ]
+   ]
+  }
+ ]
+}

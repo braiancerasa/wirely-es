@@ -2,7 +2,7 @@
 <!-- Teaches Linux desktops that *.wirely files are Wirely circuits (packaging/linux/install-desktop.sh) -->
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
   <mime-type type="application/x-wirely">
-    <comment>Wirely circuit</comment>
+    <comment>Circuito de Wirely</comment>
     <icon name="application-x-wirely"/>
     <glob pattern="*.wirely"/>
     <glob pattern="*.spark"/>

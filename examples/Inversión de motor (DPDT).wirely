@@ -1,0 +1,202 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Inversión de motor (DPDT)",
+ "components": [
+  {
+   "id": "d04e89b9",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 100,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 6
+   }
+  },
+  {
+   "id": "b78334ee",
+   "kind": "dpdt",
+   "ref": "S1",
+   "x": 150,
+   "y": 100,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "position": "A"
+   }
+  },
+  {
+   "id": "e2f8cb1f",
+   "kind": "motor",
+   "ref": "M1",
+   "x": 400,
+   "y": 100,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 6,
+    "load": "Ninguna"
+   }
+  },
+  {
+   "id": "e739e3d3",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 160,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "60445fde",
+   "kind": "note",
+   "ref": "T1",
+   "x": 200,
+   "y": 210,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Haga clic en S1 mientras ejecuta: el interruptor invierte\nlas conexiones del motor, así que gira al otro lado."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "f847ee6c",
+   "points": [
+    [
+     0,
+     70
+    ],
+    [
+     0,
+     40
+    ],
+    [
+     100,
+     40
+    ],
+    [
+     100,
+     80
+    ],
+    [
+     120,
+     80
+    ]
+   ]
+  },
+  {
+   "id": "f9693f91",
+   "points": [
+    [
+     0,
+     130
+    ],
+    [
+     0,
+     160
+    ],
+    [
+     100,
+     160
+    ],
+    [
+     100,
+     120
+    ],
+    [
+     120,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "bca56c16",
+   "points": [
+    [
+     180,
+     70
+    ],
+    [
+     400,
+     70
+    ]
+   ]
+  },
+  {
+   "id": "304b9f17",
+   "points": [
+    [
+     180,
+     130
+    ],
+    [
+     240,
+     130
+    ],
+    [
+     240,
+     30
+    ],
+    [
+     400,
+     30
+    ],
+    [
+     400,
+     70
+    ]
+   ]
+  },
+  {
+   "id": "940f3ed2",
+   "points": [
+    [
+     180,
+     90
+    ],
+    [
+     300,
+     90
+    ],
+    [
+     300,
+     130
+    ],
+    [
+     400,
+     130
+    ]
+   ]
+  },
+  {
+   "id": "82a689b4",
+   "points": [
+    [
+     180,
+     110
+    ],
+    [
+     320,
+     110
+    ],
+    [
+     320,
+     150
+    ],
+    [
+     400,
+     150
+    ],
+    [
+     400,
+     130
+    ]
+   ]
+  }
+ ]
+}

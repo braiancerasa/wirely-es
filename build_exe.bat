@@ -10,7 +10,7 @@ setlocal
 cd /d "%~dp0"
 
 if exist ".venv\Scripts\python.exe" goto :have_venv
-echo [Wirely] Setting up Python first...
+echo [Wirely] Configurando Python primero...
 set PY=
 where py >nul 2>nul && set PY=py -3
 if not defined PY where python >nul 2>nul && set PY=python
@@ -20,11 +20,11 @@ if errorlevel 1 goto :failed
 :have_venv
 set VPY=%~dp0.venv\Scripts\python.exe
 
-echo [Wirely] Installing the packaging tool...
+echo [Wirely] Instalando la herramienta de empaquetado...
 "%VPY%" -m pip install --quiet --upgrade "pyinstaller>=6.16"
-if errorlevel 1 ( echo Could not install PyInstaller - check your internet connection. & pause & exit /b 1 )
+if errorlevel 1 ( echo No se pudo instalar PyInstaller - revise su conexión a internet. & pause & exit /b 1 )
 
-echo [Wirely] Packing Wirely into an .exe (this takes a few minutes)...
+echo [Wirely] Empaquetando Wirely en un .exe (tarda unos minutos)...
 "%VPY%" -m PyInstaller packaging\wirely.spec --noconfirm --clean --distpath dist --workpath build
 if errorlevel 1 goto :failed
 
@@ -35,7 +35,7 @@ if errorlevel 1 (
   if exist "%TEMP%\wirely_selftest.txt" type "%TEMP%\wirely_selftest.txt"
   goto :failed
 )
-echo [Wirely] dist\Wirely\Wirely.exe works.
+echo [Wirely] dist\Wirely\Wirely.exe funciona.
 
 for /f %%v in ('"%VPY%" -c "import wirely; print(wirely.__version__)"') do set VER=%%v
 for /f %%r in ('"%VPY%" -c "import wirely; print(wirely.__revision__)"') do set REV=%%r
@@ -45,25 +45,25 @@ if exist "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" set ISCC=%ProgramFiles(x86)
 if exist "%ProgramFiles%\Inno Setup 6\ISCC.exe" set ISCC=%ProgramFiles%\Inno Setup 6\ISCC.exe
 if exist "%LocalAppData%\Programs\Inno Setup 6\ISCC.exe" set ISCC=%LocalAppData%\Programs\Inno Setup 6\ISCC.exe
 if defined ISCC (
-  echo [Wirely] Building the installer...
+  echo [Wirely] Creando el instalador...
   "%ISCC%" /Q /DAppVersion=%VER% /DAppRevision=%REV% "packaging\Wirely.iss"
-  if errorlevel 1 ( echo The installer build failed - the app itself is still in dist\Wirely. ) else ( echo [Wirely] Installer: dist\Wirely-Setup-%REV%.exe )
+  if errorlevel 1 ( echo Falló la creación del instalador - la app sigue en dist\Wirely. ) else ( echo [Wirely] Instalador: dist\Wirely-Setup-%REV%.exe )
 ) else (
-  echo [Wirely] Skipped the installer: Inno Setup isn't installed. Get it free from https://jrsoftware.org/isdl.php
+  echo [Wirely] Se omitió el instalador: Inno Setup no está instalado. Descárguelo gratis desde https://jrsoftware.org/isdl.php
 )
 echo.
-echo Done! Wirely is in the dist folder.
+echo ¡Listo! Wirely está en la carpeta dist.
 explorer dist
 pause
 exit /b 0
 
 :no_python
-echo Python was not found - install it from https://www.python.org (tick "Add python.exe to PATH").
+echo No se encontró Python - instálelo desde https://www.python.org (marque "Add python.exe to PATH").
 pause
 exit /b 1
 
 :failed
 echo.
-echo The build failed - scroll up for the error, or send a screenshot of this window.
+echo Falló la compilación - desplácese hacia arriba para ver el error o envíe una captura de esta ventana.
 pause
 exit /b 1

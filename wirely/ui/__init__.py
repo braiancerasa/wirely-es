@@ -1,1 +1,1 @@
-"""The Qt user interface."""
+"""La interfaz de usuario Qt."""

@@ -1,6 +1,6 @@
-"""The start-up splash screen: appears the moment Wirely is opened, shows the version and revision, and a
-progress bar while the rest loads. It closes itself once the main window is up. It only needs PySide6 and
-the logo picture, and if anything goes wrong it simply doesn't appear — it never stops Wirely starting."""
+"""La pantalla de inicio: aparece en el momento en que se abre Wirely, muestra la versión y la revisión, y una
+barra de progreso mientras carga el resto. Se cierra sola una vez que la ventana principal está lista. Solo necesita PySide6 y
+la imagen del logotipo, y si algo sale mal simplemente no aparece — nunca impide que Wirely arranque."""
 import os
 import random
 import time
@@ -21,19 +21,19 @@ ASSETS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 def _version():
     try:
         from .. import __revision__, __version__
-        return f"Version {__version__}" if __revision__ == __version__ else f"{__version__}  ·  {__revision__}"
+        return f"Versión {__version__}" if __revision__ == __version__ else f"{__version__}  ·  {__revision__}"
     except Exception:       # noqa: BLE001
         return ""
 
 
 class Splash(QWidget):
-    MIN_SECONDS = 1.2        # stay up at least this long, so it doesn't just flash
+    MIN_SECONDS = 1.2        # permanecer al menos este tiempo, para que no solo parpadee
 
     def __init__(self):
         super().__init__(None, Qt.SplashScreen | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self.setFixedSize(W, H)
-        self.text = "Starting…"
+        self.text = "Iniciando…"
         self.frac = 0.0
         self.t0 = time.monotonic()
         self._bg = self._make_background()
@@ -42,7 +42,7 @@ class Splash(QWidget):
             g = scr.availableGeometry()
             self.move(g.center().x() - W // 2, g.center().y() - H // 2)
 
-    # ------------------------------------------------------------------ progress
+    # ------------------------------------------------------------------ progreso
     def step(self, text, frac):
         self.text = text
         self.frac = max(self.frac, min(1.0, frac))
@@ -50,7 +50,7 @@ class Splash(QWidget):
         QApplication.processEvents()
 
     def finish(self, window):
-        self.step("Ready", 1.0)
+        self.step("Listo", 1.0)
         end = time.monotonic() + max(0.0, self.MIN_SECONDS - (time.monotonic() - self.t0))
         while time.monotonic() < end:
             QApplication.processEvents()
@@ -59,7 +59,7 @@ class Splash(QWidget):
         window.activateWindow()
         self.close()
 
-    # ------------------------------------------------------------------ drawing
+    # ------------------------------------------------------------------ dibujo
     def _make_background(self):
         dpr = self.devicePixelRatioF() if hasattr(self, "devicePixelRatioF") else 1.0
         pm = QPixmap(int(W * dpr), int(H * dpr))
@@ -99,7 +99,7 @@ class Splash(QWidget):
         p.setFont(f2)
         p.setPen(QColor(170, 186, 198))
         p.drawText(QRectF(180, 206, 460, 24), Qt.AlignLeft | Qt.AlignVCenter,
-                   "Draw a circuit, press play, watch it work")
+                   "Dibuje un circuito, presione Ejecutar, véalo funcionar")
         v = _version()
         if v:
             f3 = QFont("Segoe UI")
@@ -115,7 +115,7 @@ class Splash(QWidget):
 
     @staticmethod
     def _draw_traces(p):
-        """Faint circuit-board traces with junction dots across the right-hand side."""
+        """Trazas de placa de circuito tenues con puntos de unión a través del lado derecho."""
         rnd = random.Random(7)
         grid = 24
         for _ in range(16):
@@ -141,7 +141,7 @@ class Splash(QWidget):
             p.setBrush(QColor(120, 220, 220, a + 20))
             for px, py in (pts[0], pts[-1]):
                 p.drawEllipse(QPointF(px, py), 3, 3)
-        # a few glowing "current" dots
+        # algunos puntos "corriente" brillantes
         for _ in range(5):
             x, y = rnd.randrange(14, 29) * grid, rnd.randrange(1, 13) * grid
             rg = QRadialGradient(QPointF(x, y), 9)
@@ -183,11 +183,11 @@ class Splash(QWidget):
 
 
 def show_splash():
-    """Create and show the splash (returns None if anything goes wrong — never stops Wirely starting)."""
+    """Crear y mostrar la pantalla de inicio (devuelve None si algo sale mal — nunca impide que Wirely arranque)."""
     try:
         s = Splash()
         s.show()
-        s.step("Starting…", 0.05)
+        s.step("Iniciando…", 0.05)
         return s
     except Exception:       # noqa: BLE001
         return None

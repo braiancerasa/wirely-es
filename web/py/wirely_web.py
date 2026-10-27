@@ -47,7 +47,7 @@ from wirely.ui.scene import CircuitScene                             # noqa: E40
 
 SceneEvent = qtshim.SceneEvent
 DRAG_START = 4
-EMPTY_HINT = "Pick a part from the gallery, or drag from a pin to draw a wire."
+EMPTY_HINT = "Elija un componente de la galería o arrastre desde un pin para dibujar un cable."
 
 
 # ============================================================================================ small helpers
@@ -168,7 +168,7 @@ class App:
         self._press = None
         self.clip = None
         self._paste_n = 0
-        self.name = "Untitled"
+        self.name = "Sin título"
         self.history = [self.circuit.to_dict()]
         self.hi = 0
         self.saved_at = 0
@@ -202,7 +202,8 @@ class App:
         self.status = text
 
     def _on_sim_message(self, cid, text):
-        kind = "error" if ("popped" in text or "blew" in text or "burnt" in text) else "warn"
+        kind = "error" if ("quemó" in text or "fundió" in text or "reventó" in text
+                           or "destruido" in text) else "warn"
         self.toasts.append([text, kind])
 
     def _on_sim_state(self, state):
@@ -213,9 +214,10 @@ class App:
             self.status = ""
             self.synth.silence_all()
         elif state == "running":
-            self.status = "Running — click switches, drag sliders, hover over wires to read voltages."
+            self.status = ("En ejecución — haga clic en los interruptores, arrastre los deslizadores "
+                           "y pase el mouse sobre los cables para leer los voltajes.")
         else:
-            self.status = "Paused — press Play to carry on, or Stop to edit."
+            self.status = "En pausa — presione Ejecutar para continuar, o Detener para editar."
 
     # ------------------------------------------------------------------ files
     def _set_circuit(self, circuit, name):
@@ -231,20 +233,20 @@ class App:
         self.saved_at = 0
 
     def new(self):
-        self._set_circuit(Circuit(), "Untitled")
+        self._set_circuit(Circuit(), "Sin título")
         return ""
 
-    def load(self, text, name="Untitled"):
+    def load(self, text, name="Sin título"):
         """Open a .wirely file's text. Returns "" or what went wrong."""
         try:
             d = json.loads(text)
             if d.get("app") not in ("Wirely", "Sparkbench"):
-                raise ValueError("This isn't a Wirely circuit file.")
+                raise ValueError("Este no es un archivo de circuito de Wirely.")
             if int(d.get("version", 1)) > 1:
-                raise ValueError("This file was saved by a newer version of Wirely — please update.")
+                raise ValueError("Este archivo fue guardado por una versión más nueva de Wirely — actualice la aplicación.")
             c = Circuit.from_dict(d)
         except Exception as e:                   # noqa: BLE001 - show any problem to the user
-            return f"Couldn't open {name}: {e}"
+            return f"No se pudo abrir {name}: {e}"
         self._set_circuit(c, name)
         return ""
 
@@ -264,7 +266,7 @@ class App:
 
     def bom_csv(self):
         rows = self.circuit.bill_of_materials()
-        out = ["Qty,Part,Labels"]
+        out = ["Cant.,Componente,Etiquetas"]
         for r in rows:
             out.append(f'{r["qty"]},"{r["description"]}","{" ".join(r["refs"])}"')
         return "\n".join(out)
@@ -389,7 +391,7 @@ class App:
     # ------------------------------------------------------------------ actions (toolbar, menus, keys)
     def start_placing(self, kind, keep=False):
         if self.simc.active():
-            self.toasts.append(["Press Stop to go back to editing, then add the part.", "info"])
+            self.toasts.append(["Presione Detener para volver a la edición y luego agregue el componente.", "info"])
             return
         self.scene.start_placing(kind, keep=bool(keep))
 
@@ -489,7 +491,7 @@ class App:
             "paste": bool(self.clip) and not running, "volts": sc.show_volts, "flow": sc.show_flow, "readings": sc.show_readings,
             "sound": self.sound_on, "graph": self.graph_on, "grid": sc.show_grid, "dark": theme.MODE == "dark", "us": S.STYLE == "us",
             "dirty": self.is_dirty(), "name": self.name, "empty": self.circuit.is_empty(),
-            "counts": f"{n} part{'s' * (n != 1)} · {w} wire{'s' * (w != 1)}",
+            "counts": f"{n} componente{'s' * (n != 1)} · {w} cable{'s' * (w != 1)}",
             "status": self.status or (EMPTY_HINT if not running else ""),
             "wiring": sc._wiring is not None,
         })
@@ -504,22 +506,22 @@ class App:
             if not item.isSelected():
                 sc.clearSelection()
                 item.setSelected(True)
-            menu.append(["Properties…", "props", "Enter"])
+            menu.append(["Propiedades…", "props", "Enter"])
             if not running:
-                menu += [None, ["Rotate", "rotate", "R"], ["Rotate anticlockwise", "rotate_ccw", "Shift+R"],
-                         ["Flip", "flip", "F"], None, ["Duplicate", "duplicate", "Ctrl+D"], ["Copy", "copy", "Ctrl+C"],
-                         ["Cut", "cut", "Ctrl+X"], ["Delete", "delete", "Del"]]
+                menu += [None, ["Rotar", "rotate", "R"], ["Rotar en sentido antihorario", "rotate_ccw", "Shift+R"],
+                         ["Voltear", "flip", "F"], None, ["Duplicar", "duplicate", "Ctrl+D"], ["Copiar", "copy", "Ctrl+C"],
+                         ["Cortar", "cut", "Ctrl+X"], ["Eliminar", "delete", "Del"]]
         elif isinstance(item, WireItem) and not running:
             if not item.isSelected():
                 sc.clearSelection()
                 item.setSelected(True)
-            menu.append(["Delete", "delete", "Del"])
+            menu.append(["Eliminar", "delete", "Del"])
         elif not running:
-            menu += [["Paste", "paste", "Ctrl+V"], ["Select all", "select_all", "Ctrl+A"], None,
-                     ["Zoom to fit", "fit", "Ctrl+0"]]
+            menu += [["Pegar", "paste", "Ctrl+V"], ["Seleccionar todo", "select_all", "Ctrl+A"], None,
+                     ["Ajustar zoom", "fit", "Ctrl+0"]]
         else:
-            menu.append(["Pause", "pause", "F6"] if self.simc.state == "running" else ["Run", "play", "F5"])
-            menu.append(["Stop", "stop", "F7"])
+            menu.append(["Pausar", "pause", "F6"] if self.simc.state == "running" else ["Ejecutar", "play", "F5"])
+            menu.append(["Detener", "stop", "F7"])
         return json.dumps(menu)
 
     # ------------------------------------------------------------------ the properties box
@@ -547,12 +549,12 @@ class App:
                 # the number, with a box beside it for its size: Ω / kΩ / MΩ, pF / nF / µF …
                 f["value"], f["unit"] = split(float(v), p.unit)
                 f["units"] = unit_choices(p.unit)
-                f["placeholder"] = f"e.g. {split(float(p.default), p.unit)[0]}"
-                f["help"] = p.help or "Type the number and pick its size — or type it all, like 4k7 or 100n"
+                f["placeholder"] = f"p. ej. {split(float(p.default), p.unit)[0]}"
+                f["help"] = p.help or "Escriba el número y elija su escala - o escríbalo todo, como 4k7 o 100n"
             else:
                 f["value"] = fmt(v, p.unit)
-                f["placeholder"] = f"e.g. {fmt(p.default, p.unit)}"
-                f["help"] = p.help or "Type values like 10k, 4k7, 2M2, 100n, 4.7µ"
+                f["placeholder"] = f"p. ej. {fmt(p.default, p.unit)}"
+                f["help"] = p.help or "Escriba valores como 10k, 4k7, 2M2, 100n, 4.7µ"
             fields.append(f)
         return json.dumps({"id": cid, "ref": comp.ref, "name": part.name, "description": part.description,
                            "fields": fields, "kind": comp.kind,
@@ -577,19 +579,19 @@ class App:
                     else:
                         v = parse(raw, p.unit)
                     if p.min is not None and v < p.min:
-                        raise ValueError(f"{p.label} must be at least {fmt(p.min, p.unit)}")
+                        raise ValueError(f"{p.label} debe ser como mínimo {fmt(p.min, p.unit)}")
                     if p.max is not None and v > p.max:
-                        raise ValueError(f"{p.label} can be at most {fmt(p.max, p.unit)}")
+                        raise ValueError(f"{p.label} puede ser como máximo {fmt(p.max, p.unit)}")
                     out[p.key] = v
                 except ValueError as e:
                     problems.append(str(e))
                     bad.append(p.key)
         ref = str(values.get("_ref", comp.ref)).strip()
         if not ref:
-            problems.append("The label can't be empty")
+            problems.append("La etiqueta no puede estar vacía")
             bad.append("_ref")
         elif any(c.ref == ref and c.id != comp.id for c in self.circuit.components.values()):
-            problems.append(f"Another part is already called {ref}")
+            problems.append(f"Ya hay otro componente llamado {ref}")
             bad.append("_ref")
         return out, ref, problems, bad
 
@@ -640,7 +642,7 @@ class App:
             self.simc.pause()
             return ""
         if self.circuit.is_empty():
-            self.toasts.append(["Add some parts and wire them up first — then press Play.", "info"])
+            self.toasts.append(["Agregue componentes y conéctelos primero - luego presione Ejecutar.", "info"])
             return ""
         sc.cancel()
         sc.set_mode("select")
@@ -651,7 +653,7 @@ class App:
             self.simc.start(self.circuit)
         except Exception as e:                 # noqa: BLE001 - never crash the editor because of a bad circuit
             self.simc.stop()
-            self.toasts.append([f"The simulation couldn't start: {e}", "error"])
+            self.toasts.append([f"La simulación no pudo iniciarse: {e}", "error"])
             return str(e)
         return ""
 
@@ -674,7 +676,7 @@ class App:
             self.simc._tick()
         except Exception as e:                 # noqa: BLE001
             self.simc.stop()
-            self.toasts.append([f"The simulation stopped: {e}", "error"])
+            self.toasts.append([f"La simulación se detuvo: {e}", "error"])
         if self.simc.live.samples or self.simc.active():
             if self.simc.live.samples:
                 self.graph.add_samples(self.simc.live.samples, self.simc.live.t)
@@ -688,7 +690,7 @@ class App:
         txt = f"t = {t:.2f} s" if t < 100 else f"t = {t:.0f} s"
         behind = self.simc.behind and self.simc.state == "running"
         if behind:
-            txt += "  · slowed"
+            txt += "  · ralentizada"
         sound = []
         if self.sound_on and self.simc.state == "running":
             for key, v in self.synth.voices.items():
@@ -860,7 +862,7 @@ class App:
             tr = self.graph.traces[ch]
             for t, v in zip(tr.t, tr.v):
                 rows.setdefault(t, {})[ch] = v
-        out = ["time (s)," + ",".join(f"{ch} (V)" for ch in chans)]
+        out = ["tiempo (s)," + ",".join(f"{ch} (V)" for ch in chans)]
         for t in sorted(rows):
             out.append(f"{t:.9g}," + ",".join(f"{rows[t][ch]:.6g}" if ch in rows[t] else "" for ch in chans))
         return "\n".join(out)

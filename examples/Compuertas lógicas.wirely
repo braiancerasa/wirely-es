@@ -1,0 +1,300 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Compuertas lógicas",
+ "components": [
+  {
+   "id": "c0efddfc",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "5a26f6fa",
+   "kind": "switch",
+   "ref": "S1",
+   "x": 100,
+   "y": 70,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "622475cb",
+   "kind": "switch",
+   "ref": "S2",
+   "x": 180,
+   "y": 70,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "53014e84",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 100,
+   "y": 190,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 10000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "875a900c",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 180,
+   "y": 190,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 10000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "1b7658ff",
+   "kind": "and",
+   "ref": "U1",
+   "x": 320,
+   "y": 150,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "68dc3bc9",
+   "kind": "led",
+   "ref": "LED1",
+   "x": 420,
+   "y": 220,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Rojo",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "71d48a88",
+   "kind": "logic_probe",
+   "ref": "LP1",
+   "x": 140,
+   "y": 130,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "956412fd",
+   "kind": "logic_probe",
+   "ref": "LP2",
+   "x": 220,
+   "y": 150,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "b5d22f9a",
+   "kind": "logic_probe",
+   "ref": "LP3",
+   "x": 390,
+   "y": 150,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "c02ba992",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 300,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  }
+ ],
+ "wires": [
+  {
+   "id": "9bc213eb",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     180,
+     0
+    ],
+    [
+     180,
+     40
+    ]
+   ]
+  },
+  {
+   "id": "d8584ad4",
+   "points": [
+    [
+     100,
+     40
+    ],
+    [
+     100,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "10df2a2a",
+   "points": [
+    [
+     100,
+     100
+    ],
+    [
+     100,
+     160
+    ]
+   ]
+  },
+  {
+   "id": "a06ef0e1",
+   "points": [
+    [
+     180,
+     100
+    ],
+    [
+     180,
+     160
+    ]
+   ]
+  },
+  {
+   "id": "fd0d4cfe",
+   "points": [
+    [
+     100,
+     130
+    ],
+    [
+     260,
+     130
+    ],
+    [
+     260,
+     140
+    ],
+    [
+     280,
+     140
+    ]
+   ]
+  },
+  {
+   "id": "9b202d2d",
+   "points": [
+    [
+     180,
+     150
+    ],
+    [
+     240,
+     150
+    ],
+    [
+     240,
+     160
+    ],
+    [
+     280,
+     160
+    ]
+   ]
+  },
+  {
+   "id": "562295c1",
+   "points": [
+    [
+     360,
+     150
+    ],
+    [
+     420,
+     150
+    ],
+    [
+     420,
+     190
+    ]
+   ]
+  },
+  {
+   "id": "6dab20eb",
+   "points": [
+    [
+     0,
+     180
+    ],
+    [
+     0,
+     300
+    ],
+    [
+     420,
+     300
+    ],
+    [
+     420,
+     250
+    ]
+   ]
+  },
+  {
+   "id": "7939edc4",
+   "points": [
+    [
+     100,
+     220
+    ],
+    [
+     100,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "b5178a4c",
+   "points": [
+    [
+     180,
+     220
+    ],
+    [
+     180,
+     300
+    ]
+   ]
+  }
+ ]
+}

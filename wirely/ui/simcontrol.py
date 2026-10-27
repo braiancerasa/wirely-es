@@ -13,8 +13,9 @@ from ..sim.audio import SpeakerWatch, update_from_sim
 from ..sim.flow import FlowNetwork
 
 FRAME_MS = 33
-SPEEDS = [("10× faster", 10.0), ("2× faster", 2.0), ("Real time", 1.0), ("½ speed", 0.5), ("⅕ speed", 0.2),
-          ("1/10 speed", 0.1), ("1/100 speed", 0.01), ("1/1000 speed", 0.001)]
+SPEEDS = [("10× más rápido", 10.0), ("2× más rápido", 2.0), ("Tiempo real", 1.0), ("½ velocidad", 0.5),
+          ("⅕ velocidad", 0.2), ("1/10 de velocidad", 0.1), ("1/100 de velocidad", 0.01),
+          ("1/1000 de velocidad", 0.001)]
 INTERACTIVE = {"switch", "push_make", "push_break", "spdt", "dpdt", "reed_switch", "tilt_switch", "hall", "rotary",
                "keypad"}
 TOGGLES = {"switch": "closed", "reed_switch": "magnet", "tilt_switch": "tilted", "hall": "magnet"}

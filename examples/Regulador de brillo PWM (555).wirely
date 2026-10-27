@@ -1,0 +1,601 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Regulador de brillo PWM (555)",
+ "components": [
+  {
+   "id": "ba2f7e85",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 210,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "b29b3b26",
+   "kind": "timer555",
+   "ref": "IC1",
+   "x": 300,
+   "y": 200,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "e6bc3179",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 180,
+   "y": 90,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 1000,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "28b05728",
+   "kind": "potentiometer",
+   "ref": "VR1",
+   "x": 100,
+   "y": 210,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 100000.0,
+    "setting": 25
+   }
+  },
+  {
+   "id": "1740476b",
+   "kind": "diode",
+   "ref": "D1",
+   "x": 70,
+   "y": 260,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "model": "1N4148"
+   }
+  },
+  {
+   "id": "57afd98c",
+   "kind": "diode",
+   "ref": "D2",
+   "x": 130,
+   "y": 260,
+   "rot": 3,
+   "flip": false,
+   "props": {
+    "model": "1N4148"
+   }
+  },
+  {
+   "id": "de3cfbb3",
+   "kind": "capacitor",
+   "ref": "C1",
+   "x": 200,
+   "y": 310,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "capacitance": 1e-07
+   }
+  },
+  {
+   "id": "13d2920a",
+   "kind": "capacitor",
+   "ref": "C2",
+   "x": 320,
+   "y": 300,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "capacitance": 1e-08
+   }
+  },
+  {
+   "id": "6c38e434",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 400,
+   "y": 250,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 470,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "07c615dd",
+   "kind": "led",
+   "ref": "LED1",
+   "x": 400,
+   "y": 330,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "colour": "Rojo",
+    "max_current": 0.03
+   }
+  },
+  {
+   "id": "b1fb92aa",
+   "kind": "nmos",
+   "ref": "Q1",
+   "x": 500,
+   "y": 200,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "model": "2N7000"
+   }
+  },
+  {
+   "id": "e5651865",
+   "kind": "lamp",
+   "ref": "L1",
+   "x": 510,
+   "y": 110,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9,
+    "power": 0.5
+   }
+  },
+  {
+   "id": "4ece3edd",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 380,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "64043d9a",
+   "kind": "note",
+   "ref": "T1",
+   "x": 260,
+   "y": 450,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "Gire la perilla (VR1) mientras ejecuta: el LED y la lámpara se ven más o menos brillantes.\nEl 555 los enciende y apaga por completo unas 140 veces por segundo — demasiado rápido\npara verlo, así que solo parecen más tenues. Baje mucho la velocidad de la simulación para observarlo."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "baf9fa0f",
+   "points": [
+    [
+     0,
+     180
+    ],
+    [
+     0,
+     40
+    ],
+    [
+     180,
+     40
+    ]
+   ]
+  },
+  {
+   "id": "34a24f0d",
+   "points": [
+    [
+     180,
+     40
+    ],
+    [
+     280,
+     40
+    ]
+   ]
+  },
+  {
+   "id": "39789b91",
+   "points": [
+    [
+     280,
+     40
+    ],
+    [
+     320,
+     40
+    ]
+   ]
+  },
+  {
+   "id": "eee8cf6a",
+   "points": [
+    [
+     320,
+     40
+    ],
+    [
+     510,
+     40
+    ],
+    [
+     510,
+     80
+    ]
+   ]
+  },
+  {
+   "id": "7e4176be",
+   "points": [
+    [
+     0,
+     240
+    ],
+    [
+     0,
+     380
+    ],
+    [
+     200,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "bc9ee6ab",
+   "points": [
+    [
+     200,
+     380
+    ],
+    [
+     280,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "9145c7f6",
+   "points": [
+    [
+     280,
+     380
+    ],
+    [
+     320,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "882c7888",
+   "points": [
+    [
+     320,
+     380
+    ],
+    [
+     400,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "aa15f3b8",
+   "points": [
+    [
+     400,
+     380
+    ],
+    [
+     510,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "91020f52",
+   "points": [
+    [
+     320,
+     140
+    ],
+    [
+     320,
+     40
+    ]
+   ]
+  },
+  {
+   "id": "0a4630e2",
+   "points": [
+    [
+     280,
+     140
+    ],
+    [
+     280,
+     40
+    ]
+   ]
+  },
+  {
+   "id": "f3dc8c34",
+   "points": [
+    [
+     180,
+     60
+    ],
+    [
+     180,
+     40
+    ]
+   ]
+  },
+  {
+   "id": "34917c16",
+   "points": [
+    [
+     180,
+     120
+    ],
+    [
+     180,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "8a6179c2",
+   "points": [
+    [
+     240,
+     180
+    ],
+    [
+     180,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "0780bd9a",
+   "points": [
+    [
+     100,
+     180
+    ],
+    [
+     180,
+     180
+    ]
+   ]
+  },
+  {
+   "id": "b49c5fcf",
+   "points": [
+    [
+     70,
+     210
+    ],
+    [
+     70,
+     230
+    ]
+   ]
+  },
+  {
+   "id": "2ce95066",
+   "points": [
+    [
+     130,
+     210
+    ],
+    [
+     130,
+     230
+    ]
+   ]
+  },
+  {
+   "id": "69e1ef31",
+   "points": [
+    [
+     70,
+     290
+    ],
+    [
+     130,
+     290
+    ]
+   ]
+  },
+  {
+   "id": "50962be2",
+   "points": [
+    [
+     130,
+     290
+    ],
+    [
+     200,
+     290
+    ]
+   ]
+  },
+  {
+   "id": "164251ec",
+   "points": [
+    [
+     200,
+     290
+    ],
+    [
+     240,
+     290
+    ],
+    [
+     240,
+     220
+    ]
+   ]
+  },
+  {
+   "id": "32598ca9",
+   "points": [
+    [
+     240,
+     220
+    ],
+    [
+     240,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "b2080274",
+   "points": [
+    [
+     200,
+     330
+    ],
+    [
+     200,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "920b0d95",
+   "points": [
+    [
+     280,
+     260
+    ],
+    [
+     280,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "70e36159",
+   "points": [
+    [
+     320,
+     260
+    ],
+    [
+     320,
+     280
+    ]
+   ]
+  },
+  {
+   "id": "41c8864a",
+   "points": [
+    [
+     320,
+     320
+    ],
+    [
+     320,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "7e9f4dda",
+   "points": [
+    [
+     360,
+     200
+    ],
+    [
+     400,
+     200
+    ],
+    [
+     400,
+     220
+    ]
+   ]
+  },
+  {
+   "id": "cfeb2efd",
+   "points": [
+    [
+     400,
+     200
+    ],
+    [
+     470,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "8002d3de",
+   "points": [
+    [
+     400,
+     280
+    ],
+    [
+     400,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "12587108",
+   "points": [
+    [
+     400,
+     360
+    ],
+    [
+     400,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "c901964b",
+   "points": [
+    [
+     510,
+     230
+    ],
+    [
+     510,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "8e2e51b9",
+   "points": [
+    [
+     510,
+     170
+    ],
+    [
+     510,
+     140
+    ]
+   ]
+  }
+ ]
+}

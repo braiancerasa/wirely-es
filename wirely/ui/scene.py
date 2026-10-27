@@ -1,7 +1,7 @@
-"""The circuit sheet: shows a Circuit and handles placing, selecting, moving and wiring with the mouse.
+"""La hoja del circuito: muestra un Circuit y maneja colocar, seleccionar, mover y cablear con el mouse.
 
-The Circuit (model) is always the truth. Mouse actions change the model, keep the items in step, and when an
-action is finished `edited` is emitted so the window can record an undo step.
+El Circuit (modelo) es siempre la verdad. Las acciones del mouse cambian el modelo, mantienen los elementos en sincronía, y cuando una
+acción termina se emite `edited` para que la ventana registre un paso de deshacer.
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from .items import ComponentItem, DraftWire, WireItem, live_look_key
 
 MIME_PART = "application/x-wirely-part"
 MIME_CLIP = "application/x-wirely-clip"
-DRAG_START = 4          # pixels before a press becomes a drag
+DRAG_START = 4          # píxeles antes de que una pulsación se convierta en arrastre
 
 
 def _pt(p: QPointF):
@@ -28,9 +28,9 @@ def _pt(p: QPointF):
 
 
 class CircuitScene(QGraphicsScene):
-    edited = Signal(str)            # an action finished: label for the undo list
-    editRequested = Signal(str)     # double-clicked part (component id)
-    status = Signal(str)            # short hint for the status bar
+    edited = Signal(str)            # una acción terminó: etiqueta para la lista de deshacer
+    editRequested = Signal(str)     # componente con doble clic (id del componente)
+    status = Signal(str)            # breve indicación para la barra de estado
     modeChanged = Signal(str)       # "select" | "wire" | "place"
 
     def __init__(self, circuit: Circuit | None = None):
@@ -44,33 +44,33 @@ class CircuitScene(QGraphicsScene):
         self.exporting = False
         self._junctions, self._open_pins = [], []
         self._hover_pin = None
-        self._drag = None           # what the current left-button drag is doing
-        self._ghost = None          # part waiting to be placed
+        self._drag = None           # qué está haciendo el arrastre actual con el botón izquierdo
+        self._ghost = None          # componente esperando ser colocado
         self._place_kind = None
         self._place_keep = False
         self.draft = DraftWire()
         self.addItem(self.draft)
         self.draft.hide()
         self._wiring = None         # {"fixed": [...], "click": bool}
-        # live simulation
-        self.sim = None             # SimController while running / paused
+        # simulación en vivo
+        self.sim = None             # SimController mientras se ejecuta / pausa
         self.show_volts = True
         self.show_flow = True
         self.show_readings = False
-        self.pinned = set()         # wires and parts whose reading is shown while running (clicked)
-        self.tag_offsets = {}       # reading labels dragged somewhere else: wire/part id -> (dx, dy)
-        self._tag_hits = []         # where the reading labels were drawn last frame: (rect, id)
-        self._drag_tag = None       # (id, mouse start, offset at start) while a reading label is being dragged
+        self.pinned = set()         # cables y componentes cuya lectura se muestra durante la ejecución (clicados)
+        self.tag_offsets = {}       # etiquetas de lectura arrastradas a otro sitio: id de cable/componente -> (dx, dy)
+        self._tag_hits = []         # dónde se dibujaron las etiquetas de lectura en el último fotograma: (rect, id)
+        self._drag_tag = None       # (id, inicio del mouse, desplazamiento al inicio) mientras se arrastra una etiqueta de lectura
         self.anim_t = 0.0
         self.sliders = []
-        self._held = None           # push switch being held down
+        self._held = None           # pulsador que se mantiene presionado
         self._junction_net = {}
-        self.hover_info = None      # (scene point, title, lines) for the reading bubble
+        self.hover_info = None      # (punto de escena, título, líneas) para la burbuja de lectura
         self.rebuild()
 
-    # ================================================================== model <-> items
+    # ================================================================== modelo <-> elementos
     def rebuild(self):
-        """Recreate every item from the model (after loading, undo …)."""
+        """Recrear cada elemento desde el modelo (tras cargar, deshacer …)."""
         for it in list(self.comp_items.values()) + list(self.wire_items.values()):
             self.removeItem(it)
         self.comp_items.clear()
@@ -110,14 +110,14 @@ class CircuitScene(QGraphicsScene):
         if it:
             it.sync()
 
-    # ================================================================== helpers
+    # ================================================================== ayudantes
     def tolerance(self) -> float:
         v = self.views()
         s = v[0].transform().m11() if v else 1.0
         return max(4.0, 8.0 / max(s, 0.05))
 
     def pin_at(self, pos: QPointF, exclude=()):
-        """(component, pin name, position) of the nearest pin within reach, or None."""
+        """(componente, nombre de pin, posición) del pin más cercano al alcance, o None."""
         tol = self.tolerance()
         best, best_d = None, tol * tol
         for c in self.circuit.components.values():
@@ -159,7 +159,7 @@ class CircuitScene(QGraphicsScene):
             if it:
                 it.setSelected(True)
 
-    # ================================================================== live simulation
+    # ================================================================== simulación en vivo
     def sim_active(self) -> bool:
         return self.sim is not None and self.sim.active()
 
@@ -185,7 +185,7 @@ class CircuitScene(QGraphicsScene):
                     sl = SliderItem(it, key, self.sim_set_value)
                     self.addItem(sl)
                     self.sliders.append(sl)
-            # which net each junction dot belongs to (for its colour)
+            # a qué red pertenece cada punto de unión (para su color)
             self._junction_net = {}
             for net in self.sim.sim.nets:
                 for pt in self._junctions:
@@ -198,7 +198,7 @@ class CircuitScene(QGraphicsScene):
         self.update_hover()
         changed = self.refresh_look()
         fg = self._foreground_key()
-        # nothing on screen looks any different: don't draw the same picture again (saves a lot of CPU)
+        # nada en pantalla se ve diferente: no dibujar la misma imagen de nuevo (ahorra mucha CPU)
         self.frame_changed = bool(changed or fg != self._last_fg)
         if self.frame_changed:
             self._last_fg = fg
@@ -208,7 +208,7 @@ class CircuitScene(QGraphicsScene):
     frame_changed = True
 
     def repaint_all(self):
-        """Draw every part and wire afresh (the theme, voltage colours or simulation state changed)."""
+        """Dibujar cada componente y cable de nuevo (cambió el tema, los colores de voltaje o el estado de simulación)."""
         for it in list(self.comp_items.values()) + list(self.wire_items.values()):
             it.look = ("stale",)
             it.update()
@@ -217,8 +217,8 @@ class CircuitScene(QGraphicsScene):
         self.update()
 
     def refresh_look(self) -> bool:
-        """Parts and wires keep a ready-drawn picture; redraw only those whose live look has changed (a glow,
-        a reading, a wire's voltage colour …). Returns True if any did."""
+        """Componentes y cables mantienen una imagen ya dibujada; redibujar solo aquellos cuyo aspecto en vivo ha cambiado (un resplandor,
+        una lectura, el color de voltaje de un cable …). Devuelve True si alguno lo hizo."""
         active = self.sim_active()
         changed = False
         for it in self.comp_items.values():
@@ -230,7 +230,7 @@ class CircuitScene(QGraphicsScene):
         colours = active and self.show_volts
         wire_v, vmax = (self.sim.live.wire_v, self.sim.live.vmax) if colours else ({}, 1.0)
         for wid, it in self.wire_items.items():
-            v = wire_v.get(wid)            # its colour comes from its voltage (finer steps than you can see)
+            v = wire_v.get(wid)            # su color viene de su voltaje (pasos más finos de lo que se puede ver)
             k = (round(v / max(vmax, 1e-9) * 400), round(vmax, 2)) if v is not None else None
             if k != it.look:
                 it.look = k
@@ -239,7 +239,7 @@ class CircuitScene(QGraphicsScene):
         return changed
 
     def _foreground_key(self):
-        """What the dots, junctions, readings and colour key are drawn from, to the precision you can see."""
+        """De qué se dibujan los puntos, uniones, lecturas y la clave de color, con la precisión que se puede ver."""
         if not self.sim_active():
             return None
         live = self.sim.live
@@ -283,11 +283,11 @@ class CircuitScene(QGraphicsScene):
         return theme.volt_colour(v, self.sim.live.vmax)
 
     def _wire_current(self, wire, pos):
-        """Current in the piece of this wire nearest the mouse, and which way it flows (an arrow)."""
+        """Corriente en el trozo de este cable más cercano al mouse, y en qué dirección fluye (una flecha)."""
         best = None
         px, py = pos.x(), pos.y()
         for (x1, y1), (x2, y2), _ph, amps in self.sim.live.flows:
-            # only pieces that belong to this wire
+            # solo trozos que pertenecen a este cable
             if not any(_on_seg((x1, y1), a_, b_) and _on_seg((x2, y2), a_, b_) for a_, b_ in wire.segments()):
                 continue
             dx, dy = x2 - x1, y2 - y1
@@ -302,7 +302,7 @@ class CircuitScene(QGraphicsScene):
         return (best[1], best[2]) if best else (0.0, "")
 
     def _probe_info(self, pos):
-        """(title, lines) to show next to the mouse while the simulation runs, or None."""
+        """(título, líneas) para mostrar junto al mouse mientras la simulación se ejecuta, o None."""
         from ..model.units import fmt
         item = self.item_at(pos)
         live = self.sim.live
@@ -311,22 +311,22 @@ class CircuitScene(QGraphicsScene):
             if v is None:
                 return None
             amps, arrow = self._wire_current(item.wire, pos)
-            cur = f"{fmt(amps, 'A')} {arrow}" if amps >= 1e-6 else "no current"
-            return "Wire", [f"Voltage: {fmt(v if abs(v) >= 1e-3 else 0.0, 'V')}", f"Current: {cur}"]
+            cur = f"{fmt(amps, 'A')} {arrow}" if amps >= 1e-6 else "sin corriente"
+            return "Cable", [f"Voltaje: {fmt(v if abs(v) >= 1e-3 else 0.0, 'V')}", f"Corriente: {cur}"]
         if isinstance(item, ComponentItem):
             info = live.parts.get(item.comp.id)
             if not info or "v" not in info:
                 return None
-            lines = [f"Voltage across: {fmt(abs(info['v']), 'V')}", f"Current: {fmt(abs(info['i']), 'A')}"]
+            lines = [f"Voltaje: {fmt(abs(info['v']), 'V')}", f"Corriente: {fmt(abs(info['i']), 'A')}"]
             if self.power_only(item.comp):
-                lines = [f"Power: {fmt(abs(info.get('p', 0.0)), 'W')}"]
+                lines = [f"Potencia: {fmt(abs(info.get('p', 0.0)), 'W')}"]
             elif abs(info.get("p", 0)) > 1e-6 and item.comp.kind not in ("cell", "battery", "dc_supply", "ac_supply",
                                                                           "rail_pos", "signal_gen"):
-                lines.append(f"Power: {fmt(abs(info['p']), 'W')}")
+                lines.append(f"Potencia: {fmt(abs(info['p']), 'W')}")
             if "rpm" in info:
-                lines.append(f"Speed: {abs(info['rpm']):.0f} rpm")
+                lines.append(f"Velocidad: {abs(info['rpm']):.0f} rpm")
             if info.get("blown"):
-                lines.append("Broken — press Stop to mend it")
+                lines.append("Roto — presione Detener para repararlo")
             return item.comp.ref, lines
 
     def _probe_text(self, pos):
@@ -334,12 +334,12 @@ class CircuitScene(QGraphicsScene):
         return None if info is None else f"{info[0]}:  " + "   ".join(info[1])
 
     def update_hover(self, pos=None):
-        """Refresh the reading bubble at the mouse (called on mouse moves and every frame)."""
+        """Actualizar la burbuja de lectura en el mouse (llamado en movimientos del mouse y en cada fotograma)."""
         if pos is not None:
             self._mouse_pos = pos
         p = getattr(self, "_mouse_pos", None)
         if self._drag_tag is not None or (p is not None and self.tag_at(p) is not None):
-            self.hover_info = None             # over a reading label (or dragging one): no bubble on top of it
+            self.hover_info = None             # sobre una etiqueta de lectura (o arrastrándola): sin burbuja encima
             return
         info = self._probe_info(p) if (p is not None and self.sim_active()) else None
         self.hover_info = (p, info[0], info[1]) if info else None
@@ -352,7 +352,7 @@ class CircuitScene(QGraphicsScene):
                 QGraphicsScene.mousePressEvent(self, e)
                 return
         tag = self.tag_at(pos)
-        if tag is not None and e.button() == Qt.LeftButton:       # a reading label: drag it out of the way
+        if tag is not None and e.button() == Qt.LeftButton:       # una etiqueta de lectura: arrastrarla fuera del camino
             self._drag_tag = (tag, QPointF(pos), self.tag_offsets.get(tag, (0.0, 0.0)))
             e.accept()
             return
@@ -375,21 +375,21 @@ class CircuitScene(QGraphicsScene):
                 self.sim_set_value(c.id, "pressed", True)
                 self._held = c.id
         elif isinstance(item, (ComponentItem, WireItem)) and e.button() == Qt.LeftButton:
-            # click a wire or part to pin its reading on the sheet (click again to take it off)
+            # hacer clic en un cable o componente para fijar su lectura en la hoja (clic de nuevo para quitarla)
             key = item.comp.id if isinstance(item, ComponentItem) else item.wire.id
             self.pinned.symmetric_difference_update({key})
             self.update()
         e.accept()
 
     def tag_at(self, pos):
-        """The wire or part whose reading label is under pos (the top one), or None."""
+        """El cable o componente cuya etiqueta de lectura está bajo pos (la de arriba), o None."""
         for r, key in reversed(self._tag_hits):
             if r.adjusted(-2, -2, 2, 2).contains(pos):
                 return key
         return None
 
     def _keypad_key(self, item, pos):
-        """Which key of a keypad is under pos (allowing for the keypad being turned round)."""
+        """Qué tecla de un teclado está bajo pos (teniendo en cuenta que el teclado esté girado)."""
         from . import symbols as S
         local = pos - item.pos()
         q = S._rotvec(QPointF(local.x(), local.y()), item.comp.rot, item.comp.flip, inverse=True)
@@ -426,41 +426,41 @@ class CircuitScene(QGraphicsScene):
             self.hover_info = None
             for v in self.views():
                 v.viewport().setCursor(Qt.OpenHandCursor)
-            self.status.emit("Drag the reading to move it out of the way")
+            self.status.emit("Arrastre la lectura para moverla fuera del camino")
             return
         item = self.item_at(pos)
         clickable = isinstance(item, ComponentItem) and item.comp.kind in INTERACTIVE
         for v in self.views():
             v.viewport().setCursor(Qt.PointingHandCursor if clickable else Qt.ArrowCursor)
         self.update_hover(pos)
-        if self.sim.state != "running":        # paused: no frames are coming, so show the bubble move now
+        if self.sim.state != "running":        # pausado: no llegan fotogramas, así que mostrar la burbuja moviéndose ahora
             self.update()
         text = self._probe_text(pos)
         if clickable:
-            what = {"reed_switch": "click to move the magnet", "hall": "click to move the magnet",
-                    "tilt_switch": "click to tilt it", "rotary": "click to turn it to the next position",
-                    "keypad": "hold down a key to press it"}.get(
-                item.comp.kind, "hold down to press" if item.comp.kind.startswith("push") else "click to switch")
+            what = {"reed_switch": "haga clic para mover el imán", "hall": "haga clic para mover el imán",
+                    "tilt_switch": "haga clic para inclinarlo", "rotary": "haga clic para girarlo a la siguiente posición",
+                    "keypad": "mantenga presionada una tecla para presionarla"}.get(
+                item.comp.kind, "mantenga presionado para presionar" if item.comp.kind.startswith("push") else "haga clic para conmutar")
             text = f"{text}   ·   {what}" if text else what.capitalize()
         elif isinstance(item, (ComponentItem, WireItem)) and text:
             key = item.comp.id if isinstance(item, ComponentItem) else item.wire.id
-            text += "   ·   click to " + ("unpin its reading" if key in self.pinned else "pin its reading")
-        self.status.emit(text or "Running — click switches, drag sliders, hover over wires to read voltages.")
+            text += "   ·   haga clic para " + ("desfijar su lectura" if key in self.pinned else "fijar su lectura")
+        self.status.emit(text or "Ejecutando — haga clic en interruptores, arrastre deslizadores, pase el mouse sobre los cables para leer voltajes.")
 
-    # ================================================================== modes
+    # ================================================================== modos
     def set_mode(self, mode: str):
         self.cancel()
         self.mode = mode
         self.modeChanged.emit(mode)
         if mode == "wire":
-            self.status.emit("Wire: press on a pin or a wire and drag to another pin. Click to add corners, Esc to stop.")
+            self.status.emit("Cable: presione sobre un pin o un cable y arrastre a otro pin. Haga clic para agregar esquinas, Esc para terminar.")
         else:
             self.status.emit("")
         for v in self.views():
             v.viewport().setCursor(Qt.CrossCursor if mode == "wire" else Qt.ArrowCursor)
 
     def start_placing(self, kind: str, keep=False):
-        """Pick up a part from the gallery: it follows the mouse until you click on the sheet."""
+        """Recoger un componente de la galería: sigue al mouse hasta que haga clic en la hoja."""
         self.cancel()
         self._place_kind = kind
         self._place_keep = keep
@@ -470,8 +470,8 @@ class CircuitScene(QGraphicsScene):
         self._ghost.hide()
         self.mode = "place"
         self.modeChanged.emit("place")
-        self.status.emit(f"Click on the sheet to place the {P.get(kind).name.lower()}. "
-                         "R rotates, F flips, Esc cancels.")
+        self.status.emit(f"Haga clic en la hoja para colocar el {P.get(kind).name.lower()}. "
+                         "R rota, F voltea, Esc cancela.")
 
     def _move_ghost(self, pos: QPointF):
         if self._ghost:
@@ -486,7 +486,7 @@ class CircuitScene(QGraphicsScene):
         self.clearSelection()
         self.comp_items[c.id].setSelected(True)
         self.refresh_connections()
-        self.edited.emit(f"Add {c.ref}")
+        self.edited.emit(f"Agregar {c.ref}")
         if self._place_keep:
             self._ghost.comp.ref = self.circuit.next_ref(P.get(g.kind).prefix)
             self._ghost.sync()
@@ -496,7 +496,7 @@ class CircuitScene(QGraphicsScene):
         return c
 
     def cancel(self):
-        """Stop whatever is half-done (placing a part, drawing a wire, dragging)."""
+        """Detener lo que esté a medias (colocar un componente, dibujar un cable, arrastrar)."""
         if self._ghost is not None:
             self.removeItem(self._ghost)
             self._ghost = None
@@ -514,12 +514,12 @@ class CircuitScene(QGraphicsScene):
         self._drag = None
         self.status.emit("")
 
-    # ================================================================== editing operations
+    # ================================================================== operaciones de edición
     def _apply_moves(self, moves: dict, orig_comps: dict, orig_wires: dict, translate_wires: set, delta=(0, 0)):
-        """Put components at new places (moves: id -> (x, y, rot, flip)) and make the wires follow.
+        """Poner los componentes en nuevos lugares (moves: id -> (x, y, rot, flip)) y hacer que los cables sigan.
 
-        orig_comps / orig_wires hold the state from before the action, so a drag is always worked out from
-        where it started (no drift). Wires in translate_wires move bodily by delta."""
+        orig_comps / orig_wires guardan el estado de antes de la acción, así un arrastre siempre se calcula desde
+        donde empezó (sin deriva). Los cables en translate_wires se mueven en bloque por delta."""
         moved_pins = {}
         for cid, (x, y, rot, flip) in moves.items():
             c = self.circuit.components[cid]
@@ -576,7 +576,7 @@ class CircuitScene(QGraphicsScene):
         moves = {c.id: (c.x, c.y, (c.rot + (1 if clockwise else 3)) % 4, c.flip) for c in comps}
         self._apply_moves(moves, oc, ow, set())
         self.refresh_connections()
-        self.edited.emit("Rotate")
+        self.edited.emit("Rotar")
 
     def flip_selected(self):
         if self._ghost is not None:
@@ -590,7 +590,7 @@ class CircuitScene(QGraphicsScene):
         moves = {c.id: (c.x, c.y, c.rot, not c.flip) for c in comps}
         self._apply_moves(moves, oc, ow, set())
         self.refresh_connections()
-        self.edited.emit("Flip")
+        self.edited.emit("Voltear")
 
     def delete_selected(self):
         comps, wires = self.selected_ids()
@@ -603,7 +603,7 @@ class CircuitScene(QGraphicsScene):
             self.removeItem(self.wire_items.pop(wid))
             self.circuit.remove(wid)
         self.refresh_connections()
-        self.edited.emit("Delete")
+        self.edited.emit("Eliminar")
 
     def select_all(self):
         for it in list(self.comp_items.values()) + list(self.wire_items.values()):
@@ -641,7 +641,7 @@ class CircuitScene(QGraphicsScene):
             return False
         self.select_ids(new_ids)
         self.refresh_connections()
-        self.edited.emit("Paste")
+        self.edited.emit("Pegar")
         return True
 
     def update_component(self, cid, props: dict, ref: str | None = None):
@@ -650,7 +650,7 @@ class CircuitScene(QGraphicsScene):
         if ref:
             c.ref = ref
         self.sync_component(cid)
-        self.edited.emit(f"Edit {c.ref}")
+        self.edited.emit(f"Editar {c.ref}")
 
     # ================================================================== mouse
     def mousePressEvent(self, e):
@@ -671,7 +671,7 @@ class CircuitScene(QGraphicsScene):
         if self._ghost is not None:
             self._drop_ghost(pos)
             return
-        if self._wiring is not None:            # click-to-route mode: add a corner or finish
+        if self._wiring is not None:            # modo de enrutado por clics: agregar una esquina o terminar
             self._wiring_click(pos)
             return
         mods = e.modifiers()
@@ -686,7 +686,7 @@ class CircuitScene(QGraphicsScene):
         end = self.wire_end_at(pos)
         item = self.item_at(pos)
         if end is not None and isinstance(item, WireItem) and item.wire is end[0]:
-            # grab the loose end of a wire and move it
+            # agarrar el extremo suelto de un cable y moverlo
             w, idx = end
             if not (mods & (Qt.ControlModifier | Qt.ShiftModifier)):
                 self.clearSelection()
@@ -702,7 +702,7 @@ class CircuitScene(QGraphicsScene):
         if item is None:
             if not (mods & (Qt.ControlModifier | Qt.ShiftModifier)):
                 self.clearSelection()
-            e.ignore()           # lets the view draw a selection rectangle
+            e.ignore()           # permite a la vista dibujar un rectángulo de selección
             return
         if mods & Qt.ControlModifier:
             item.setSelected(not item.isSelected())
@@ -773,7 +773,7 @@ class CircuitScene(QGraphicsScene):
                 self.wire_items[d["wire"].id].sync()
             self.refresh_connections()
             return
-        # just hovering: show which pin you'd start a wire from
+        # solo pasando el mouse: mostrar desde qué pin empezaría un cable
         pin = self.pin_at(pos)
         hp = pin[2] if pin else None
         if hp != self._hover_pin:
@@ -781,7 +781,7 @@ class CircuitScene(QGraphicsScene):
             for v in self.views():
                 v.viewport().setCursor(Qt.CrossCursor if (hp or self.mode == "wire") else Qt.ArrowCursor)
             if hp:
-                self.status.emit("Drag from this pin to draw a wire.")
+                self.status.emit("Arrastre desde este pin para dibujar un cable.")
             self.update()
         super().mouseMoveEvent(e)
 
@@ -798,9 +798,9 @@ class CircuitScene(QGraphicsScene):
                 if w["dragged"]:
                     self._finish_wire(e.scenePos())
                 else:
-                    w["click"] = True       # it was a click: carry on routing with clicks
-                    self.status.emit("Click to add corners; click a pin or wire to finish. "
-                                     "Double-click to stop here, Esc cancels, Backspace undoes a corner.")
+                    w["click"] = True       # fue un clic: seguir enrutando con clics
+                    self.status.emit("Haga clic para agregar esquinas; haga clic en un pin o cable para terminar. "
+                                     "Doble clic para parar aquí, Esc cancela, Retroceso deshace una esquina.")
             return
         d, self._drag = self._drag, None
         if d is None:
@@ -816,7 +816,7 @@ class CircuitScene(QGraphicsScene):
                 else:
                     self.wire_items[w.id].sync()
             self.refresh_connections()
-            self.edited.emit({"move": "Move", "segment": "Move wire", "wire_end": "Move wire end"}[d["kind"]])
+            self.edited.emit({"move": "Mover", "segment": "Mover cable", "wire_end": "Mover extremo de cable"}[d["kind"]])
 
     def mouseDoubleClickEvent(self, e):
         if e.button() != Qt.LeftButton:
@@ -828,7 +828,7 @@ class CircuitScene(QGraphicsScene):
         if self.sim_active():
             from .simcontrol import INTERACTIVE
             if isinstance(item, ComponentItem) and item.comp.kind in INTERACTIVE:
-                self._sim_press(e)       # a quick double click on a switch flips it twice: keep up
+                self._sim_press(e)       # un doble clic rápido en un interruptor lo conmuta dos veces: mantener el ritmo
                 return
         if isinstance(item, ComponentItem):
             self.editRequested.emit(item.comp.id)
@@ -850,9 +850,9 @@ class CircuitScene(QGraphicsScene):
             return
         super().keyPressEvent(e)
 
-    # ================================================================== drawing wires
+    # ================================================================== dibujar cables
     def undo_corner(self):
-        """Backspace while drawing a wire: take back the last corner (or stop if there are none)."""
+        """Retroceso mientras se dibuja un cable: quitar la última esquina (o parar si no hay)."""
         if self._wiring is None:
             return
         fixed = self._wiring["fixed"]
@@ -870,7 +870,7 @@ class CircuitScene(QGraphicsScene):
         self.draft.show()
 
     def _wire_target(self, pos: QPointF):
-        """Where the wire would end: a pin, a wire end, a point on a wire, or just the grid point."""
+        """Dónde terminaría el cable: un pin, un extremo de cable, un punto en un cable, o simplemente el punto de la cuadrícula."""
         pin = self.pin_at(pos)
         if pin:
             return pin[2], True
@@ -902,7 +902,7 @@ class CircuitScene(QGraphicsScene):
         self.draft.set(path, w["target"])
 
     def _crossings(self, pts) -> int:
-        """How many part bodies a proposed wire would run through (so we can pick the better corner)."""
+        """Cuántos cuerpos de componentes atravesaría un cable propuesto (para poder elegir la mejor esquina)."""
         n = 0
         bodies = []
         for it in self.comp_items.values():
@@ -920,7 +920,7 @@ class CircuitScene(QGraphicsScene):
         if snapped and target != w["fixed"][0]:
             self._finish_wire(pos)
             return
-        # add a corner here
+        # agregar una esquina aquí
         w["fixed"] = tidy(w["path"]) if len(w["path"]) > 1 else w["fixed"]
         if w["fixed"][-1] != target:
             w["fixed"].append(target)
@@ -937,11 +937,11 @@ class CircuitScene(QGraphicsScene):
         if wire:
             self._add_wire_item(wire)
             self.refresh_connections()
-            self.edited.emit("Add wire")
+            self.edited.emit("Agregar cable")
         if self.mode == "wire":
-            self.status.emit("Wire added. Draw another, or press Esc.")
+            self.status.emit("Cable agregado. Dibuje otro, o presione Esc.")
 
-    # ================================================================== drag and drop from the gallery
+    # ================================================================== arrastrar y soltar desde la galería
     def dragEnterEvent(self, e):
         if self.sim_active():
             e.ignore()
@@ -970,7 +970,7 @@ class CircuitScene(QGraphicsScene):
             self._drop_ghost(e.scenePos())
             e.acceptProposedAction()
 
-    # ================================================================== painting the sheet
+    # ================================================================== pintar la hoja
     def drawBackground(self, p, rect: QRectF):
         p.fillRect(rect, QColor(theme.CANVAS))
         if self.exporting or not self.show_grid:
@@ -999,7 +999,7 @@ class CircuitScene(QGraphicsScene):
         p.drawPoints(major)
 
     def _draw_flow(self, p, live, rect):
-        """Moving dots along the wires: conventional current, faster for bigger currents."""
+        """Puntos en movimiento a lo largo de los cables: corriente convencional, más rápida para corrientes mayores."""
         spacing = 16.0
         p.setPen(QPen(QColor(theme.FLOW_EDGE), 0.8))
         p.setBrush(QColor(theme.FLOW_DOT))
@@ -1018,13 +1018,13 @@ class CircuitScene(QGraphicsScene):
                 p.drawEllipse(QPointF(x1 + ux * d, y1 + uy * d), r, r)
                 d += spacing
 
-    # readings: what a multimeter would show, written on the sheet
+    # lecturas: lo que mostraría un multímetro, escrito en la hoja
     NO_READING = {"ground", "note", "scope_probe", "logic_probe", "voltmeter", "ammeter"}
     SOURCES = {"cell", "battery", "dc_supply", "ac_supply", "rail_pos", "signal_gen"}
 
     def _tag(self, p, x, y, text, pinned, anchor, key=None):
-        """A small reading label at (x, y): anchor "above" sits it above the point, "right" beside it. If it has
-        been dragged somewhere else, it's drawn there with a dashed line back to (x, y)."""
+        """Una pequeña etiqueta de lectura en (x, y): el ancla "above" la sitúa encima del punto, "right" al lado. Si se
+        ha arrastrado a otro sitio, se dibuja allí con una línea discontinua de vuelta a (x, y)."""
         from PySide6.QtGui import QFont, QFontMetricsF
         f = QFont()
         f.setPixelSize(8)
@@ -1035,14 +1035,14 @@ class CircuitScene(QGraphicsScene):
             r = QRectF(x - w / 2, y - h - 4, w, h)
         elif anchor == "below":
             r = QRectF(x - w / 2, y + 3, w, h)
-        elif anchor == "under":                  # left-aligned, just under (x, y)
+        elif anchor == "under":                  # alineado a la izquierda, justo debajo de (x, y)
             r = QRectF(x, y + 1, w, h)
         else:
             r = QRectF(x + 5, y - h / 2, w, h)
         dx, dy = self.tag_offsets.get(key, (0.0, 0.0))
         if dx or dy:
             r = r.translated(dx, dy)
-            # a dashed line from what it belongs to, to the nearest point of the label
+            # una línea discontinua desde lo que pertenece, al punto más cercano de la etiqueta
             px = min(max(x, r.left()), r.right())
             py = min(max(y, r.top()), r.bottom())
             if abs(px - x) + abs(py - y) > 4:
@@ -1064,13 +1064,13 @@ class CircuitScene(QGraphicsScene):
 
     @staticmethod
     def power_only(comp) -> bool:
-        """Chips (and parts with several separate legs): a voltage and current between their first two pins would
-        mean nothing, so only their power is shown."""
-        return comp.part.category == "Integrated circuits" or comp.kind in ("led_rgb", "led_bi3", "dpdt")
+        """Chips (y componentes con varias patas separadas): un voltaje y corriente entre sus dos primeros pines
+        no significaría nada, así que solo se muestra su potencia."""
+        return comp.part.category == "Circuitos integrados" or comp.kind in ("led_rgb", "led_bi3", "dpdt")
 
     def readings_text(self) -> str:
-        """Every part's voltage, current and power as a table (tab-separated, so it pastes into a spreadsheet as
-        columns). Empty when nothing is running."""
+        """El voltaje, la corriente y la potencia de cada componente como tabla (separado por tabulaciones, para que se pegue en una hoja de cálculo como
+        columnas). Vacío cuando no se está ejecutando nada."""
         if not self.sim_active():
             return ""
         live = self.sim.live
@@ -1099,15 +1099,15 @@ class CircuitScene(QGraphicsScene):
             else:
                 rows.append("\t".join((comp.ref, name, num(info["v"], 1e-3), num(info["i"], 1e-6), power)))
         t = getattr(self.sim, "sim", None)
-        when = f"Readings at {t.t:.3g} s" if t is not None else "Readings"
-        return "\n".join([when, "Part\tWhat\tVoltage (V)\tCurrent (A)\tPower (W)"] + rows) + "\n"
+        when = f"Lecturas en {t.t:.3g} s" if t is not None else "Lecturas"
+        return "\n".join([when, "Componente\tQué\tVoltaje (V)\tCorriente (A)\tPotencia (W)"] + rows) + "\n"
 
     def _draw_readings(self, p, live):
         from ..model.units import fmt
         show_all = self.show_readings
         net_of = {wid: net.name for net in self.sim.sim.nets for wid in net.wires} if self.sim else {}
         labelled = set()
-        # wires carrying current first (they always get a label), then one voltage label per remaining net
+        # primero los cables que llevan corriente (siempre reciben una etiqueta), luego una etiqueta de voltaje por cada red restante
         order = []
         for wid, it in self.wire_items.items():
             pinned = wid in self.pinned
@@ -1123,7 +1123,7 @@ class CircuitScene(QGraphicsScene):
         for idle, _l, wid, pinned, a, b, mx, my, amps, arrow in order:
             net = net_of.get(wid)
             if idle and not pinned and net in labelled:
-                continue                         # same voltage is already shown on this net
+                continue                         # el mismo voltaje ya se muestra en esta red
             labelled.add(net)
             vv = live.wire_v[wid]
             text = fmt(vv if abs(vv) >= 1e-3 else 0.0, "V")
@@ -1138,7 +1138,7 @@ class CircuitScene(QGraphicsScene):
             info = live.parts.get(cid)
             if not info or "v" not in info:
                 continue
-            def tidy(x, floor):          # leakage (pA, nV) reads as 0, like a real meter
+            def tidy(x, floor):          # la fuga (pA, nV) se lee como 0, como un medidor real
                 x = abs(x)
                 return x if x >= floor else 0.0
             if self.power_only(it.comp):
@@ -1147,13 +1147,13 @@ class CircuitScene(QGraphicsScene):
                 bits = [fmt(tidy(info["v"], 1e-3), "V"), fmt(tidy(info["i"], 1e-6), "A")]
                 if abs(info.get("p", 0)) > 1e-6 and kind not in self.SOURCES:
                     bits.append(fmt(tidy(info["p"], 1e-6), "W"))
-            # next to the part's own label (its name and value), so it's clear which part it belongs to
+            # junto a la etiqueta propia del componente (su nombre y valor), para que quede claro a qué componente pertenece
             lab, lines, align = it._label
             if lines:
                 r = lab.translated(it.pos())
-                if align == Qt.AlignLeft:            # label beside a standing part: reading underneath it
+                if align == Qt.AlignLeft:            # etiqueta al lado de un componente de pie: lectura debajo
                     self._tag(p, r.left(), r.bottom(), "  ".join(bits), pinned, "under", key=cid)
-                else:                                # label above a part lying flat: reading underneath it
+                else:                                # etiqueta encima de un componente acostado: lectura debajo
                     sym = it._sym.translated(it.pos())
                     self._tag(p, sym.center().x(), sym.bottom() + (22 if "reading" in info else 0),
                               "  ".join(bits), pinned, "below", key=cid)
@@ -1182,7 +1182,7 @@ class CircuitScene(QGraphicsScene):
             self._draw_readings(p, live)
         if self.sim_active():
             return
-        # pins with nothing attached: small open circles so you can see where to connect
+        # pines sin nada conectado: pequeños círculos abiertos para que pueda ver dónde conectar
         p.setBrush(QColor(theme.CANVAS))
         p.setPen(QPen(QColor(theme.PIN_OPEN), 1.3))
         for x, y in self._open_pins:

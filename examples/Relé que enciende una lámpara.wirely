@@ -1,0 +1,331 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Relé que enciende una lámpara",
+ "components": [
+  {
+   "id": "6e264e92",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "79916edf",
+   "kind": "switch",
+   "ref": "S1",
+   "x": 100,
+   "y": 70,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "bff990c0",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 150,
+   "y": 150,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "resistance": 4700.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "298133df",
+   "kind": "resistor",
+   "ref": "R2",
+   "x": 100,
+   "y": 230,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 47000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "f8003635",
+   "kind": "npn",
+   "ref": "Q1",
+   "x": 210,
+   "y": 150,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "model": "BC548"
+   }
+  },
+  {
+   "id": "6f0dea19",
+   "kind": "relay",
+   "ref": "RL1",
+   "x": 240,
+   "y": 60,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "cfd8a9ad",
+   "kind": "diode",
+   "ref": "D1",
+   "x": 180,
+   "y": 60,
+   "rot": 3,
+   "flip": false,
+   "props": {
+    "model": "1N4148"
+   }
+  },
+  {
+   "id": "0ee5165e",
+   "kind": "lamp",
+   "ref": "L1",
+   "x": 400,
+   "y": 180,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9,
+    "power": 0.5
+   }
+  },
+  {
+   "id": "49938694",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 300,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  },
+  {
+   "id": "465fbecb",
+   "kind": "note",
+   "ref": "T1",
+   "x": 330,
+   "y": -40,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "text": "El diodo en paralelo con la bobina del relé protege a Q1.\nBórrelo y vea qué pasa."
+   }
+  }
+ ],
+ "wires": [
+  {
+   "id": "f86f1c91",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     330,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "f98d2d84",
+   "points": [
+    [
+     100,
+     40
+    ],
+    [
+     100,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "7c408fa5",
+   "points": [
+    [
+     100,
+     100
+    ],
+    [
+     100,
+     150
+    ],
+    [
+     120,
+     150
+    ]
+   ]
+  },
+  {
+   "id": "2663d453",
+   "points": [
+    [
+     100,
+     150
+    ],
+    [
+     100,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "35a37fd1",
+   "points": [
+    [
+     220,
+     30
+    ],
+    [
+     220,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "47f76607",
+   "points": [
+    [
+     180,
+     30
+    ],
+    [
+     180,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "9b33784c",
+   "points": [
+    [
+     180,
+     90
+    ],
+    [
+     220,
+     90
+    ]
+   ]
+  },
+  {
+   "id": "7a460b0a",
+   "points": [
+    [
+     220,
+     90
+    ],
+    [
+     220,
+     120
+    ]
+   ]
+  },
+  {
+   "id": "095be65e",
+   "points": [
+    [
+     260,
+     90
+    ],
+    [
+     260,
+     100
+    ],
+    [
+     330,
+     100
+    ],
+    [
+     330,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "5939857b",
+   "points": [
+    [
+     270,
+     30
+    ],
+    [
+     270,
+     20
+    ],
+    [
+     400,
+     20
+    ],
+    [
+     400,
+     150
+    ]
+   ]
+  },
+  {
+   "id": "b89ef936",
+   "points": [
+    [
+     0,
+     180
+    ],
+    [
+     0,
+     300
+    ],
+    [
+     400,
+     300
+    ],
+    [
+     400,
+     210
+    ]
+   ]
+  },
+  {
+   "id": "03ef629a",
+   "points": [
+    [
+     100,
+     260
+    ],
+    [
+     100,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "4903c99a",
+   "points": [
+    [
+     220,
+     180
+    ],
+    [
+     220,
+     300
+    ]
+   ]
+  }
+ ]
+}

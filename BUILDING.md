@@ -1,84 +1,86 @@
-# Building Wirely
+# Compilar Wirely
 
-This is for people who want to run Wirely from its source code, change it, or make the installers themselves.
-To just **use** Wirely, download it from the [latest release](https://github.com/richiewillmott/Wirely/releases/latest)
-instead — see the [README](README.md).
+Esto es para quienes quieren ejecutar Wirely desde su código fuente, modificarlo o crear los instaladores por su
+cuenta. Para simplemente **usar** Wirely, descárguelo desde la [última versión](https://github.com/wirely-app/wirely-app.github.io/releases/latest)
+— consulte el [README](README.md).
 
-## Run from source
+## Ejecutar desde el código fuente
 
-You need Python 3.10–3.13 (64-bit) from https://www.python.org. On Windows, tick "Add python.exe to PATH".
-Then start it — **the first run installs everything automatically**:
+Necesita Python 3.10–3.13 (64 bits) desde https://www.python.org. En Windows, marque «Add python.exe to PATH».
+Luego inícielo — **la primera ejecución instala todo automáticamente**:
 
-- **Windows:** double-click `run_wirely.bat` (or `start.py` if Smart App Control blocks .bat files)
-- **Mac / Linux:** run `./run_wirely.sh` (or `python3 start.py`)
+- **Windows:** haga doble clic en `run_wirely.bat` (o en `start.py` si Smart App Control bloquea los archivos .bat)
+- **Mac / Linux:** ejecute `./run_wirely.sh` (o `python3 start.py`)
 
-The first start creates a private `.venv` folder and downloads Qt and numpy (about 170 MB). To reinstall from
-scratch, delete the `.venv` folder. Or manage it yourself: `pip install -r requirements.txt` then `python -m wirely`.
+El primer inicio crea una carpeta privada `.venv` y descarga Qt y numpy (unos 170 MB). Para reinstalar desde cero,
+elimine la carpeta `.venv`. O adminístrelo usted mismo: `pip install -r requirements.txt` y luego `python -m wirely`.
 
-## Automatic builds on GitHub (Windows, Mac and Linux)
+## Compilaciones automáticas en GitHub (Windows, Mac y Linux)
 
-`.github/workflows/build.yml` does it all on GitHub's own computers:
+`.github/workflows/build.yml` hace todo en las propias computadoras de GitHub:
 
-- **Every push** runs the automatic tests.
-- **Publishing a release** builds the Windows installer, the Mac `.dmg` (Apple Silicon) and the Linux AppImage,
-  checks each one starts (its self-test), and attaches all three to the release.
-- **Actions → Build (Windows, Mac, Linux) → Run workflow** makes a test build instead: the files, a screenshot
-  of Wirely running on the Mac and the logs go on a private *Test builds* draft release (only you can see it).
+- **Cada push** ejecuta las pruebas automáticas.
+- **Publicar una versión** compila el instalador de Windows, el `.dmg` de Mac (Apple Silicon) y el AppImage de
+  Linux, verifica que cada uno inicie (su autoprueba) y adjunta los tres a la versión publicada.
+- **Actions → Build (Windows, Mac, Linux) → Run workflow** hace en cambio una compilación de prueba: los archivos,
+  una captura de pantalla de Wirely ejecutándose en Mac y los registros van a un borrador de versión privado
+  llamado *Test builds* (solo usted puede verlo).
 
-To release: bump `__version__` in `wirely/__init__.py` (and `pyproject.toml`), push, then on GitHub
-**Releases → Draft a new release**, tag it (e.g. `v1.0.1`) and **Publish**. The downloads appear on the release
-about 15 minutes later.
+Para publicar una versión: aumente `__version__` en `wirely/__init__.py` (y en `pyproject.toml`), haga push y luego
+en GitHub vaya a **Releases → Draft a new release**, etiquétela (p. ej. `v1.0.1`) y presione **Publish**. Las
+descargas aparecen en la versión unos 15 minutos después.
 
-## The browser version (Wirely Web)
+## La versión para navegador (Wirely Web)
 
-The web version is in `web/`. It runs the desktop app's own Python code — `wirely/model`, `wirely/sim` and the
-sheet and drawing code from `wirely/ui` — in the browser with [Pyodide](https://pyodide.org). There's no Qt in
-a browser, so `web/py/qtshim.py` stands in for the parts of Qt that code uses: its QPainter writes down what it
-was asked to draw, and `web/app.js` replays that on an HTML canvas. `web/py/wirely_web.py` is the glue between
-the page and Python, and `web/py/fallback/numpy` is a small pure-Python stand-in for numpy, used only if the
-real numpy can't be downloaded.
+La versión web está en `web/`. Ejecuta el propio código Python de la app de escritorio — `wirely/model`, `wirely/sim`
+y el código de la hoja y del dibujo de `wirely/ui` — en el navegador con [Pyodide](https://pyodide.org). En un
+navegador no hay Qt, así que `web/py/qtshim.py` reemplaza las partes de Qt que usa ese código: su QPainter anota lo
+que se le pidió dibujar, y `web/app.js` lo reproduce en un canvas de HTML. `web/py/wirely_web.py` es el pegamento
+entre la página y Python, y `web/py/fallback/numpy` es un pequeño reemplazo de numpy en Python puro, que se usa solo
+si no se puede descargar el numpy real.
 
-**On GitHub** (`.github/workflows/web.yml`): every push builds it and tests it in a real browser (Chromium);
-pushes to the main branch then publish it to GitHub Pages, at `https://<your user name>.github.io/Wirely/`.
-One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+**En GitHub** (`.github/workflows/web.yml`): cada push lo compila y lo prueba en un navegador real (Chromium); los
+push a la rama principal luego lo publican en GitHub Pages, en `https://wirely-app.github.io/ (un proyecto llamado <owner>.github.io se sirve en la raíz)`.
+Configuración por única vez: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
-**Yourself:**
+**Usted mismo:**
 
 ```
-python tools/build_web.py                      # builds _site/ (Pyodide then loads from the jsDelivr CDN)
-cd _site && python -m http.server 8000         # then open http://localhost:8000
+python tools/build_web.py                      # compila _site/ (luego Pyodide se carga desde el CDN de jsDelivr)
+cd _site && python -m http.server 8000         # luego abra http://localhost:8000
 ```
 
-To include Pyodide itself (so nothing loads from a CDN, as the GitHub build does):
-`npm pack pyodide@314.0.7`, unpack it, and pass `--pyodide <that>/package` (plus `--numpy <wheel>` for numpy).
-`python tools/web_smoke.py _site` tests the built site in headless Chromium (`pip install playwright` and
-`playwright install chromium` first). `tests/test_web.py` tests the web glue in ordinary Python.
+Para incluir Pyodide mismo (así no se carga nada desde un CDN, como hace la compilación de GitHub):
+`npm pack pyodide@314.0.7`, descomprímalo y pase `--pyodide <eso>/package` (más `--numpy <wheel>` para numpy).
+`python tools/web_smoke.py _site` prueba el sitio compilado en Chromium sin interfaz (`pip install playwright` y
+`playwright install chromium` primero). `tests/test_web.py` prueba el pegamento web en Python común.
 
-## Make a Windows program yourself
+## Crear un programa de Windows usted mismo
 
-Double-click **`build_exe.bat`**. It packs Wirely into **`dist\Wirely\Wirely.exe`** (runs on any 64-bit Windows
-PC without Python) and, if [Inno Setup](https://jrsoftware.org/isdl.php) (free) is installed, also builds
-**`dist\Wirely-Setup-<version>.exe`** with Start-menu and desktop shortcuts and `.wirely` files opening in Wirely.
+Haga doble clic en **`build_exe.bat`**. Empaqueta Wirely en **`dist\Wirely\Wirely.exe`** (se ejecuta en cualquier PC
+con Windows de 64 bits sin Python) y, si está instalado [Inno Setup](https://jrsoftware.org/isdl.php) (gratuito),
+también crea **`dist\Wirely-Setup-<version>.exe`** con accesos directos en el menú Inicio y en el escritorio, y con
+los archivos `.wirely` abriéndose en Wirely.
 
-## Mac and Linux yourself
+## Mac y Linux usted mismo
 
-- Mac: `python3 -m pip install -r requirements.txt pyinstaller` then `bash packaging/mac/build_mac.sh`
-- Linux: `python3 -m pip install -r requirements.txt pyinstaller` then `bash packaging/linux/build_appimage.sh`
-  (an AppImage runs on Linux systems at least as new as the one it was built on).
+- Mac: `python3 -m pip install -r requirements.txt pyinstaller` y luego `bash packaging/mac/build_mac.sh`
+- Linux: `python3 -m pip install -r requirements.txt pyinstaller` y luego `bash packaging/linux/build_appimage.sh`
+  (un AppImage se ejecuta en sistemas Linux al menos tan nuevos como aquel en el que se compiló).
 
-## Icons
+## Iconos
 
-The logo and the `.wirely` file icon are drawn in code (`wirely/ui/icons.py`). After changing them, run
-`python tools/make_icons.py` (needs Pillow) to rewrite the PNG, ICO and SVG files in `wirely/assets`.
+El logotipo y el icono de archivo `.wirely` se dibujan en código (`wirely/ui/icons.py`). Después de cambiarlos,
+ejecute `python tools/make_icons.py` (necesita Pillow) para reescribir los archivos PNG, ICO y SVG de `wirely/assets`.
 
-## Where things are
+## Dónde está cada cosa
 
 ```
 wirely/
-  model/       the circuit (parts library, wires, connections, files) — no Qt
-  sim/         the circuit solver, part models, current flow, sound synthesis — no Qt
-  ui/          the window: sheet, gallery, graph, dialogs, splash, sound output
-packaging/     PyInstaller recipe, Windows installer, Mac and Linux build scripts
-tests/         pytest: model, solver (vs hand-worked answers and ngspice), editor and live simulation
-tools/         example circuits, icons and screenshots
+  model/       el circuito (biblioteca de componentes, cables, conexiones, archivos) — sin Qt
+  sim/         el solucionador de circuitos, modelos de componentes, flujo de corriente, síntesis de sonido — sin Qt
+  ui/          la ventana: hoja, galería, gráfico, diálogos, pantalla de inicio, salida de sonido
+packaging/     receta de PyInstaller, instalador de Windows, scripts de compilación para Mac y Linux
+tests/         pytest: modelo, solucionador (contra respuestas calculadas a mano y ngspice), editor y simulación en vivo
+tools/         circuitos de ejemplo, iconos y capturas de pantalla
 ```

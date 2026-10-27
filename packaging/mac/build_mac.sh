@@ -21,30 +21,30 @@ make_icns() {   # make_icns <prefix of PNGs in wirely/assets> <output .icns>
   done
   iconutil -c icns "$set" -o "$2"
 }
-echo "[Wirely] Making the app and document icons..."
+echo "[Wirely] Creando los iconos de la app y de los documentos..."
 make_icns logo build/Wirely.icns
 make_icns doc build/WirelyDoc.icns
 
-echo "[Wirely] Packing Wirely with PyInstaller (a few minutes)..."
+echo "[Wirely] Empaquetando Wirely con PyInstaller (unos minutos)..."
 "$PY" -m PyInstaller packaging/wirely.spec --noconfirm --clean --distpath dist --workpath build/mac-work
 
-echo "[Wirely] Checking the packed app..."
+echo "[Wirely] Verificando la app empaquetada..."
 rm -f build/selftest.txt
 dist/Wirely.app/Contents/MacOS/Wirely --self-test "$ROOT/build/selftest.txt" || true
 if ! grep -q '^OK' build/selftest.txt 2>/dev/null; then
   cat build/selftest.txt 2>/dev/null || true
-  echo "[Wirely] The packed app failed its self-test." >&2
+  echo "[Wirely] La app empaquetada no pasó su autoprueba." >&2
   exit 1
 fi
 
 # not signed with an Apple Developer ID: sign it "ad hoc" so Apple Silicon Macs will run it at all
 codesign --force --deep --sign - dist/Wirely.app
 
-echo "[Wirely] Making the .dmg..."
+echo "[Wirely] Creando el .dmg..."
 DMG="dist/Wirely-$REV-mac-$ARCH.dmg"
 STAGE=build/dmg
 rm -rf "$STAGE" "$DMG"; mkdir -p "$STAGE"
 cp -R dist/Wirely.app "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
 hdiutil create -volname "Wirely" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
-echo "[Wirely] Done: $DMG"
+echo "[Wirely] Listo: $DMG"

@@ -1,0 +1,230 @@
+{
+ "app": "Wirely",
+ "version": 1,
+ "title": "Conmutación de motor con MOSFET",
+ "components": [
+  {
+   "id": "9ebcfc98",
+   "kind": "battery",
+   "ref": "B1",
+   "x": 0,
+   "y": 150,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9
+   }
+  },
+  {
+   "id": "d369cdcd",
+   "kind": "motor",
+   "ref": "M1",
+   "x": 300,
+   "y": 80,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "voltage": 9,
+    "load": "Ninguna"
+   }
+  },
+  {
+   "id": "445e8cb0",
+   "kind": "diode",
+   "ref": "D1",
+   "x": 370,
+   "y": 80,
+   "rot": 3,
+   "flip": false,
+   "props": {
+    "model": "1N4001"
+   }
+  },
+  {
+   "id": "8cf33672",
+   "kind": "nmos",
+   "ref": "Q1",
+   "x": 290,
+   "y": 190,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "model": "IRF540"
+   }
+  },
+  {
+   "id": "291a37d4",
+   "kind": "switch",
+   "ref": "S1",
+   "x": 170,
+   "y": 190,
+   "rot": 0,
+   "flip": false,
+   "props": {
+    "closed": false
+   }
+  },
+  {
+   "id": "41a9c46b",
+   "kind": "resistor",
+   "ref": "R1",
+   "x": 230,
+   "y": 250,
+   "rot": 1,
+   "flip": false,
+   "props": {
+    "resistance": 100000.0,
+    "power": 0.25
+   }
+  },
+  {
+   "id": "3123b8ac",
+   "kind": "ground",
+   "ref": "GND1",
+   "x": 0,
+   "y": 300,
+   "rot": 0,
+   "flip": false,
+   "props": {}
+  }
+ ],
+ "wires": [
+  {
+   "id": "7c204337",
+   "points": [
+    [
+     0,
+     120
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     370,
+     0
+    ],
+    [
+     370,
+     50
+    ]
+   ]
+  },
+  {
+   "id": "9417d458",
+   "points": [
+    [
+     300,
+     50
+    ],
+    [
+     300,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "117ee9c9",
+   "points": [
+    [
+     300,
+     110
+    ],
+    [
+     300,
+     160
+    ]
+   ]
+  },
+  {
+   "id": "461b6a09",
+   "points": [
+    [
+     370,
+     110
+    ],
+    [
+     370,
+     140
+    ],
+    [
+     300,
+     140
+    ]
+   ]
+  },
+  {
+   "id": "af4207ee",
+   "points": [
+    [
+     140,
+     190
+    ],
+    [
+     140,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "fee137aa",
+   "points": [
+    [
+     200,
+     190
+    ],
+    [
+     260,
+     190
+    ]
+   ]
+  },
+  {
+   "id": "a2b9db50",
+   "points": [
+    [
+     230,
+     220
+    ],
+    [
+     230,
+     190
+    ]
+   ]
+  },
+  {
+   "id": "0d8ff90d",
+   "points": [
+    [
+     0,
+     180
+    ],
+    [
+     0,
+     300
+    ],
+    [
+     300,
+     300
+    ],
+    [
+     300,
+     220
+    ]
+   ]
+  },
+  {
+   "id": "52caf324",
+   "points": [
+    [
+     230,
+     280
+    ],
+    [
+     230,
+     300
+    ]
+   ]
+  }
+ ]
+}

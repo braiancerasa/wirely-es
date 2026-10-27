@@ -1,4 +1,4 @@
-"""The graph (oscilloscope) panel: plots the voltage at each graph probe against time while the circuit runs."""
+"""El panel del gráfico (osciloscopio): representa el voltaje en cada sonda de gráfico frente al tiempo mientras el circuito se ejecuta."""
 from __future__ import annotations
 
 import bisect
@@ -76,48 +76,48 @@ class GraphPanel(QWidget):
         v.setSpacing(4)
         top = QHBoxLayout()
         top.setSpacing(8)
-        title = QLabel("Graph")
+        title = QLabel("Gráfico")
         title.setObjectName("sectionHeader")
         title.setContentsMargins(0, 0, 0, 0)
         top.addWidget(title)
-        self.chips = QLabel("Put a graph probe (Meters & probes) on a wire, then press Play.")
+        self.chips = QLabel("Coloque una sonda de gráfico (Medidores y sondas) en un cable, luego presione Ejecutar.")
         self.chips.setObjectName("muted")
         self.chips.setTextFormat(Qt.RichText)
         top.addWidget(self.chips, 1)
         self.tbox = QComboBox()
         for name, _v in TIMEBASES:
             self.tbox.addItem(name)
-        self.tbox.setToolTip("Time per square across")
+        self.tbox.setToolTip("Tiempo por cuadro horizontal")
         self.tbox.currentIndexChanged.connect(lambda _i: self.plot.update())
         self.vbox = QComboBox()
         for name, _v in VOLTS:
             self.vbox.addItem(name)
-        self.vbox.setToolTip("Volts per square up")
+        self.vbox.setToolTip("Voltios por cuadro vertical")
         self.vbox.currentIndexChanged.connect(lambda _i: self.plot.update())
-        top.addWidget(QLabel("Time"))
+        top.addWidget(QLabel("Tiempo"))
         top.addWidget(self.tbox)
-        top.addWidget(QLabel("Volts"))
+        top.addWidget(QLabel("Voltios"))
         top.addWidget(self.vbox)
-        clear = QPushButton("Clear")
+        clear = QPushButton("Limpiar")
         clear.clicked.connect(self.clear)
-        save = QPushButton("Save picture…")
+        save = QPushButton("Guardar imagen…")
         save.clicked.connect(self.save_picture)
         top.addWidget(clear)
         top.addWidget(save)
         close = QToolButton()
         close.setText("✕")
-        close.setToolTip("Hide the graph (View → Graph shows it again)")
+        close.setToolTip("Ocultar el gráfico (Ver → Gráfico lo muestra de nuevo)")
         close.clicked.connect(self.closed.emit)
         top.addWidget(close)
         v.addLayout(top)
         self.plot = Plot(self)
         v.addWidget(self.plot, 1)
 
-    # ------------------------------------------------------------------ data
+    # ------------------------------------------------------------------ datos
     def clear(self):
         self.traces = {}
         self.t_now = 0.0
-        self.chips.setText("Put a graph probe (Meters & probes) on a wire, then press Play.")
+        self.chips.setText("Coloque una sonda de gráfico (Medidores y sondas) en un cable, luego presione Ejecutar.")
         self.plot.update()
 
     def add_samples(self, samples, t_now):
@@ -131,13 +131,13 @@ class GraphPanel(QWidget):
     def has_data(self):
         return any(tr.t for tr in self.traces.values())
 
-    # ------------------------------------------------------------------ scales
+    # ------------------------------------------------------------------ escalas
     def timebase(self):
         tdiv = TIMEBASES[self.tbox.currentIndex()][1]
         if tdiv is not None:
             return tdiv
-        # auto: about three cycles of the fastest repeating signal on any probe, else 0.5 s per square.
-        # (Looking at every probe matters: in a buck converter probe A is smooth DC and only B repeats.)
+        # auto: aproximadamente tres ciclos de la señal repetitiva más rápida en cualquier sonda, si no 0,5 s por cuadro.
+        # (Mirar todas las sondas importa: en un convertidor buck la sonda A es DC suave y solo B se repite.)
         fastest = None
         for ch in sorted(self.traces):
             ts, vs = self.traces[ch].window(self.t_now - 10.0, self.t_now)
@@ -184,7 +184,7 @@ class GraphPanel(QWidget):
                         f"<span style='color:{theme.TEXT}'>{fmt(now, 'V')}{extra}</span>")
         self.chips.setText("&nbsp;&nbsp;&nbsp;".join(bits))
 
-    # ------------------------------------------------------------------ drawing
+    # ------------------------------------------------------------------ dibujo
     def paint_plot(self, p: QPainter, rect: QRectF, mouse):
         bg = QColor(theme.CANVAS)
         p.setPen(QPen(QColor(theme.BORDER), 1))
@@ -215,9 +215,9 @@ class GraphPanel(QWidget):
         p.drawText(QRectF(area.left(), area.bottom() + 4, area.width() / 2, 14), Qt.AlignLeft,
                    f"{fmt(t0, 's')}")
         p.drawText(QRectF(area.center().x(), area.bottom() + 4, area.width() / 2, 14), Qt.AlignRight,
-                   f"{fmt(t1, 's')}   ({fmt(tdiv, 's')} per square)")
+                   f"{fmt(t1, 's')}   ({fmt(tdiv, 's')} por cuadro)")
         if not self.traces:
-            p.drawText(area, Qt.AlignCenter, "No signals yet — put a graph probe on a wire and press Play.")
+            p.drawText(area, Qt.AlignCenter, "Aún no hay señales — coloque una sonda de gráfico en un cable y presione Ejecutar.")
             return
 
         def X(t):
@@ -227,7 +227,7 @@ class GraphPanel(QWidget):
             return area.bottom() - (val - v0) / (v1 - v0) * area.height()
         p.save()
         p.setClipRect(area.adjusted(-1, -2, 1, 2))
-        p.setBrush(Qt.NoBrush)          # outline only: a filled trace would hide the grid and the other traces
+        p.setBrush(Qt.NoBrush)          # solo contorno: un trazo relleno ocultaría la cuadrícula y los demás trazos
         cols = max(1, int(area.width()))
         for ch in sorted(self.traces):
             ts, vs = self.traces[ch].window(t0, t1)
@@ -238,7 +238,7 @@ class GraphPanel(QWidget):
             p.setPen(pen)
             pts = []
             if len(ts) > cols:
-                # more points than pixels across: draw each pixel column as its min/max (looks the same)
+                # más puntos que píxeles de ancho: dibujar cada columna de píxeles como su mín/máx (se ve igual)
                 bucket = {}
                 for t, val in zip(ts, vs):
                     c = int((t - t0) / (t1 - t0) * cols)
@@ -253,8 +253,8 @@ class GraphPanel(QWidget):
                 sy = -area.height() / (v1 - v0)
                 ax, ay = area.left() - t0 * sx, area.bottom() - v0 * sy
                 pts = [(ax + t * sx, ay + val * sy) for t, val in zip(ts, vs)]
-            # leave out points in the middle of a level stretch (a square wave is mostly flat): same picture,
-            # far less to draw
+            # omitir puntos en medio de un tramo nivelado (una onda cuadrada es casi toda plana): misma imagen,
+            # mucho menos que dibujar
             line = []
             for x, y in pts:
                 if len(line) >= 2 and abs(line[-1][1] - y) < 0.25 and abs(line[-2][1] - y) < 0.25:
@@ -286,7 +286,7 @@ class GraphPanel(QWidget):
                 p.drawText(QRectF(box.left() + 6, box.top() + 4 + 14 * k, box.width() - 8, 14), Qt.AlignLeft, line)
 
     def save_picture(self):
-        path, _ = QFileDialog.getSaveFileName(self, "Save graph", "graph.png", "PNG picture (*.png)")
+        path, _ = QFileDialog.getSaveFileName(self, "Guardar gráfico", "grafico.png", "Imagen PNG (*.png)")
         if path:
             if not path.lower().endswith(".png"):
                 path += ".png"

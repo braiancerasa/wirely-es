@@ -115,13 +115,14 @@ class CircuitView(QGraphicsView):
             f.setBold(True)
             p.setFont(f)
             p.setPen(QColor(theme.TEXT_MUTED))
-            p.drawText(r.adjusted(0, -30, 0, -30), Qt.AlignCenter, "Your circuit sheet is empty")
+            p.drawText(r.adjusted(0, -30, 0, -30), Qt.AlignCenter, "Su hoja de circuito está vacía")
             f.setPixelSize(13)
             f.setBold(False)
             p.setFont(f)
             p.drawText(r.adjusted(0, 20, 0, 20), Qt.AlignCenter,
-                       "Drag parts here from the gallery on the left,\nthen drag from pin to pin to wire them up.\n"
-                       "Or open an example from the File menu.")
+                       "Arrastre componentes aquí desde la galería de la izquierda,\n"
+                       "luego de pin a pin para cablearlos.\n"
+                       "O abra un ejemplo desde el menú Archivo.")
             p.restore()
 
     def _draw_legend(self, p, sc):

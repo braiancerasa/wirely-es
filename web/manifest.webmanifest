@@ -1,7 +1,7 @@
 {
-  "name": "Wirely — circuit simulator",
+  "name": "Wirely — simulador de circuitos",
   "short_name": "Wirely",
-  "description": "Draw a circuit, press play, watch it work.",
+  "description": "Dibuje un circuito, presione Ejecutar y véalo funcionar.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
