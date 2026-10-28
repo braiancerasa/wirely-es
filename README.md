@@ -86,9 +86,7 @@ más. Para tenerla **en español**, compílela desde el código con `build_exe.b
 - **Windows:** `Wirely-Setup-<version>.exe` — ejecútelo y siga el instalador. Agrega Wirely al menú Inicio y hace
   que los archivos `.wirely` se abran en Wirely. Es posible que Windows SmartScreen advierta la primera vez porque
   el instalador aún no está firmado digitalmente: haga clic en **Más información → Ejecutar de todos modos**.
-- **Mac (Apple Silicon, M1 o posterior):** `Wirely-<version>-mac-arm64.dmg` — ábralo y arrastre Wirely a
-  Aplicaciones. Apple aún no lo ha firmado, así que la primera vez: haga clic derecho en Wirely dentro de
-  Aplicaciones → **Abrir** → **Abrir**.
+
 - **Linux:** `Wirely-<version>-x86_64.AppImage` — hágalo ejecutable y ejecútelo:
   `chmod +x Wirely-*-x86_64.AppImage && ./Wirely-*-x86_64.AppImage`
   (o clic derecho → Propiedades → «Permitir ejecutar como programa», y luego doble clic). Si dice que falta FUSE,
