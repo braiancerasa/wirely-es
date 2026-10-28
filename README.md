@@ -1,11 +1,20 @@
-# Wirely
+# Wirely en español
+
+> **Traducción no oficial al español (Argentina) de [Wirely](https://github.com/wirely-app/wirely-app.github.io).**
+> Wirely es un simulador de circuitos creado por **Richard Willmott**; el programa, el diseño y el código son
+> suyos. Este repositorio solo traduce la interfaz, los ejemplos y la documentación: no está afiliado al autor
+> ni es una versión oficial, y se distribuye con la misma licencia **GNU GPL v3**. En la historia de Git están
+> sus commits originales, por eso figura como colaborador del repositorio.
+>
+> **▶ [Usar la versión web en español](https://braiancerasa.github.io/wirely-es/)** ·
+> [Sitio original, en inglés](https://wirely-app.github.io/)
 
 **Una app gratuita y de código abierto para diseñar y simular circuitos en Windows, Mac y Linux — y en su navegador web.**
 Dibuje un circuito, presione Ejecutar y véalo funcionar — los LEDs se encienden, los motores giran, los relés hacen
 clic, los medidores muestran lecturas y los cables muestran su voltaje. Para el trabajo, el aula y el banco de
 trabajo, todo en su propia computadora, sin nube y sin cuenta.
 
-**▶ [Pruébelo en su navegador](https://wirely-app.github.io/)** — no hay nada que instalar y funciona en
+**▶ [Pruébelo en su navegador](https://braiancerasa.github.io/wirely-es/)** — no hay nada que instalar y funciona en
 Chromebooks. O [descargue la app](#descarga-e-instalación) para Windows, Mac y Linux.
 
 Debajo hay un verdadero solucionador de circuitos, que usa el mismo método que SPICE, verificado contra cálculos
@@ -13,14 +22,14 @@ a mano y contra ngspice. Así, los números que muestra son los que mediría.
 
 ![Demostración de Wirely: coloque una batería, un interruptor, una resistencia y un LED, conéctelos, presione Ejecutar, encienda y pase el mouse sobre un cable para leer su voltaje y corriente](docs/images/demo.gif)
 
-## Por qué lo hice
+## Por qué existe Wirely
 
-Quería probar circuitos antes de construirlos — en el trabajo y en casa — con algo rápido y amigable de usar.
+La idea era poder probar circuitos antes de construirlos — en el trabajo y en casa — con algo rápido y amigable de usar.
 Los simuladores amigables de arrastrar y soltar son en su mayoría pagos y están orientados solo a escuelas, y las
 herramientas profesionales gratuitas, como LTspice y ngspice, son potentes pero uno termina dedicando el tiempo a
 netlists, modelos y ajustes de gráficos en lugar de al circuito.
 
-Quería algo intermedio: un simulador que sea **tan fácil como dibujar el circuito**, pero **gratuito**, que **se
+Buscaba algo intermedio: un simulador que sea **tan fácil como dibujar el circuito**, pero **gratuito**, que **se
 ejecute localmente** y sea **lo bastante preciso como para confiar en el trabajo** —
 
 - bosqueje un circuito y **vea de inmediato** si funciona: qué se enciende, qué se calienta demasiado, qué revienta,
@@ -30,7 +39,7 @@ ejecute localmente** y sea **lo bastante preciso como para confiar en el trabajo
 - use números de componente reales (**BC547, 2N2222, TIP31, IRF540, IRLZ44N, LM358, TL071, PC817, 1N4148, 1N4007 …**),
 - **exporte** diagramas limpios para informes, documentación y hojas de trabajo.
 
-Así que construí Wirely (con mucha ayuda de Claude, un asistente de IA), probando cada revisión contra respuestas
+Así nació Wirely (con mucha ayuda de Claude, un asistente de IA), probando cada revisión contra respuestas
 conocidas.
 
 ## Qué hace
@@ -70,8 +79,9 @@ conocidas.
 
 ## Descarga e instalación
 
-Descárguelo desde la [**última versión**](https://github.com/wirely-app/wirely-app.github.io/releases/latest) — no
-necesita Python ni nada más:
+La app de escritorio **oficial, en inglés**, se descarga desde la
+[**última versión**](https://github.com/wirely-app/wirely-app.github.io/releases/latest) — no necesita Python ni nada
+más. Para tenerla **en español**, compílela desde el código con `build_exe.bat` (vea [ACTUALIZAR.md](ACTUALIZAR.md)).
 
 - **Windows:** `Wirely-Setup-<version>.exe` — ejecútelo y siga el instalador. Agrega Wirely al menú Inicio y hace
   que los archivos `.wirely` se abran en Wirely. Es posible que Windows SmartScreen advierta la primera vez porque
@@ -89,11 +99,11 @@ necesita Python ni nada más:
 
 ### O úselo en un navegador web (Chromebooks, computadoras de la escuela)
 
-Abra **[wirely-app.github.io](https://wirely-app.github.io/)** en Chrome, Edge, Firefox o Safari — no hay nada que
-instalar y no hace falta cuenta. Es el mismo Wirely: los mismos componentes, símbolos, ejemplos y simulador,
-ejecutándose dentro del navegador (el propio código Python de la app de escritorio, ejecutado por
-[Pyodide](https://pyodide.org)). Sus circuitos permanecen en su computadora — no se sube nada. (El sitio cuenta las
-visitas con [GoatCounter](https://www.goatcounter.com): sin cookies ni datos personales.)
+Abra **[braiancerasa.github.io/wirely-es](https://braiancerasa.github.io/wirely-es/)** en Chrome, Edge, Firefox o
+Safari — no hay nada que instalar y no hace falta cuenta. Es el mismo Wirely, traducido: los mismos componentes,
+símbolos, ejemplos y simulador, ejecutándose dentro del navegador (el propio código Python de la app de escritorio,
+ejecutado por [Pyodide](https://pyodide.org)). Sus circuitos permanecen en su computadora — no se sube nada, y el
+sitio no usa cookies ni recopila datos personales. Después de la primera visita funciona sin conexión.
 
 - **Guardar** le da un archivo `.wirely`, que se abre tanto en la versión web como en la app de escritorio.
 - **Archivo → Copiar un enlace a este circuito** crea un enlace con el circuito dentro — péguelo en Google

@@ -1,7 +1,8 @@
 # Actualizar la traducción de Wirely
 
-Wirely es un simulador de circuitos de Richard Willmott (GPLv3). Este proyecto es **su traducción
-al español de Argentina**, para uso personal y con amigos. No se publica ni se distribuye.
+Wirely es un simulador de circuitos de Richard Willmott (GPLv3). Este proyecto es **una traducción
+no oficial al español de Argentina**, publicada en <https://braiancerasa.github.io/wirely-es/>.
+El programa, el diseño y el código son del autor original; acá solo está traducido el texto.
 
 La traducción no es un archivo aparte: son cambios sobre el código original. Por eso el proyecto
 está guardado como un repositorio Git con la versión original como base, y cada versión nueva se
@@ -116,6 +117,17 @@ carga de los 35 ejemplos, que el generador reproduzca los ejemplos, la versión 
 `cerrar` vuelve a verificar, guarda el catálogo de cadenas, hace el commit y crea la etiqueta
 `es-v1.5.3`. Si algo falla, no cierra nada.
 
+### 7. Publicar la web
+
+El sitio se publica solo: GitHub Actions compila la versión web, la prueba en un navegador real y la sube
+a <https://braiancerasa.github.io/wirely-es/>. Después de `cerrar`, alcanza con subir los cambios:
+
+```bash
+git push
+```
+
+Tarda unos 5–10 minutos. Los navegadores que ya lo tenían abierto se actualizan en la siguiente visita.
+
 ## Qué hace cada herramienta
 
 | Archivo | Para qué sirve |
@@ -160,8 +172,9 @@ insostenible, la solución definitiva es sacar el español del código (archivos
 un diccionario JSON para la web), que es un trabajo aparte.
 
 **¿Puedo publicar el instalador?**
-Wirely es GPLv3: si algún día lo distribuís, tenés que publicar también el código fuente modificado,
-mantener los avisos de autoría y aclarar que es una traducción no oficial. Hoy es solo uso local.
+Sí, con las condiciones de la GPLv3: al distribuir el instalador hay que ofrecer también el código
+fuente modificado (este repositorio público ya lo hace), mantener los avisos de autoría y aclarar que
+es una traducción no oficial. El instalador no está firmado, así que SmartScreen va a advertir.
 
 **¿Mis circuitos guardados se pierden al actualizar?**
 No. Los archivos `.wirely` viven fuera del proyecto. Solo se renombran los ejemplos que se

@@ -136,6 +136,9 @@ generador (no lo hagas si tocaste ejemplos o la web).
 
 - Cuéntale al usuario: versión nueva, cuántos conflictos hubo, qué se tradujo y el resultado de las
   comprobaciones.
+- El sitio web se publica solo: con `git push` (rama `main`), GitHub Actions compila la versión web, la
+  prueba y la sube a <https://braiancerasa.github.io/wirely-es/>. Pregunta antes de subir si hay algo
+  que el usuario quiera revisar primero.
 - Recuérdale que puede rehacer el instalador con:
   ```bash
   python tools/actualizar/actualizar.py compilar
@@ -156,7 +159,9 @@ generador (no lo hagas si tocaste ejemplos o la web).
 
 ## Nunca
 
-- Nunca publiques, hagas push ni crees releases: el repositorio es local.
+- El repositorio **sí** se publica: es la traducción no oficial en <https://braiancerasa.github.io/wirely-es/>,
+  y la GPLv3 obliga a mantener el código fuente disponible. Pero nunca hagas push a `upstream` (el
+  repositorio del autor), ni abras issues o pull requests ahí, ni crees releases sin que el usuario lo pida.
 - Nunca borres `.git` ni cambies de rama sin pedirlo.
 - Nunca traduzcas `LICENSE` ni `THIRD-PARTY-NOTICES.txt`.
 - Nunca edites `tools/actualizar/datos/cadenas.json` a mano: se regenera con `cerrar`.

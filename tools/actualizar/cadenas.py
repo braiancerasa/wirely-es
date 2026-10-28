@@ -94,6 +94,7 @@ IGNORAR = {
     "Files",                             # tipo de dato del navegador
     "Enter", "Delete", "Backspace",      # nombres de teclas
     "Zoom",                              # se usa igual en español
+    "**Settings → Pages → Build and deployment → Source: GitHub Actions**.",   # menú de GitHub, en inglés
     "{}: {} parts, {} wires, {} nets, unconnected pins: {}",   # salida de la herramienta de ejemplos
     # palabras clave de búsqueda de parts.py: quedan en inglés a propósito
     "bicolour bicolor two colour dual red green led",

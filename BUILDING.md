@@ -40,8 +40,9 @@ entre la página y Python, y `web/py/fallback/numpy` es un pequeño reemplazo de
 si no se puede descargar el numpy real.
 
 **En GitHub** (`.github/workflows/web.yml`): cada push lo compila y lo prueba en un navegador real (Chromium); los
-push a la rama principal luego lo publican en GitHub Pages, en `https://wirely-app.github.io/ (un proyecto llamado <owner>.github.io se sirve en la raíz)`.
-Configuración por única vez: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+push a la rama principal (`main`) luego lo publican en GitHub Pages, en
+<https://braiancerasa.github.io/wirely-es/>. Configuración por única vez:
+**Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
 **Usted mismo:**
 
