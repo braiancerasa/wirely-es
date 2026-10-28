@@ -1193,7 +1193,7 @@ function showAbout() {
     sus circuitos permanecen en su computadora.</p>
     <p><a href="https://github.com/braiancerasa/wirely-es" target="_blank" rel="noopener">Código de esta traducción</a> ·
     <a href="https://github.com/wirely-app/wirely-app.github.io" target="_blank" rel="noopener">Original, en inglés</a> ·
-    <a href="https://github.com/braiancerasa/wirely-es/releases/latest" target="_blank" rel="noopener">App de escritorio oficial (en inglés)</a></p>
+    <a href="https://github.com/braiancerasa/wirely-es/releases/latest" target="_blank" rel="noopener">App de escritorio en español (Windows y Linux)</a></p>
     <p class="hint">Matemática: ${escapeHtml(numpyKind)}</p></div>
     <div class="dlgButtons"><button class="btn primary" id="aClose">Cerrar</button></div>`, (d) => {
     opsCanvas(d.querySelector("#abMark"), J(app.logo_ops()), 50, 50, 50 / 32);
