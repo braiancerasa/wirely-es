@@ -275,7 +275,7 @@ if ${haveNumpy ? "False" : "True"}:
     $("loadText").classList.add("error");
     $("loadText").innerHTML = "Lo sentimos — Wirely no pudo iniciarse en este navegador.<br>" + escapeHtml(String(e && e.message || e)) +
       "<br><br>Intente recargar la página. Wirely funciona en versiones recientes de Chrome, Edge, Firefox y Safari." +
-      ' También puede <a href="https://github.com/wirely-app/wirely-app.github.io/releases/latest">descargar la app de escritorio</a>.';
+      ' También puede <a href="https://github.com/braiancerasa/wirely-es/releases/latest">descargar la app de escritorio</a>.';
   }
 }
 
@@ -886,7 +886,7 @@ function showPopup(items, x, y, onPick) {
 
 function pickMenu(act) {
   if (act === "examples") { showExamplesMenu(); return; }
-  if (act === "desktop") { window.open("https://github.com/wirely-app/wirely-app.github.io/releases/latest", "_blank", "noopener"); closeMenus(); return; }
+  if (act === "desktop") { window.open("https://github.com/braiancerasa/wirely-es/releases/latest", "_blank", "noopener"); closeMenus(); return; }
   if (act === "github") { window.open("https://github.com/wirely-app/wirely-app.github.io", "_blank", "noopener"); closeMenus(); return; }
   doAction(act);
 }
@@ -1193,7 +1193,7 @@ function showAbout() {
     sus circuitos permanecen en su computadora.</p>
     <p><a href="https://github.com/braiancerasa/wirely-es" target="_blank" rel="noopener">Código de esta traducción</a> ·
     <a href="https://github.com/wirely-app/wirely-app.github.io" target="_blank" rel="noopener">Original, en inglés</a> ·
-    <a href="https://github.com/wirely-app/wirely-app.github.io/releases/latest" target="_blank" rel="noopener">App de escritorio oficial (en inglés)</a></p>
+    <a href="https://github.com/braiancerasa/wirely-es/releases/latest" target="_blank" rel="noopener">App de escritorio oficial (en inglés)</a></p>
     <p class="hint">Matemática: ${escapeHtml(numpyKind)}</p></div>
     <div class="dlgButtons"><button class="btn primary" id="aClose">Cerrar</button></div>`, (d) => {
     opsCanvas(d.querySelector("#abMark"), J(app.logo_ops()), 50, 50, 50 / 32);
