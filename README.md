@@ -79,13 +79,19 @@ conocidas.
 
 ## Descarga e instalación
 
-La app de escritorio **oficial, en inglés**, se descarga desde la
-[**última versión**](https://github.com/wirely-app/wirely-app.github.io/releases/latest) — no necesita Python ni nada
-más. Para tenerla **en español**, compílela desde el código con `build_exe.bat` (vea [ACTUALIZAR.md](ACTUALIZAR.md)).
+Los instaladores de esta traducción están en las
+[**versiones publicadas**](https://github.com/braiancerasa/wirely-es/releases) — no necesita Python ni nada más.
+La app original, en inglés, se descarga desde el
+[repositorio del autor](https://github.com/wirely-app/wirely-app.github.io/releases/latest).
 
 - **Windows:** `Wirely-Setup-<version>.exe` — ejecútelo y siga el instalador. Agrega Wirely al menú Inicio y hace
   que los archivos `.wirely` se abran en Wirely. Es posible que Windows SmartScreen advierta la primera vez porque
   el instalador aún no está firmado digitalmente: haga clic en **Más información → Ejecutar de todos modos**.
+
+- **macOS:** `Wirely-<version>-mac-arm64.dmg` para Mac con chip Apple (M1 o posterior) y
+  `Wirely-<version>-mac-intel.dmg` para Mac con procesador Intel. Abra el `.dmg` y arrastre Wirely a la carpeta
+  Aplicaciones. La primera vez, si macOS lo bloquea porque la app aún no está firmada, vaya a **Ajustes del
+  Sistema → Privacidad y seguridad** y elija **Abrir igualmente**. Requiere macOS 14 o posterior.
 
 - **Linux:** `Wirely-<version>-x86_64.AppImage` — hágalo ejecutable y ejecútelo:
   `chmod +x Wirely-*-x86_64.AppImage && ./Wirely-*-x86_64.AppImage`

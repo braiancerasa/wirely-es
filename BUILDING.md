@@ -20,8 +20,8 @@ elimine la carpeta `.venv`. O adminístrelo usted mismo: `pip install -r require
 `.github/workflows/build.yml` hace todo en las propias computadoras de GitHub:
 
 - **Cada push** ejecuta las pruebas automáticas.
-- **Publicar una versión** compila el instalador de Windows, el `.dmg` de Mac (Apple Silicon) y el AppImage de
-  Linux, verifica que cada uno inicie (su autoprueba) y adjunta los tres a la versión publicada.
+- **Publicar una versión** compila el instalador de Windows, los `.dmg` de Mac (Apple Silicon e Intel) y el AppImage
+  de Linux, verifica que cada uno inicie (su autoprueba) y adjunta los cuatro a la versión publicada.
 - **Actions → Build (Windows, Mac, Linux) → Run workflow** hace en cambio una compilación de prueba: los archivos,
   una captura de pantalla de Wirely ejecutándose en Mac y los registros van a un borrador de versión privado
   llamado *Test builds* (solo usted puede verlo).

@@ -1,7 +1,8 @@
 # Builds Wirely for Windows, Mac and Linux on GitHub's own computers, tests each one, and attaches the
 # downloads to the release — so there's nothing to build by hand.
-#   - Publishing a release: builds all three and attaches
-#       Wirely-Setup-<rev>.exe, Wirely-<rev>-mac-arm64.dmg and Wirely-<rev>-x86_64.AppImage
+#   - Publishing a release: builds all four and attaches
+#       Wirely-Setup-<rev>.exe, Wirely-<rev>-mac-arm64.dmg, Wirely-<rev>-mac-intel.dmg and
+#       Wirely-<rev>-x86_64.AppImage
 #   - Actions tab → "Build (Windows, Mac, Linux)" → Run workflow: a test build. The files, a screenshot of
 #     Wirely running on the Mac and the logs go on a "Test builds" DRAFT release instead — drafts are only
 #     visible to you (Releases page), never to the public. Each test run replaces the previous test files.
@@ -154,6 +155,38 @@ jobs:
             for f in dist/*.dmg mac-screenshot.png app-log.txt build-log.txt test-results.txt; do [ -f "$f" ] && files="$files $f"; done
             gh release upload test-builds $files --clobber
           fi
+
+  # ------------------------------------------------------------------ Mac Intel: .dmg (Intel)
+  # The same build on an Intel Mac, so the app also runs on Macs with an Intel processor. The tests already
+  # ran in the "tests" job and on the Apple Silicon Mac, so this job only packages.
+  mac-intel:
+    needs: prepare
+    runs-on: macos-15-intel      # the Intel Mac runner (macos-latest is Apple Silicon)
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pyinstaller
+      - name: Build Wirely.app and the .dmg
+        run: bash packaging/mac/build_mac.sh 2>&1 | tee build-log.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wirely-mac-intel
+          path: |
+            dist/*.dmg
+            build-log.txt
+          if-no-files-found: warn
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then TAG="${{ github.event.release.tag_name }}"; else TAG=test-builds; fi
+          gh release upload "$TAG" dist/*.dmg --clobber
 
   # ------------------------------------------------------------------ Linux: AppImage
   linux:

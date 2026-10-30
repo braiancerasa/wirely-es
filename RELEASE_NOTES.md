@@ -12,6 +12,8 @@ Descargas (aplicación de escritorio)
 
 - Windows (64 bits): Wirely-Setup-1.5.3.exe — ejecutalo; actualiza una instalación existente de Wirely. Si SmartScreen te advierte (el instalador todavía no está firmado digitalmente), hacé clic en Más información → Ejecutar de todas formas.
 
+- macOS (Apple Silicon e Intel): Wirely-1.5.3-mac-arm64.dmg para Mac con chip Apple (M1 o posterior) y Wirely-1.5.3-mac-intel.dmg para Mac con procesador Intel. Abrí el .dmg y arrastrá Wirely a la carpeta Aplicaciones. La primera vez, si macOS lo bloquea porque la app todavía no está firmada, andá a Ajustes del Sistema → Privacidad y seguridad y elegí Abrir igualmente. Requiere macOS 14 o posterior.
+
 - Linux (x86_64): Wirely-1.5.3-x86_64.AppImage — ejecutá chmod +x Wirely-1.5.3-x86_64.AppImage, y después ejecutalo.
 
 Corregido
