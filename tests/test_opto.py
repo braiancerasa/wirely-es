@@ -81,7 +81,7 @@ def test_led_without_a_resistor_pops():
     s.run_until(0.2)
     u = s.device(comps[1].id)
     assert u.blown
-    assert any("popped" in text for _cid, text in s.take_events())
+    assert any("reventó" in text for _cid, text in s.take_events())
 
 
 def test_darlington_type_has_more_gain():

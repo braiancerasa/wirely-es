@@ -21,9 +21,9 @@ def pwm_circuit(duty):
     if duty == 100:
         src = ("dc_supply", ("v", "0"), {"voltage": 5})
     else:
-        src = ("signal_gen", ("v", "0"), {"waveform": "square", "frequency": 1000, "amplitude": 2.5,
+        src = ("signal_gen", ("v", "0"), {"waveform": "Cuadrada", "frequency": 1000, "amplitude": 2.5,
                                           "offset": 2.5, "duty": duty})
-    c, comps = build([src, ("resistor", ("v", "a"), {"resistance": 150}), ("led", ("a", "0"), {"colour": "Red"}),
+    c, comps = build([src, ("resistor", ("v", "a"), {"resistance": 150}), ("led", ("a", "0"), {"colour": "Rojo"}),
                       ("lamp", ("v", "0"), {})])
     s = Simulator(c)
     s.h_max = 1e-4
@@ -102,7 +102,7 @@ def test_a_blown_led_looks_dark():
 
 
 def test_pwm_dimmer_example_knob_sets_the_brightness():
-    c = Circuit.load(os.path.join(ROOT, "examples", "PWM dimmer (555).wirely"))
+    c = Circuit.load(os.path.join(ROOT, "examples", "Regulador de brillo PWM (555).wirely"))
     seen = []
     for setting in (10, 50, 90):
         s = Simulator(c)
@@ -122,7 +122,7 @@ def test_pwm_dimmer_example_knob_sets_the_brightness():
 def test_rgb_led_mixes_by_average_light():
     """PWM on one colour of an RGB LED changes the mix (how real colour mixing with PWM works)."""
     c, comps = build([("dc_supply", ("v", "0"), {"voltage": 5}),
-                      ("signal_gen", ("p", "0"), {"waveform": "square", "frequency": 1000, "amplitude": 2.5,
+                      ("signal_gen", ("p", "0"), {"waveform": "Cuadrada", "frequency": 1000, "amplitude": 2.5,
                                                   "offset": 2.5, "duty": 25}),
                       ("resistor", ("v", "r"), {"resistance": 220}), ("resistor", ("p", "b"), {"resistance": 100}),
                       ("led_rgb", ("r", "g", "b", "0"), {}), ("resistor", ("g", "0"), {"resistance": 1e6})])

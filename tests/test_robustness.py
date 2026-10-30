@@ -135,7 +135,7 @@ def test_opamp_on_a_reversed_supply_is_destroyed():
     s = Simulator(c)
     s.run_until(0.01)
     assert s.device(comps[1].id).blown
-    assert any("wrong way round" in t for _c, t in s.take_events())
+    assert any("al revés" in t for _c, t in s.take_events())
 
 
 def test_burnt_out_thyristor_doesnt_slow_the_simulation():

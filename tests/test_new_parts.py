@@ -53,7 +53,7 @@ def test_shunt_ref_burns_out_without_enough_series_resistance():
     s.h_max = 1e-3
     s.run_until(0.3)
     assert s.device(comps[2].id).blown
-    assert any("TL431 can sink" in t for _c, t in s.take_events())
+    assert any("TL431 puede absorber" in t for _c, t in s.take_events())
 
 
 def test_tlv431_destroyed_above_6v():
@@ -249,7 +249,7 @@ def test_74hc_chip_on_9v_warns_it_would_be_damaged():
     s = Simulator(c)
     s.h_max = 1e-3
     s.run_until(0.01)
-    assert any("would be damaged" in t for _c, t in s.take_events())
+    assert any("se dañaría" in t for _c, t in s.take_events())
 
 
 # ------------------------------------------------------------------------------------------- type descriptions

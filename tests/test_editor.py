@@ -134,7 +134,7 @@ def test_moving_a_part_drags_its_wires(win):
     w = next(iter(win.circuit.wires.values()))
     assert w.points[0] == r.pin_positions()["2"] and w.points[-1] == led.pin_positions()["A"]
     assert square(w.points)
-    assert win.undo.undoText() == "Move"
+    assert win.undo.undoText() == "Mover"
     win.undo.undo()
     r = win.circuit.components[r.id]
     assert (r.x, r.y) == (0, 0)
@@ -233,10 +233,10 @@ def test_open_examples_have_no_loose_pins(win):
 
 
 def test_export_png_svg_pdf(win, tmp_path):
-    win.open_file(os.path.join(EXAMPLES, "LED and resistor.wirely"))
+    win.open_file(os.path.join(EXAMPLES, "LED y resistencia.wirely"))
     for ext in ("png", "svg", "pdf"):
         p = tmp_path / f"out.{ext}"
-        EX.export(win.scene, str(p), "LED and resistor")
+        EX.export(win.scene, str(p), "LED y resistencia")
         assert p.exists() and p.stat().st_size > 500, ext
     from PySide6.QtGui import QImage
     img = QImage(str(tmp_path / "out.png"))
@@ -286,10 +286,10 @@ def test_text_note_sizes_itself_and_stays_out_of_the_parts_list(win):
 def test_right_click_menu_offers_the_right_things(win):
     r = place(win, "resistor", 0, 0)
     texts = [a.text() for a in win._context_menu(QPointF(0, 0)).actions() if a.text()]
-    assert "Properties…" in texts and "Rotate" in texts and "Delete" in texts
+    assert "Propiedades…" in texts and "Rotar" in texts and "Eliminar" in texts
     assert r.id in win.scene.selected_ids()[0]
     texts = [a.text() for a in win._context_menu(QPointF(500, 500)).actions() if a.text()]
-    assert "Paste" in texts
+    assert "Pegar" in texts
 
 
 def test_autosave_and_recovery(win, monkeypatch):

@@ -160,7 +160,7 @@ def test_diode_blocks_backwards():
     assert abs(s.device(d.id).current) < 1e-6
 
 
-@pytest.mark.parametrize("colour,vf", [("Red", 1.95), ("Green", 2.15), ("Blue", 3.1)])
+@pytest.mark.parametrize("colour,vf", [("Rojo", 1.95), ("Verde", 2.15), ("Azul", 3.1)])
 def test_led_current_with_resistor(colour, vf):
     s, (b, r, led) = op([("dc_supply", ("a", "0"), {"voltage": 9}), ("resistor", ("a", "k"), {"resistance": 470}),
                          ("led", ("k", "0"), {"colour": colour})])
@@ -180,7 +180,7 @@ def test_led_without_resistor_pops():
     d = s.device(led.id)
     assert d.blown
     ev = s.take_events()
-    assert any("popped" in m for _cid, m in ev)
+    assert any("reventó" in m for _cid, m in ev)
     assert abs(d.i_pins[0]) < 1e-6          # once popped, no current
 
 
@@ -229,7 +229,7 @@ def test_pnp_switch_mirror_of_npn():
 
 
 def test_night_light_example_turns_on_in_the_dark():
-    path = os.path.join(os.path.dirname(__file__), "..", "examples", "Night light.wirely")
+    path = os.path.join(os.path.dirname(__file__), "..", "examples", "Luz nocturna.wirely")
     c = Circuit.load(path)
     ldr = next(x for x in c.components.values() if x.kind == "ldr")
     led = next(x for x in c.components.values() if x.kind == "led")
@@ -336,7 +336,7 @@ def test_fuse_blows_on_short():
 
 def test_real_time_speed():
     """The night light must simulate much faster than real time."""
-    path = os.path.join(os.path.dirname(__file__), "..", "examples", "Night light.wirely")
+    path = os.path.join(os.path.dirname(__file__), "..", "examples", "Luz nocturna.wirely")
     s = Simulator(Circuit.load(path))
     t0 = time.perf_counter()
     s.run_until(1.0)
@@ -364,7 +364,7 @@ def ngspice_op(netlist: str, probes):
 @pytest.mark.skipif(not NGSPICE, reason="ngspice not installed")
 def test_against_ngspice_led_and_transistor_switch():
     _, Is, bf, br, _, _ = D.BJTS["BC548"]
-    led_is = D.led_is("Red")
+    led_is = D.led_is("Rojo")
     net = f"""* LED driven by an NPN switch
 V1 a 0 9
 Rb a b 10k
@@ -379,7 +379,7 @@ Q1 c b 0 QN
     s, comps = op([("dc_supply", ("a", "0"), {"voltage": 9}),
                    ("resistor", ("a", "b"), {"resistance": 10e3}),
                    ("resistor", ("a", "k"), {"resistance": 330}),
-                   ("led", ("k", "c"), {"colour": "Red"}),
+                   ("led", ("k", "c"), {"colour": "Rojo"}),
                    ("npn", ("b", "c", "0"), {"model": "BC548"})])
     sup, rb, rc, led, q = comps
     # our supply has 0.02 Ω inside, ngspice's is ideal: allow 0.1 %
@@ -423,7 +423,7 @@ print v(k)
 # ----------------------------------------------------------------------------------------- current along wires
 def test_current_flow_along_wires_follows_the_loop():
     from wirely.sim.flow import FlowNetwork
-    path = os.path.join(os.path.dirname(__file__), "..", "examples", "LED and resistor.wirely")
+    path = os.path.join(os.path.dirname(__file__), "..", "examples", "LED y resistencia.wirely")
     c = Circuit.load(path)
     sw = next(x for x in c.components.values() if x.kind == "switch")
     led = next(x for x in c.components.values() if x.kind == "led")

@@ -142,7 +142,7 @@ meas tran tr when v(d)={vdd / 2} rise=1
     tf_ng = float(re.search(r"tf\s*=\s*([-+0-9.eE]+)", out).group(1))
     tr_ng = float(re.search(r"tr\s*=\s*([-+0-9.eE]+)", out).group(1))
     c, comps = build([("dc_supply", ("vdd", "0"), {"voltage": vdd}),
-                      ("signal_gen", ("gin", "0"), {"waveform": "Square", "frequency": 1 / period, "amplitude": 5,
+                      ("signal_gen", ("gin", "0"), {"waveform": "Cuadrada", "frequency": 1 / period, "amplitude": 5,
                                                     "offset": 5, "duty": 50}),
                       ("resistor", ("gin", "g"), {"resistance": rgate}),
                       ("resistor", ("vdd", "d"), {"resistance": rl, "power": 100.0}),

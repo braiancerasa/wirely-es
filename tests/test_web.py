@@ -25,10 +25,10 @@ FALLBACK = os.path.join(WEB_PY, "fallback")
 def run_web(code, lite=False, timeout=600):
     """Run code in a fresh Python with the web version's paths (and the numpy fallback if lite)."""
     path = [WEB_PY, ROOT] if not lite else [FALLBACK, WEB_PY, ROOT]
-    env = dict(os.environ, PYTHONPATH=os.pathsep.join(path))
+    env = dict(os.environ, PYTHONPATH=os.pathsep.join(path), PYTHONIOENCODING="utf-8")
     env.pop("QT_QPA_PLATFORM", None)
     r = subprocess.run([sys.executable, "-c", textwrap.dedent(code)], capture_output=True, text=True, env=env,
-                       timeout=timeout, cwd=ROOT)
+                       timeout=timeout, cwd=ROOT, encoding="utf-8")
     assert r.returncode == 0, r.stdout + r.stderr
     return r.stdout
 
@@ -85,7 +85,7 @@ def test_build_a_circuit_with_the_mouse_and_run_it():
         drag(pins["R1"]["2"], pins["LED1"]["A"])
         drag(pins["LED1"]["K"], pins["B1"]["-"])
         st = json.loads(app.state())
-        assert st["counts"] == "3 parts · 3 wires", st["counts"]
+        assert st["counts"] == "3 componentes · 3 cables", st["counts"]
         # double-click the resistor and change its value through the properties box
         r = app.circuit.components[[c.id for c in app.circuit.components.values() if c.kind == "resistor"][0]]
         click(r.x, r.y)
@@ -106,7 +106,7 @@ def test_build_a_circuit_with_the_mouse_and_run_it():
     """)
     glow, counts = out.split()[0], " ".join(out.split()[1:])
     assert float(glow) > 0.3                    # the LED lights
-    assert counts == "3 parts · 2 wires"         # undo: the resistor value, then the last wire
+    assert counts == "3 componentes · 2 cables"         # undo: the resistor value, then the last wire
 
 
 def test_fallback_numpy_solves_like_numpy():
@@ -131,7 +131,7 @@ def test_drag_a_pinned_reading_label():
         import json, time, wirely_web
         app = wirely_web.App()
         L = 1
-        app.load(open("examples/Thyristor alarm (latching).wirely").read(), "x")
+        app.load(open("examples/Alarma con tiristor (enclavada).wirely").read(), "x")
         app.run()
         for _ in range(4):
             time.sleep(0.03); app.tick()

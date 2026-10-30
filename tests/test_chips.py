@@ -138,7 +138,7 @@ def test_opamp_integrator_ramps_at_vin_over_rc():
 
 
 def test_opamp_slew_rate_741():
-    c, comps = build(dual_supply(("signal_gen", ("in", "0"), {"waveform": "Square", "frequency": 1000,
+    c, comps = build(dual_supply(("signal_gen", ("in", "0"), {"waveform": "Cuadrada", "frequency": 1000,
                                                              "amplitude": 5, "offset": 0}),
                                  ("opamp", ("out", "in", "out", "vp", "vn"), {"model": "741"}),
                                  ("resistor", ("out", "0"), {"resistance": 10e3})))
@@ -212,7 +212,7 @@ def test_schmitt_rc_oscillator_period():
 
 
 def square_clock(freq):
-    return ("signal_gen", ("clk", "0"), {"waveform": "Square", "frequency": freq, "amplitude": 4.5, "offset": 4.5})
+    return ("signal_gen", ("clk", "0"), {"waveform": "Cuadrada", "frequency": freq, "amplitude": 4.5, "offset": 4.5})
 
 
 def test_d_flip_flop_and_reset():

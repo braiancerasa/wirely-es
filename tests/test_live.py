@@ -26,7 +26,7 @@ def find(w, kind):
 
 
 def test_play_click_switch_led_lights_then_stop(win):
-    win.open_file(os.path.join(EXAMPLES, "LED and resistor.wirely"))
+    win.open_file(os.path.join(EXAMPLES, "LED y resistencia.wirely"))
     led, sw = find(win, "led"), find(win, "switch")
     win.a_play.trigger()
     assert win.simc.state == "running"
@@ -71,7 +71,7 @@ def test_push_button_only_while_held(win):
 
 
 def test_ldr_slider_switches_night_light(win):
-    win.open_file(os.path.join(EXAMPLES, "Night light.wirely"))
+    win.open_file(os.path.join(EXAMPLES, "Luz nocturna.wirely"))
     ldr, led = find(win, "ldr"), find(win, "led")
     ldr.props["light"] = 500.0
     win.a_play.trigger()
@@ -101,7 +101,7 @@ def test_led_pops_and_message_appears(win):
     win.a_play.trigger()
     run_for(win, 0.3)
     assert win.scene.live_part(led.id)["blown"]
-    assert win.view._toasts and "popped" in win.view._toasts[-1].findChild(type(win.hint)).text()
+    assert win.view._toasts and "reventó" in win.view._toasts[-1].findChild(type(win.hint)).text()
     win.a_stop.trigger()
     win.a_play.trigger()                       # a fresh start mends it (then it pops again)
     assert not win.scene.live_part(led.id)["blown"]
@@ -109,7 +109,7 @@ def test_led_pops_and_message_appears(win):
 
 
 def test_pause_and_resume(win):
-    win.open_file(os.path.join(EXAMPLES, "Voltage divider.wirely"))
+    win.open_file(os.path.join(EXAMPLES, "Divisor de voltaje.wirely"))
     win.a_play.trigger()
     run_for(win, 0.1)
     win.a_pause.trigger()
@@ -125,7 +125,7 @@ def test_pause_and_resume(win):
 
 
 def test_editing_is_locked_while_running(win):
-    win.open_file(os.path.join(EXAMPLES, "Voltage divider.wirely"))
+    win.open_file(os.path.join(EXAMPLES, "Divisor de voltaje.wirely"))
     r = next(c for c in win.circuit.components.values() if c.kind == "resistor")
     x0 = r.x
     win.a_play.trigger()
@@ -140,7 +140,7 @@ def test_editing_is_locked_while_running(win):
 
 
 def test_changing_a_value_while_running(win):
-    win.open_file(os.path.join(EXAMPLES, "Voltage divider.wirely"))
+    win.open_file(os.path.join(EXAMPLES, "Divisor de voltaje.wirely"))
     r2 = next(c for c in win.circuit.components.values() if c.ref == "R2")
     vm = find(win, "voltmeter")
     win.a_play.trigger()
@@ -152,13 +152,13 @@ def test_changing_a_value_while_running(win):
 
 
 def test_graph_records_and_measures_the_555(win):
-    win.open_file(os.path.join(EXAMPLES, "555 LED flasher.wirely"))
-    win.speed_box.setCurrentText("2× faster")
+    win.open_file(os.path.join(EXAMPLES, "Intermitente LED con 555.wirely"))
+    win.speed_box.setCurrentText("2× más rápido")
     win.a_play.trigger()
     assert win.graph.isVisible()
     run_for(win, 2.6)
     win.a_stop.trigger()
-    win.speed_box.setCurrentText("Real time")
+    win.speed_box.setCurrentText("Tiempo real")
     from wirely.ui.graph import frequency
     tr = win.graph.traces["A"]
     assert len(tr.t) > 100
@@ -169,7 +169,7 @@ def test_graph_records_and_measures_the_555(win):
 
 
 def test_logic_probe_shows_levels(win):
-    win.open_file(os.path.join(EXAMPLES, "Logic gates.wirely"))
+    win.open_file(os.path.join(EXAMPLES, "Compuertas lógicas.wirely"))
     win.a_play.trigger()
     run_for(win, 0.1)
     probes = [c for c in win.circuit.components.values() if c.kind == "logic_probe"]
@@ -183,7 +183,7 @@ def test_logic_probe_shows_levels(win):
 
 
 def test_hovering_a_wire_shows_voltage_and_current(win):
-    win.open_file(os.path.join(EXAMPLES, "LED and resistor.wirely"))
+    win.open_file(os.path.join(EXAMPLES, "LED y resistencia.wirely"))
     sw = find(win, "switch")
     sw.props["closed"] = True
     win.a_play.trigger()
@@ -192,10 +192,10 @@ def test_hovering_a_wire_shows_voltage_and_current(win):
     a = led.pin_positions()["A"]                       # the wire from R1 comes down into the LED's anode
     move(win, (a[0], a[1] - 10), held=False)
     pos, title, lines = win.scene.hover_info
-    assert title == "Wire"
-    assert lines[0].startswith("Voltage: ") and lines[1].startswith("Current: ")
+    assert title == "Cable"
+    assert lines[0].startswith("Voltaje: ") and lines[1].startswith("Corriente: ")
     i_led = win.scene.live_part(led.id)["i"]
-    assert lines[1] == f"Current: {__import__('wirely.model.units', fromlist=['fmt']).fmt(abs(i_led), 'A')} ↓"
+    assert lines[1] == f"Corriente: {__import__('wirely.model.units', fromlist=['fmt']).fmt(abs(i_led), 'A')} ↓"
     win.a_stop.trigger()
     assert win.scene.hover_info is None
 
@@ -226,7 +226,7 @@ def test_graph_auto_timebase_follows_the_fastest_probe(qapp=None):
 def test_capacitor_reads_no_heat_and_mosfet_reads_its_channel(win):
     """A capacitor charging soaks up V×I as stored energy, not heat; a MOSFET's readout is its drain–source
     voltage and drain current, not the gate's (which is always ~0 A)."""
-    win.open_file(os.path.join(EXAMPLES, "5 V power supply (7805).wirely"))
+    win.open_file(os.path.join(EXAMPLES, "Fuente de 5 V (7805).wirely"))
     win.a_play.trigger()
     run_for(win, 1.0)
     cap = find(win, "electrolytic")
@@ -235,7 +235,8 @@ def test_capacitor_reads_no_heat_and_mosfet_reads_its_channel(win):
     assert info["p"] == 0.0
     win.a_stop.trigger()
 
-    win.open_file(os.path.join(EXAMPLES, "MOSFET motor switch.wirely"))
+    win.open_file(os.path.join(EXAMPLES, "Conmutación de motor con MOSFET.wirely"))
+    app.processEvents()                        # let the pending zoom-to-fit run, so clicks land where we mean
     sw = find(win, "switch")
     win.a_play.trigger()
     click(win, (sw.x, sw.y))

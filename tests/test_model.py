@@ -148,12 +148,12 @@ def test_parts_touching_pin_to_pin_connect():
 
 def test_save_and_load_round_trip(tmp_path):
     c, b, r, led, g = led_circuit()
-    led.props["colour"] = "Green"
+    led.props["colour"] = "Verde"
     path = tmp_path / "led.wirely"
     c.save(str(path))
     d = Circuit.load(str(path))
     assert len(d.components) == 4 and len(d.wires) == 4
-    assert d.components[led.id].props["colour"] == "Green"
+    assert d.components[led.id].props["colour"] == "Verde"
     assert d.components[r.id].props["resistance"] == 470
     assert sorted(len(n.pins) for n in d.nets()) == sorted(len(n.pins) for n in c.nets())
 
@@ -169,7 +169,7 @@ def test_bill_of_materials_groups_same_parts():
     c, *_ = led_circuit()
     c.add("resistor", 300, 300, props={"resistance": 470})
     bom = c.bill_of_materials()
-    res = [row for row in bom if row["description"].startswith("Resistor")]
+    res = [row for row in bom if row["description"].startswith("Resistencia")]
     assert res[0]["qty"] == 2 and res[0]["refs"] == ["R1", "R2"]
     assert not any("0 V" in row["description"] for row in bom)
 

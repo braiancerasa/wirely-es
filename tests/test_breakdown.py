@@ -35,7 +35,7 @@ def test_mosfet_off_with_more_than_its_rating_breaks_down_and_dies():
     s = run(c, 0.1)
     assert s.device(comps[4].id).blown
     msgs = [t for _cid, t in s.take_events()]
-    assert any("Q1" in m and "rated for 100 V" in m for m in msgs), msgs
+    assert any("Q1" in m and "soporta 100 V" in m for m in msgs), msgs
 
 
 def test_mosfet_at_its_rating_is_fine():
@@ -49,7 +49,7 @@ def test_nine_volt_motor_on_150_volts_burns_out():
     c2, comps2 = build([("battery", ("vcc", "0"), {"voltage": 150}), ("motor", ("vcc", "0"), {"voltage": 9})])
     s = run(c2, 1.5)
     assert s.device(comps2[1].id).blown
-    assert any("9 V motor" in t for _cid, t in s.take_events())
+    assert any("motor de 9 V" in t for _cid, t in s.take_events())
 
 
 def test_motor_at_its_own_voltage_is_fine():

@@ -76,7 +76,7 @@ def test_load_current_comes_from_the_supply_pins():
 def test_closed_loop_bandwidth(model, gbw):
     """A gain-of-11 amplifier rolls off at GBW / 11: at that frequency the gain is down to 11/√2."""
     f = gbw / 11
-    c, comps = build(split(15.0, ("signal_gen", ("in", "0"), {"waveform": "Sine", "frequency": f,
+    c, comps = build(split(15.0, ("signal_gen", ("in", "0"), {"waveform": "Senoidal", "frequency": f,
                                                               "amplitude": 0.01, "offset": 0}),
                            ("opamp", ("fb", "in", "out", "vp", "vn"), {"model": model}),
                            ("resistor", ("out", "fb"), {"resistance": 10e3}),
@@ -95,4 +95,4 @@ def test_too_much_supply_voltage_destroys_it():
     s.h_max = 1e-3
     s.run_until(0.2)
     assert s.device(comps[1].id).blown
-    assert any("32 V maximum" in text for _cid, text in s.take_events())
+    assert any("32 V como máximo" in text for _cid, text in s.take_events())

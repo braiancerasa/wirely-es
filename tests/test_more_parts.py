@@ -67,7 +67,7 @@ def test_two_leg_bicolour_led_colour_depends_on_direction(forward, colour):
 def test_bicolour_led_pops_without_a_resistor():
     s, c = run([("dc_supply", ("v", "0"), {"voltage": 9}), ("led_bi3", ("v", "0x", "0"), {})], 0.1)
     d = s.device(c[1].id)
-    assert d.blown and any("popped" in t for _c, t in s.take_events())
+    assert d.blown and any("reventó" in t for _c, t in s.take_events())
 
 
 # ------------------------------------------------------------------------------------------- bridge rectifier
@@ -170,7 +170,7 @@ def test_regulator_overheats_and_shuts_down_without_a_heatsink():
                 ("resistor", ("o", "0"), {"resistance": 10, "power": 10})], 2, 0.01)
     reg = s.device(c[1].id)
     assert reg.hot and s.pin_voltage(c[1].id, "OUT") < 0.1
-    assert any("too hot" in t for _c, t in s.take_events())
+    assert any("se calentó demasiado" in t for _c, t in s.take_events())
     s2, c2 = run([("dc_supply", ("v", "0"), {"voltage": 24}),
                   ("reg_fixed", ("v", "0", "o"), {"model": "7805", "heatsink": True}),
                   ("resistor", ("o", "0"), {"resistance": 10, "power": 10})], 6, 0.01)
@@ -194,12 +194,12 @@ def test_transformer_steps_ac_down_by_its_turns_ratio():
 def test_transformer_on_dc_warns():
     s, c = run([("battery", ("p", "0"), {"voltage": 9}), ("transformer", ("p", "0", "s", "t"), {"ratio": 1}),
                 ("resistor", ("s", "t"), {"resistance": 100})], 3)
-    assert any("only works with AC" in t for _c, t in s.take_events())
+    assert any("solo funciona con AC" in t for _c, t in s.take_events())
 
 
 # ------------------------------------------------------------------------------------------- switches, sensors, outputs
 def test_dpdt_reverses_a_motor():
-    c = Circuit.load(os.path.join(ROOT, "examples", "Reversing a motor (DPDT).wirely"))
+    c = Circuit.load(os.path.join(ROOT, "examples", "Inversión de motor (DPDT).wirely"))
     s = Simulator(c)
     s.h_max = 1e-3
     s.run_until(0.5)
@@ -281,7 +281,7 @@ def test_comparator_output(vminus, low):
 
 def test_comparator_switches_as_the_input_crosses():
     s, c = run([("dc_supply", ("v", "0"), {"voltage": 9}), ("signal_gen", ("p", "0"),
-                {"waveform": "Triangle", "frequency": 10, "amplitude": 4, "offset": 4.5}),
+                {"waveform": "Triangular", "frequency": 10, "amplitude": 4, "offset": 4.5}),
                 ("dc_supply", ("m", "0"), {"voltage": 4.5}), ("comparator", ("p", "m", "o"), {}),
                 ("resistor", ("v", "o"), {"resistance": 4700})], 0.0)
     s.recording = False
@@ -330,13 +330,13 @@ def test_l293d_overloaded_gets_too_hot_and_switches_off():
     s, c = l293d(1, 0, load=("resistor", {"resistance": 4, "power": 100}), v2=12)
     s.run_until(2.0)
     ic = s.device(c[2].id)
-    assert ic.hot and any("too hot" in t for _c, t in s.take_events())
+    assert ic.hot and any("se calentó demasiado" in t for _c, t in s.take_events())
     assert abs(s.pin_voltage(c[2].id, "1Y") - s.pin_voltage(c[2].id, "2Y")) < 0.05      # outputs off
 
 
 # ------------------------------------------------------------------------------------------- counters
 def test_4026_counts_and_drives_the_display():
-    s, c = run([("signal_gen", ("clk", "0"), {"waveform": "Square", "frequency": 10, "amplitude": 4.5,
+    s, c = run([("signal_gen", ("clk", "0"), {"waveform": "Cuadrada", "frequency": 10, "amplitude": 4.5,
                                               "offset": 4.5}),
                 ("dc_supply", ("v", "0"), {"voltage": 9}),
                 ("ic4026", ("clk", "0", "0") + tuple("abcdefg") + ("co",), {}),
@@ -347,7 +347,7 @@ def test_4026_counts_and_drives_the_display():
 
 
 def test_4026_carry_clocks_the_next_digit():
-    s, c = run([("signal_gen", ("clk", "0"), {"waveform": "Square", "frequency": 20, "amplitude": 4.5,
+    s, c = run([("signal_gen", ("clk", "0"), {"waveform": "Cuadrada", "frequency": 20, "amplitude": 4.5,
                                               "offset": 4.5}),
                 ("dc_supply", ("v", "0"), {"voltage": 9}),
                 ("ic4026", ("clk", "0", "0") + tuple(f"u{s_}" for s_ in "abcdefg") + ("co",), {}),
@@ -383,10 +383,10 @@ def test_new_parts_are_in_the_gallery_with_types_explained():
                 assert TYPE_INFO.get(ch), ch
 
 
-@pytest.mark.parametrize("name,t", [("Thyristor alarm (latching)", 0.3), ("5 V power supply (7805)", 0.3),
-                                    ("RGB colour mixer", 0.1), ("Counter (555 + 4026)", 1.5),
-                                    ("Reversing a motor (DPDT)", 0.3), ("Motor driver (L293D)", 0.3),
-                                    ("Relay reversing a motor (DPDT)", 0.3)])
+@pytest.mark.parametrize("name,t", [("Alarma con tiristor (enclavada)", 0.3), ("Fuente de 5 V (7805)", 0.3),
+                                    ("Mezclador de color RGB", 0.1), ("Contador (555 + 4026)", 1.5),
+                                    ("Inversión de motor (DPDT)", 0.3), ("Controlador de motor (L293D)", 0.3),
+                                    ("Inversión de motor con relé (DPDT)", 0.3)])
 def test_new_examples_run_cleanly(name, t):
     c = Circuit.load(os.path.join(ROOT, "examples", f"{name}.wirely"))
     s = Simulator(c)
@@ -396,7 +396,7 @@ def test_new_examples_run_cleanly(name, t):
 
 
 def test_power_supply_example_gives_5_volts():
-    c = Circuit.load(os.path.join(ROOT, "examples", "5 V power supply (7805).wirely"))
+    c = Circuit.load(os.path.join(ROOT, "examples", "Fuente de 5 V (7805).wirely"))
     s = Simulator(c)
     s.run_until(0.4)
     reg = next(d for d in s.devices if d.comp.kind == "reg_fixed")
@@ -412,7 +412,7 @@ def test_readings_show_on_the_sheet_and_pin_with_a_click():
     from PySide6.QtGui import QImage, QPainter
     from wirely.ui.scene import CircuitScene
     from wirely.ui.simcontrol import SimController
-    c = Circuit.load(os.path.join(ROOT, "examples", "Voltage divider.wirely"))
+    c = Circuit.load(os.path.join(ROOT, "examples", "Divisor de voltaje.wirely"))
     sc = CircuitScene(c)
     simc = SimController()
     sc.attach_sim(simc)
@@ -440,7 +440,7 @@ def test_readings_show_on_the_sheet_and_pin_with_a_click():
     assert not tags
     # Copy readings: a table that pastes into a spreadsheet
     table = sc.readings_text().splitlines()
-    assert table[1].split("\t") == ["Part", "What", "Voltage (V)", "Current (A)", "Power (W)"]
+    assert table[1].split("\t") == ["Componente", "Qué", "Voltaje (V)", "Corriente (A)", "Potencia (W)"]
     r1 = next(row.split("\t") for row in table if row.startswith("R1\t"))
     assert float(r1[2]) > 0 and float(r1[3]) > 0 and float(r1[4]) == pytest.approx(float(r1[2]) * float(r1[3]), rel=0.01)
     p.end()
@@ -467,7 +467,7 @@ def test_wire_current_into_a_0v_symbol_is_right():
     """The 0 V symbol doesn't report a current (it goes back to the +9 V rail without a wire), so the wires
     leading to it must carry whatever the parts put in: in the Night light, the transistor's emitter current."""
     from wirely.sim.flow import FlowNetwork
-    c = Circuit.load(os.path.join(ROOT, "examples", "Night light.wirely"))
+    c = Circuit.load(os.path.join(ROOT, "examples", "Luz nocturna.wirely"))
     next(x for x in c.components.values() if x.kind == "ldr").props["light"] = 30.0     # dim: the LED is on
     s = Simulator(c)
     s.dc()
@@ -499,7 +499,7 @@ def test_reading_labels_can_be_dragged_out_of_the_way():
     from wirely.ui.scene import CircuitScene
     from wirely.ui.simcontrol import SimController
     QApplication.instance() or QApplication([])
-    c = Circuit.load(os.path.join(ROOT, "examples", "Voltage divider.wirely"))
+    c = Circuit.load(os.path.join(ROOT, "examples", "Divisor de voltaje.wirely"))
     sc = CircuitScene(c)
     simc = SimController()
     sc.attach_sim(simc)

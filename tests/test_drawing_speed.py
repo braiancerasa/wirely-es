@@ -116,7 +116,7 @@ def test_export_while_running_in_dark_theme_is_in_paper_colours(win):
 
 
 def test_flow_reuses_its_answer_only_when_the_currents_are_the_same():
-    path = glob.glob(os.path.join(ROOT, "examples", "Night light*.wirely"))[0]
+    path = glob.glob(os.path.join(ROOT, "examples", "Luz nocturna*.wirely"))[0]
     c = Circuit.load(path)
     fs = FlowNetwork(c)
     currents = {}

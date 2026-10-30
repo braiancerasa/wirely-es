@@ -76,7 +76,7 @@ def test_relay_without_diode_kills_the_transistor():
     s.run_until(0.08)
     q = s.device(comps[4].id)
     assert q.blown
-    assert any("spike" in m and "diode" in m for _cid, m in s.take_events())
+    assert any("pico" in m and "diodo" in m for _cid, m in s.take_events())
 
 
 def test_relay_pull_in_and_drop_out_levels():
@@ -95,7 +95,7 @@ def test_relay_pull_in_and_drop_out_levels():
 
 
 # ------------------------------------------------------------------------------------------- motor
-def motor(load="None", V=6.0):
+def motor(load="Ninguna", V=6.0):
     return build([("dc_supply", ("a", "0"), {"voltage": V}), ("switch", ("a", "m"), {"closed": False}),
                   ("motor", ("m", "0"), {"voltage": 6.0, "load": load})])
 
@@ -114,7 +114,7 @@ def test_motor_starting_current_then_running_current():
 
 def test_motor_slows_down_and_takes_more_current_under_load():
     speeds, currents = [], []
-    for load in ("None", "Light", "Medium", "Heavy"):
+    for load in ("Ninguna", "Ligera", "Media", "Pesada"):
         c, comps = motor(load)
         s = Simulator(c)
         s.set_value(comps[1].id, "closed", True)
@@ -257,7 +257,7 @@ def test_synth_makes_the_frequency_asked_for():
 def test_speaker_plays_the_simulated_frequency():
     """A 440 Hz square wave into a speaker: the sound engine must hear 440 Hz and a square shape."""
     from wirely.sim.audio import SpeakerWatch, Synth, update_from_sim
-    c, comps = build([("signal_gen", ("a", "0"), {"waveform": "Square", "frequency": 440, "amplitude": 2,
+    c, comps = build([("signal_gen", ("a", "0"), {"waveform": "Cuadrada", "frequency": 440, "amplitude": 2,
                                                   "offset": 0}),
                       ("resistor", ("a", "s"), {"resistance": 10}), ("speaker", ("s", "0"), {})])
     sim = Simulator(c)
@@ -288,7 +288,7 @@ def test_buzzer_sounds_only_when_powered_the_right_way():
 def buck(duty, F=1000.0, L=10e-3, C=100e-6, R=10.0, VIN=12.0):
     """12 V buck converter: P-MOSFET switch (on while the drive is low), Schottky diode, LC filter, 10 Ω load."""
     return build([("dc_supply", ("vin", "0"), {"voltage": VIN}),
-                  ("signal_gen", ("g", "0"), {"waveform": "Square", "frequency": F, "amplitude": 6, "offset": 6,
+                  ("signal_gen", ("g", "0"), {"waveform": "Cuadrada", "frequency": F, "amplitude": 6, "offset": 6,
                                               "duty": 100 - duty}),
                   ("pmos", ("g", "sw", "vin"), {"model": "IRF9540"}),
                   ("diode", ("0", "sw"), {"model": "1N5819"}),

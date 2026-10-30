@@ -163,7 +163,7 @@ def test_stepper_turns_one_step_per_coil_change():
 
 
 def test_stepper_example_turns():
-    c = Circuit.load(os.path.join(ROOT, "examples", "Stepper motor (crystal clock + L293D).wirely"))
+    c = Circuit.load(os.path.join(ROOT, "examples", "Motor paso a paso (reloj de cuarzo + L293D).wirely"))
     s = Simulator(c)
     s.h_max = 1e-3
     s.run_until(3.1)                            # a step every 0.25 s
@@ -199,27 +199,27 @@ def test_new_examples_behave():
         s = Simulator(c)
         s.h_max = 1e-3
         return s
-    s = load("Binary counter (JK flip-flops)")
+    s = load("Contador binario (flip-flops JK)")
     leds = sorted((d for d in s.devices if d.comp.kind == "led"), key=lambda d: d.comp.ref)
     seq = []
     for k in range(1, 6):
         s.run_until(k * 0.5 - 0.1)
         seq.append("".join("1" if d.glow() > 0.3 else "0" for d in reversed(leds)))
     assert seq == ["00", "01", "10", "11", "00"]
-    s = load("Rotary switch (pick an LED)")
+    s = load("Conmutador rotatorio (elegir un LED)")
     sw = next(d for d in s.devices if d.comp.kind == "rotary")
-    for pos, colour in zip("1234", ("Red", "Yellow", "Green", "Blue")):
+    for pos, colour in zip("1234", ("Rojo", "Amarillo", "Verde", "Azul")):
         s.set_value(sw.cid, "position", pos)
         s.run_until(s.t + 0.05)
         assert [d.comp.value("colour") for d in s.devices if d.comp.kind == "led" and d.glow() > 0.3] == [colour]
-    s = load("Keypad (which key is pressed)")
+    s = load("Teclado (qué tecla se presiona)")
     kp = next(d for d in s.devices if d.comp.kind == "keypad")
     s.run_until(0.02)
     s.set_value(kp.cid, "_key", "5")
     s.run_until(0.05)
     assert sorted(d.comp.value("colour") for d in s.devices if d.comp.kind == "led" and d.glow() > 0.3) == \
-        ["Blue", "Orange"]
-    s = load("Schmitt NAND flasher (4093)")
+        ["Azul", "Naranja"]
+    s = load("Intermitente con NAND Schmitt (4093)")
     led = next(d for d in s.devices if d.comp.kind == "led")
     s.run_until(0.5)
     assert led.glow() == 0                                            # off until S1 is closed
@@ -244,7 +244,7 @@ def test_clicking_a_keypad_key_while_running():
 
         def accept(self):
             pass
-    c = Circuit.load(os.path.join(ROOT, "examples", "Keypad (which key is pressed).wirely"))
+    c = Circuit.load(os.path.join(ROOT, "examples", "Teclado (qué tecla se presiona).wirely"))
     sc = CircuitScene(c)
     simc = SimController()
     sc.attach_sim(simc)
@@ -282,7 +282,7 @@ def test_rotary_switch_steps_round_when_clicked():
 
         def accept(self):
             pass
-    c = Circuit.load(os.path.join(ROOT, "examples", "Rotary switch (pick an LED).wirely"))
+    c = Circuit.load(os.path.join(ROOT, "examples", "Conmutador rotatorio (elegir un LED).wirely"))
     sc = CircuitScene(c)
     simc = SimController()
     sc.attach_sim(simc)
