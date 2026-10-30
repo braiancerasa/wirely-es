@@ -43,7 +43,7 @@ jobs:
   # ------------------------------------------------------------------ test runs: one private draft to put them on
   prepare:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
- #   needs: tests
+    needs: tests
     runs-on: ubuntu-latest
     outputs:
       rev: ${{ steps.v.outputs.rev }}
