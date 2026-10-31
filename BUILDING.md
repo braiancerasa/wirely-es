@@ -30,6 +30,13 @@ Para publicar una versión: aumente `__version__` en `wirely/__init__.py` (y en 
 en GitHub vaya a **Releases → Draft a new release**, etiquétela (p. ej. `v1.0.1`) y presione **Publish**. Las
 descargas aparecen en la versión unos 15 minutos después.
 
+### Numeración de las versiones de esta traducción
+
+Las versiones de esta traducción llevan un cuarto número propio: `1.5.4.1`, `1.5.4.2`, y así. Los tres primeros
+números son la versión de la app y el cuarto es la revisión de la traducción, de modo que nunca coincida con una
+versión del proyecto original (que usa tres números). Use solo números: el instalador de Windows y los datos del
+`.exe` no aceptan sufijos como `-es.1`. En cada versión, las notas aclaran sobre qué versión de Wirely está basada.
+
 ## La versión para navegador (Wirely Web)
 
 La versión web está en `web/`. Ejecuta el propio código Python de la app de escritorio — `wirely/model`, `wirely/sim`
