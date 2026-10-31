@@ -2,7 +2,7 @@
 
 > **Traducción no oficial al español (Argentina) de [Wirely](https://github.com/wirely-app/wirely-app.github.io).**
 > Wirely es un simulador de circuitos creado por **Richard Willmott**; el programa, el diseño y el código son
-> suyos. Este repositorio solo traduce la interfaz, los ejemplos y la documentación: no está afiliado al autor
+> suyos. Este repositorio traduce la interfaz, los ejemplos y la documentación, además de que añade algunas funciones extra: no está afiliado al autor
 > ni es una versión oficial, y se distribuye con la misma licencia **GNU GPL v3**. En la historia de Git están
 > sus commits originales, por eso figura como colaborador del repositorio.
 >
