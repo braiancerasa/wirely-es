@@ -729,8 +729,8 @@ class MainWindow(QMainWindow):
         self.time_label.setText(txt)
 
     def _on_sim_message(self, cid, text):
-        self.view.toast(text, "error" if ("quemó" in text or "fundió" in text or "reventó" in text
-                                          or "destruido" in text) else "warn")
+        # una pieza rota es un error; una advertencia es algo que todavía se puede corregir
+        self.view.toast(text, "error" if self.simc.is_broken(cid) else "warn")
 
     def _toggle_volts(self):
         self.scene.show_volts = self.a_volts.isChecked()

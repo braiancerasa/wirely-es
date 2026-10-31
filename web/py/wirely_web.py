@@ -202,9 +202,8 @@ class App:
         self.status = text
 
     def _on_sim_message(self, cid, text):
-        kind = "error" if ("quemó" in text or "fundió" in text or "reventó" in text
-                           or "destruido" in text) else "warn"
-        self.toasts.append([text, kind])
+        # una pieza rota es un error; una advertencia es algo que todavía se puede corregir
+        self.toasts.append([text, "error" if self.simc.is_broken(cid) else "warn"])
 
     def _on_sim_state(self, state):
         if state == "stopped":

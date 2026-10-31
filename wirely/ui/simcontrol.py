@@ -100,6 +100,12 @@ class SimController(QObject):
         self.stateChanged.emit(self.state)
         self.frame.emit()
 
+    def is_broken(self, cid):
+        """¿Esta pieza quedó rota (se quemó, se fundió, se destruyó)? Sirve para colorear su mensaje como error,
+        sin depender de las palabras del texto."""
+        dev = self.sim.by_id.get(cid) if self.sim is not None else None
+        return bool(getattr(dev, "blown", False))
+
     def active(self):
         return self.state != "stopped"
 

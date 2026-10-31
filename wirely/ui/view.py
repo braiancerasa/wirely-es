@@ -277,6 +277,7 @@ class Toast(QWidget):
         from . import theme
         super().__init__(parent)
         self.stack = stack
+        self.kind = kind
         self.setAttribute(Qt.WA_StyledBackground, True)
         col = theme.ERROR if kind == "error" else theme.WARN
         self.setStyleSheet(f"Toast {{ background: {theme.PANEL}; border: 1px solid {theme.BORDER}; "

@@ -101,10 +101,27 @@ def test_led_pops_and_message_appears(win):
     win.a_play.trigger()
     run_for(win, 0.3)
     assert win.scene.live_part(led.id)["blown"]
+    assert win.simc.is_broken(led.id)
     assert win.view._toasts and "reventó" in win.view._toasts[-1].findChild(type(win.hint)).text()
     win.a_stop.trigger()
     win.a_play.trigger()                       # a fresh start mends it (then it pops again)
     assert not win.scene.live_part(led.id)["blown"]
+    assert not win.simc.is_broken(led.id)
+    win.a_stop.trigger()
+
+
+def test_message_colour_follows_the_part_state(win):
+    """Un mensaje es error si la pieza quedó rota, aunque el texto no diga «se quemó» ni «reventó»."""
+    win.open_file(os.path.join(EXAMPLES, "Divisor de voltaje.wirely"))
+    win.a_play.trigger()
+    run_for(win, 0.05)
+    r = find(win, "resistor")
+    text = "T1 se sobrecalentó - 9,0 W es mucho más que su 5 W nominales."
+    win._on_sim_message(r.id, text)
+    assert win.view._toasts[-1].kind == "warn"            # todavía no se rompió
+    win.simc.sim.by_id[r.id].blown = True
+    win._on_sim_message(r.id, text)
+    assert win.view._toasts[-1].kind == "error"           # rota: el color no depende del texto
     win.a_stop.trigger()
 
 
