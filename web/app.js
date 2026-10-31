@@ -768,6 +768,14 @@ function setupToolbar() {
     sp.appendChild(o);
   }
   sp.addEventListener("change", () => app.set_speed(parseFloat(sp.value)));
+  const fp = $("flowSpeed");
+  for (const [label, v] of J(app.flow_speeds())) {
+    const o = document.createElement("option");
+    o.textContent = label; o.value = v;
+    if (v === 1) o.selected = true;
+    fp.appendChild(o);
+  }
+  fp.addEventListener("change", () => app.set_flow_speed(parseFloat(fp.value)));
   opsCanvas($("logoMark"), J(app.logo_ops()), 26, 26, 26 / 32);
   opsCanvas($("splashMark"), J(app.logo_ops()), 96, 96, 3);
 }
@@ -838,6 +846,7 @@ const MENUS = {
     [ui.sim === "paused" ? "Reanudar" : "Ejecutar", "play", "F5", ui.sim !== "running"], ["Pausar", "pause", "F6", ui.sim === "running"],
     ["Detener", "stop", "F7", ui.sim !== "stopped"], null,
     [check(ui.volts) + "Colores de voltaje", "volts", ""], [check(ui.flow) + "Flujo de corriente", "flow", ""],
+    [check(ui.flow_follow) + "El flujo sigue la velocidad de simulación", "flow_follow", ""],
     [check(ui.readings) + "Lecturas", "readings", ""], ["Copiar lecturas", "copy_readings", "", ui.sim !== "stopped"],
     [check(ui.graph) + "Gráfico", "graph", "Ctrl+G"], [check(ui.sound) + "Sonido", "sound", ""],
   ],

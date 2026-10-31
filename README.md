@@ -172,7 +172,10 @@ alta — la escala está en la esquina) y circulan puntos por ellos para mostrar
 - **pase el mouse sobre cualquier cable o componente** para leer su voltaje, corriente (con sentido) y potencia,
 - presione **Lecturas** para mostrarlas todas a la vez, o **haga clic** en un cable o componente para fijar su lectura
   en la hoja (arrastre una lectura para moverla),
-- cambie la **velocidad** — desde 10× más rápido hasta 1/1000, para cámara lenta.
+- cambie la **velocidad** — desde 10× más rápido hasta 1/1000, para cámara lenta,
+- cambie la **velocidad del flujo** (×¼ a ×4) para ver los puntos de corriente en cámara lenta; con **El flujo sigue
+  la velocidad de simulación** (menú Simular), la cámara lenta también frena los puntos. Ninguna de las dos toca el
+  circuito: son solo la animación.
 
 **Detener** (Shift+F5) vuelve a la edición y repara todo lo que haya reventado.
 

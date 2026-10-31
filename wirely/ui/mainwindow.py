@@ -18,7 +18,7 @@ from .dialogs import BomDialog, PropertiesDialog, ShortcutsDialog
 from .gallery import Gallery
 from .graph import GraphPanel
 from .scene import MIME_CLIP, CircuitScene
-from .simcontrol import SPEEDS, SimController
+from .simcontrol import FLOW_SPEEDS, SPEEDS, SimController
 from .sound import SoundPlayer
 from .view import CircuitView
 
@@ -82,6 +82,7 @@ class MainWindow(QMainWindow):
         self.sound.availabilityChanged.connect(self._sound_availability)
         self._sound_availability(self.sound.available())
         self.simc.sound = self.sound
+        self.simc.set_flow_follow(self.a_flow_follow.isChecked())
         self.scene.attach_sim(self.simc)
         self.scene.show_volts = self.a_volts.isChecked()
         self.scene.show_flow = self.a_flow.isChecked()
@@ -210,6 +211,10 @@ class MainWindow(QMainWindow):
         self.a_copy_readings.setEnabled(False)
         self.a_flow = A("Flujo de corriente", self._toggle_flow, None, "flow",
                         "Mostrar la corriente fluyendo por los cables durante la ejecución", checkable=True)
+        self.a_flow_follow = A("El flujo sigue la velocidad de simulación", self._toggle_flow_follow, None, None,
+                               "En cámara lenta los puntos de corriente se frenan junto con la simulación, en la "
+                               "misma proporción", checkable=True)
+        self.a_flow_follow.setChecked(self.settings.value("flow_follow", "false") == "true")
         self.a_sound = A("Sonido", self._toggle_sound, None, "sound", "Zumbadores, parlantes, motores y relés emiten "
                          "sonido durante la ejecución", checkable=True)
         self.a_sound.setChecked(self.settings.value("sound", "true") == "true")
@@ -257,8 +262,8 @@ class MainWindow(QMainWindow):
             ("Editar", [self.a_undo, self.a_redo, None, self.a_cut, self.a_copy, self.a_paste, self.a_dup,
                       self.a_delete, self.a_select_all, None, self.a_rotate, self.a_rotate_ccw, self.a_flip,
                       None, self.a_props]),
-            ("Simular", [self.a_play, self.a_pause, self.a_stop, None, self.a_volts, self.a_flow, self.a_readings, self.a_copy_readings,
-                          self.a_graph, self.a_sound]),
+            ("Simular", [self.a_play, self.a_pause, self.a_stop, None, self.a_volts, self.a_flow, self.a_flow_follow,
+                          self.a_readings, self.a_copy_readings, self.a_graph, self.a_sound]),
             ("Ver", [self.a_zoom_in, self.a_zoom_out, self.a_fit, None, self.a_grid, self.a_dark, self.a_us]),
             ("Ayuda", [self.a_help, self.a_about]),
         ):
@@ -326,6 +331,14 @@ class MainWindow(QMainWindow):
         self.speed_box.setCurrentText("Tiempo real")
         self.speed_box.currentIndexChanged.connect(lambda i: self.simc.set_speed(SPEEDS[i][1]))
         sh.addWidget(self.speed_box)
+        self.flow_box = QComboBox()
+        self.flow_box.setToolTip("Velocidad del flujo de corriente: ×1 es la normal. Solo mueve los puntos de los "
+                                 "cables; el circuito, el voltaje y la simulación no cambian.")
+        for name, _v in FLOW_SPEEDS:
+            self.flow_box.addItem(name)
+        self.flow_box.setCurrentText("×1")
+        self.flow_box.currentIndexChanged.connect(lambda i: self.simc.set_flow_speed(FLOW_SPEEDS[i][1]))
+        sh.addWidget(self.flow_box)
         self.time_label = QLabel("")
         self.time_label.setObjectName("muted")
         self.time_label.setMinimumWidth(92)
@@ -763,6 +776,12 @@ class MainWindow(QMainWindow):
         self.scene.show_flow = self.a_flow.isChecked()
         self.settings.setValue("flow", "true" if self.scene.show_flow else "false")
         self.scene.update()
+
+    def _toggle_flow_follow(self):
+        """El flujo sigue la velocidad de simulación (solo la animación)."""
+        on = self.a_flow_follow.isChecked()
+        self.settings.setValue("flow_follow", "true" if on else "false")
+        self.simc.set_flow_follow(on)
 
     def edit_selected(self):
         comps = self.scene.selected_components()

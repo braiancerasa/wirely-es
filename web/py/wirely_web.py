@@ -452,6 +452,8 @@ class App:
             sc.show_volts = not sc.show_volts
         elif name == "flow":
             sc.show_flow = not sc.show_flow
+        elif name == "flow_follow":
+            self.simc.set_flow_follow(not self.simc.flow_follow)
         elif name == "readings":
             sc.show_readings = not sc.show_readings
         elif name == "copy_readings":
@@ -488,6 +490,7 @@ class App:
             "sel": bool(comps or wires), "comps": len(comps), "running": running,
             "undo": self.hi > 0 and not running, "redo": self.hi < len(self.history) - 1 and not running,
             "paste": bool(self.clip) and not running, "volts": sc.show_volts, "flow": sc.show_flow, "readings": sc.show_readings,
+            "flow_follow": self.simc.flow_follow,
             "sound": self.sound_on, "graph": self.graph_on, "grid": sc.show_grid, "dark": theme.MODE == "dark", "us": S.STYLE == "us",
             "dirty": self.is_dirty(), "name": self.name, "empty": self.circuit.is_empty(),
             "counts": f"{n} componente{'s' * (n != 1)} · {w} cable{'s' * (w != 1)}",
@@ -665,6 +668,17 @@ class App:
 
     def speeds(self):
         return json.dumps(SC.SPEEDS)
+
+    def set_flow_speed(self, s):
+        """Velocidad de los puntos de corriente: solo la animación, el circuito no cambia."""
+        self.simc.set_flow_speed(float(s))
+
+    def set_flow_follow(self, on=True):
+        """Que los puntos sigan la velocidad de simulación (cámara lenta)."""
+        self.simc.set_flow_follow(bool(on))
+
+    def flow_speeds(self):
+        return json.dumps(SC.FLOW_SPEEDS)
 
     def tick(self):
         """One step of the running simulation (the page calls this about 30 times a second)."""

@@ -109,6 +109,25 @@ def test_build_a_circuit_with_the_mouse_and_run_it():
     assert counts == "3 componentes · 2 cables"         # undo: the resistor value, then the last wire
 
 
+def test_flow_speed_control_is_exposed_to_the_page():
+    out = run_web("""
+        import json, wirely_web
+        app = wirely_web.App()
+        opts = json.loads(app.flow_speeds())
+        app.set_flow_speed(4)
+        fixed = [app.simc.flow_speed, app.simc.flow_follow, app.simc.flow_factor()]
+        app.action("flow_follow")
+        following = [app.simc.flow_follow, app.simc.flow_factor()]
+        state = json.loads(app.state())["flow_follow"]
+        print(json.dumps([opts, fixed, following, state]))
+    """)
+    opts, fixed, following, state = json.loads(out.strip().splitlines()[-1])
+    assert [v for _n, v in opts] == [0.25, 0.5, 1.0, 2.0, 4.0]
+    assert fixed == [4.0, False, 4.0]
+    assert following == [True, 4.0]           # a tiempo real, seguir la simulación es ×1 sobre el flujo elegido
+    assert state is True
+
+
 def test_fallback_numpy_solves_like_numpy():
     spec = importlib.util.spec_from_file_location("numpy_lite", os.path.join(FALLBACK, "numpy", "__init__.py"))
     lite = importlib.util.module_from_spec(spec)

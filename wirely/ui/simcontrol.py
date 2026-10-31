@@ -16,6 +16,25 @@ FRAME_MS = 33
 SPEEDS = [("10× más rápido", 10.0), ("2× más rápido", 2.0), ("Tiempo real", 1.0), ("½ velocidad", 0.5),
           ("⅕ velocidad", 0.2), ("1/10 de velocidad", 0.1), ("1/100 de velocidad", 0.01),
           ("1/1000 de velocidad", 0.001)]
+# Velocidad de los puntos de corriente: solo la animación, nunca el circuito. Se combina con «el flujo sigue la
+# velocidad de simulación» (SimController.flow_follow), que además la multiplica por la velocidad de simulación.
+FLOW_SPEEDS = [("×¼", 0.25), ("×½", 0.5), ("×1", 1.0), ("×2", 2.0), ("×4", 4.0)]
+# La corriente manda, pero comprimida: entre 1 µA y 1 A la velocidad cambia unas 16 veces (lineal sería un
+# millón), así se nota la diferencia entre ramas sin que las corrientes grandes salgan disparadas.
+FLOW_REF = 1e-6
+FLOW_MIN = 12.0
+FLOW_MAX = 260.0
+FLOW_EXP = 0.2
+
+
+def flow_dots_speed(amps: float) -> float:
+    """Píxeles por segundo de los puntos de corriente para una corriente dada, sin el multiplicador del control."""
+    a = abs(amps)
+    if a <= FLOW_REF:
+        return FLOW_MIN
+    return min(FLOW_MAX, FLOW_MIN * (a / FLOW_REF) ** FLOW_EXP)
+
+
 INTERACTIVE = {"switch", "push_make", "push_break", "spdt", "dpdt", "reed_switch", "tilt_switch", "hall", "rotary",
                "keypad"}
 TOGGLES = {"switch": "closed", "reed_switch": "magnet", "tilt_switch": "tilted", "hall": "magnet"}
@@ -46,6 +65,8 @@ class SimController(QObject):
         self.state = "stopped"
         self.sim = None
         self.speed = 1.0
+        self.flow_speed = 1.0       # multiplicador de la animación del flujo (no toca el circuito)
+        self.flow_follow = False    # si es True, el flujo sigue la velocidad de simulación
         D.Device.eye_window = 0.066
         self.behind = False
         self.live = Live()
@@ -112,6 +133,18 @@ class SimController(QObject):
     def set_speed(self, s: float):
         self.speed = s
         D.Device.eye_window = 0.066 * s      # the eye's 1/15 s, in simulated time at this speed
+
+    def set_flow_speed(self, s: float):
+        """Cuánto se acelera o frena la animación del flujo. Solo mueve los puntos: el circuito no cambia."""
+        self.flow_speed = max(0.01, float(s))
+
+    def set_flow_follow(self, on: bool = True):
+        """Que los puntos sigan la velocidad de simulación: en cámara lenta el flujo también se frena."""
+        self.flow_follow = bool(on)
+
+    def flow_factor(self) -> float:
+        """Multiplicador que se aplica a la velocidad de los puntos en este momento."""
+        return self.flow_speed * (self.speed if self.flow_follow else 1.0)
 
     def set_value(self, cid, key, value):
         """A switch clicked / slider moved / value edited while running."""
@@ -203,8 +236,8 @@ class SimController(QObject):
             if abs(amps) < 1e-6:
                 ph = self._phase.get(key, 0.0)
             else:
-                # dots move faster for bigger currents (on a log scale: 1 µA slow … 1 A fast)
-                spd = 18 + 16 * max(0.0, min(6.0, math.log10(abs(amps) / 1e-6)))
+                # dots move faster for bigger currents, and the flow control (or the simulation speed) scales them
+                spd = flow_dots_speed(amps) * self.flow_factor()
                 ph = self._phase.get(key, 0.0) + math.copysign(spd, amps) * wall_dt
             self._phase[key] = ph
             flows.append((a, b, ph, amps))
