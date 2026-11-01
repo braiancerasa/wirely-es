@@ -19,10 +19,11 @@ import time
 
 import numpy as np
 
-from ..model.circuit import Circuit
+from ..model.circuit import Circuit, on_segment
 from . import chips as CH
 from . import devices as D
 from . import extra as EX
+from .flow import FlowNetwork, segment_current
 
 D.FACTORY.update(CH.FACTORY)
 D.FACTORY.update(EX.FACTORY)
@@ -146,6 +147,14 @@ class Simulator:
         for d in self.devices:
             if d.comp.kind == "scope_probe":
                 self.probe_nodes[d.comp.value("channel")] = d.nodes[0]
+        # sondas de corriente: se enganchan al cable que tienen debajo (canal -> cable, tramo, punto)
+        self.current_probes = {}
+        for d in self.devices:
+            if d.comp.kind == "current_probe":
+                hook = self._hook_wire(d.comp)
+                if hook is not None:
+                    self.current_probes[d.comp.value("channel")] = hook
+        self.flow = FlowNetwork(c, self.nets) if self.current_probes else None
         self.recording = False
         self.record = []
         self.speakers = {d.cid: (d.nodes[0], d.nodes[1]) for d in self.devices if d.comp.kind == "speaker"}
@@ -160,6 +169,33 @@ class Simulator:
             d.event = None
         # parts that give out light: the eye averages it (so PWM dims them, as in real life)
         self.lights = [d for d in self.devices if d.light_now() is not None]
+
+    def _hook_wire(self, comp):
+        """(cable, tramo, punto) que queda justo debajo de una sonda de corriente, o None si no toca ningún cable.
+        El criterio es el mismo que usa la sonda de voltaje: la pata de la sonda tiene que estar sobre el cable."""
+        pin = comp.part.pins[0][0]
+        pos = comp.pin_positions()[pin]
+        for net in self.nets:
+            if (comp.id, pin) not in net.pins:
+                continue
+            for wid in net.wires:
+                wire = self.circuit.wires.get(wid)
+                if wire is None:
+                    continue
+                for a, b in wire.segments():
+                    if on_segment(pos, a, b):
+                        return wid, (a, b), pos
+        return None
+
+
+    def _pin_current(self, cid, pin):
+        """Corriente que entra en la pieza por ese pin (la que usa la red de flujo de los cables)."""
+        dev = self.by_id.get(cid)
+        if dev is None:
+            return 0.0
+        names = [n for n, _x, _y in dev.comp.part.pins]
+        i = names.index(pin)
+        return dev.i_pins[i] if i < len(dev.i_pins) else 0.0
 
     # ========================================================================================== solving
     def _solve_once(self, x0, ctx):
@@ -288,8 +324,15 @@ class Simulator:
         if self.recording and self.speakers:
             for cid, (a, b) in self.speakers.items():
                 self.spk_record.append((self.t, cid, (float(x[a]) if a >= 0 else 0.0) - (float(x[b]) if b >= 0 else 0.0)))
-        if self.recording and self.probe_nodes:
-            self.record.append((self.t, {ch: float(x[n]) if n >= 0 else 0.0 for ch, n in self.probe_nodes.items()}))
+        if self.recording and (self.probe_nodes or self.current_probes):
+            vals = {ch: float(x[n]) if n >= 0 else 0.0 for ch, n in self.probe_nodes.items()}
+            if self.current_probes and self.flow is not None:
+                groups = {self.flow.wire_group[wid] for wid, _seg, _pos in self.current_probes.values()
+                          if wid in self.flow.wire_group}
+                flows = self.flow.solve(self._pin_current, groups=groups)
+                for ch, (_wid, seg, pos) in self.current_probes.items():
+                    vals[ch] = segment_current(flows, seg, pos)
+            self.record.append((self.t, vals))
         was_jump = self._jump
         self._jump = False
         # choose the next step

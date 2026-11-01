@@ -67,8 +67,15 @@ CHECK_ICON = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__
                            "assets", "check.svg").replace("\\", "/")
 
 
+def _asset(name: str) -> str:
+    return _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),
+                         "assets", name).replace("\\", "/")
+
+
 def stylesheet() -> str:
     g = globals()
+    # flecha de los desplegables dibujada por la app (la nativa de Windows se ve cuadrada, tipo Windows 95)
+    chevron = _asset("chevron-light.svg" if MODE == "dark" else "chevron-dark.svg")
     return f"""
 * {{ font-family: "Inter", "Segoe UI", "Helvetica Neue", "Noto Sans", Arial, sans-serif; font-size: 13px; color: {g['TEXT']}; }}
 QMainWindow, QWidget#central {{ background: {g['PANEL_ALT']}; }}
@@ -110,6 +117,9 @@ QLabel#dialogTitle {{ font-weight: 700; font-size: 14px; }}
 QLabel#dialogError {{ color: {g['ERROR']}; }}
 QLabel#hint {{ color: {g['TEXT_MUTED']}; font-size: 12px; }}
 QLineEdit, QComboBox, QDoubleSpinBox, QSpinBox {{ border: 1px solid {g['BORDER']}; border-radius: 5px; padding: 4px 7px; background: {g['INPUT']}; }}
+QComboBox {{ padding-right: 22px; }}
+QComboBox::drop-down {{ subcontrol-origin: padding; subcontrol-position: center right; width: 20px; border: none; background: transparent; }}
+QComboBox::down-arrow {{ image: url({chevron}); width: 10px; height: 7px; }}
 QComboBox QAbstractItemView {{ background: {g['INPUT']}; border: 1px solid {g['BORDER']}; selection-background-color: {g['ACCENT_LIGHT']}; }}
 QLineEdit:focus, QComboBox:focus {{ border-color: {g['ACCENT']}; }}
 QLineEdit[invalid="true"] {{ border-color: {g['ERROR']}; background: {g['INVALID_BG']}; }}

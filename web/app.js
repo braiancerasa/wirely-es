@@ -1193,14 +1193,16 @@ json.dumps(SHORTCUTS)`));
 function showAbout() {
   const v = app.version();
   openDialog(`<div class="about"><div class="dlgTop"><canvas id="abMark"></canvas><div><div class="dlgTitle">Wirely ${escapeHtml(v)} — versión web</div>
-    <div class="hint">Dibuje un circuito, presione Ejecutar y véalo funcionar.</div></div></div>
-    <p>Gratuito y de código abierto bajo la GNU GPL v3. Wirely es de Richard Willmott, creado con ayuda de Claude.</p>
-    <p><strong>Esta es una traducción no oficial al español (Argentina):</strong> el programa, el diseño y el código son
-    del autor original; acá solo está traducido el texto.</p>
+    <div class="hint">Dibuje un circuito, presione Ejecutar, véalo funcionar.</div></div></div>
+    <p>Libre y de código abierto bajo la GNU GPL v3.</p>
+    <p>El Wirely original es de Richard Willmott, construido con ayuda de Claude.</p>
+    <p><strong>Esta es una versión no oficial en español (Argentina) y un fork del original:</strong> además de traducir
+    la interfaz, los ejemplos y la documentación, agrega funciones que el original no tiene y corrige algunas fallas.
+    No está afiliada al autor ni es una versión oficial. Los cambios de esta versión son de Braian Cerasa.</p>
     <p>Este es el mismo Wirely que la app de escritorio — los mismos componentes, dibujos y simulador — ejecutándose en su navegador
     con <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> (Python para la web). No se sube nada:
     sus circuitos permanecen en su computadora.</p>
-    <p><a href="https://github.com/braiancerasa/wirely-es" target="_blank" rel="noopener">Código de esta traducción</a> ·
+    <p><a href="https://github.com/braiancerasa/wirely-es" target="_blank" rel="noopener">Código de este fork</a> ·
     <a href="https://github.com/wirely-app/wirely-app.github.io" target="_blank" rel="noopener">Original, en inglés</a> ·
     <a href="https://github.com/braiancerasa/wirely-es/releases/latest" target="_blank" rel="noopener">App de escritorio en español (Windows y Linux)</a></p>
     <p class="hint">Matemática: ${escapeHtml(numpyKind)}</p></div>
@@ -1491,7 +1493,7 @@ let plotMouse = null;
 function graphShown() { return ui.graph && !$("graphPanel").hidden; }
 function setupGraph() {
   const ch = J(app.graph_choices());
-  for (const [id, list] of [["tbox", ch.time], ["vbox", ch.volts]]) {
+  for (const [id, list] of [["tbox", ch.time], ["vbox", ch.volts], ["abox", ch.amps], ["mbox", ch.views]]) {
     const s = $(id);
     list.forEach((name, i) => { const o = document.createElement("option"); o.value = i; o.textContent = name; s.appendChild(o); });
     s.addEventListener("change", drawGraph);
@@ -1519,7 +1521,7 @@ function drawGraph() {
     plot.height = Math.round(r.height * dpr);
   }
   const g = J(app.graph_ops(r.width, r.height, plotMouse ? plotMouse[0] : -1, plotMouse ? plotMouse[1] : -1,
-    +$("tbox").value, +$("vbox").value));
+    +$("tbox").value, +$("vbox").value, +$("mbox").value, +$("abox").value));
   const ctx = plot.getContext("2d");
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, r.width, r.height);

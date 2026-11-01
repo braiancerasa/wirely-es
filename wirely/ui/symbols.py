@@ -502,7 +502,8 @@ DRAW = {
 
 
 # ------------------------------------------------------------------------------------------ r3: chips & logic
-CHANNEL_RGB = {"A": "#e0a800", "B": "#0ea5e9", "C": "#d946ef", "D": "#16a34a"}
+CHANNEL_RGB = {"A": "#e0a800", "B": "#0ea5e9", "C": "#d946ef", "D": "#16a34a",
+               "I1": "#f76707", "I2": "#7048e8", "I3": "#0b7285", "I4": "#c2255c"}
 
 
 def _signal_gen(c):
@@ -744,6 +745,21 @@ def _scope_probe(c):
     p.drawEllipse(QPointF(0, 0), 2.6, 2.6)
 
 
+def _current_probe(c):
+    ch = c.props.get("channel", "I1")
+    col = QColor(CHANNEL_RGB.get(ch, "#f76707"))
+    p = c.p
+    p.setPen(QPen(col, 2.0))
+    p.setBrush(Qt.NoBrush)
+    p.drawArc(QRectF(-7, -7, 14, 14), 40 * 16, 280 * 16)     # pinza abierta sobre el cable
+    p.setPen(Qt.NoPen)
+    p.setBrush(col)
+    p.drawRoundedRect(QRectF(-12, -32, 24, 20), 4, 4)
+    c.upright(0, -22, ch, 11, True, QColor("#ffffff"))
+    p.setBrush(col)
+    p.drawEllipse(QPointF(0, 0), 2.2, 2.2)
+
+
 def _logic_probe(c):
     c.line(0, 0, 0, -10, 1.8)
     lvl = c.props.get("_level")
@@ -762,7 +778,8 @@ DRAW.update({
     "nand": lambda c: _gate_body(c, "nand"), "nor": lambda c: _gate_body(c, "nor"),
     "xor": lambda c: _gate_body(c, "xor"), "schmitt_not": lambda c: _gate_body(c, "schmitt_not"),
     "dff": _dff, "timer555": _timer555, "opamp": _opamp, "counter4017": _counter4017,
-    "decoder4511": _decoder4511, "sevenseg": _sevenseg, "scope_probe": _scope_probe, "logic_probe": _logic_probe,
+    "decoder4511": _decoder4511, "sevenseg": _sevenseg, "scope_probe": _scope_probe,
+    "current_probe": _current_probe, "logic_probe": _logic_probe,
 })
 
 

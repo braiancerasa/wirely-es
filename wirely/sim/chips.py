@@ -1365,7 +1365,7 @@ class SignalGen(Source):
 
 
 class Probe(Device):
-    """Graph probes and logic probes: they only look."""
+    """Graph, current and logic probes: they only look."""
 
     def stamp(self, S, x, ctx):
         pass
@@ -1662,5 +1662,6 @@ FACTORY = {
     "dff": DFF, "counter4017": Counter4017, "decoder4511": Decoder4511,
     "shunt_ref": ShuntRef, "ssr": SolidStateRelay,
     "sr164": ShiftReg164, "sr595": ShiftReg595, "sr165": ShiftReg165, "sr597": ShiftReg597, "mux4051": Mux4051,
-    "sevenseg": SevenSeg, "signal_gen": SignalGen, "scope_probe": Probe, "logic_probe": Probe,
+    "sevenseg": SevenSeg, "signal_gen": SignalGen, "scope_probe": Probe, "current_probe": Probe,
+    "logic_probe": Probe,
 }

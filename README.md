@@ -2,7 +2,8 @@
 
 > **Fork no oficial de [Wirely](https://github.com/wirely-app/wirely-app.github.io).**
 > Wirely es un simulador de circuitos creado por **Richard Willmott**; el programa, el diseño y el código son
-> suyos. Este repositorio traduce la interfaz, los ejemplos y la documentación, al español Argentina, además de que añade algunas funciones extra. no está afiliado al autor
+> suyos. Este repositorio traduce la interfaz, los ejemplos y la documentación al español de Argentina y, además,
+> agrega algunas funciones extra y correcciones. No está afiliado al autor
 > ni es una versión oficial, y se distribuye con la misma licencia **GNU GPL v3**. En la historia de Git están
 > sus commits originales, por eso figura como colaborador del repositorio.
 >
@@ -57,7 +58,9 @@ conocidas.
 - **Lecturas** — un botón muestra el voltaje y la corriente en cada cable y el voltaje, la corriente y la potencia
   de cada componente mientras se ejecuta; haga clic en cualquier cable o componente para fijar solo su lectura; o
   **Copiar lecturas** para pegarlas todas en una planilla de cálculo.
-- **Gráfico y sonda lógica** — hasta cuatro sondas, lecturas de frecuencia, tiempo y voltios por división ajustables.
+- **Gráfico, sondas de voltaje y de corriente y sonda lógica** — hasta cuatro sondas de voltaje (A–D) y cuatro de
+  corriente (I1–I4), lecturas de frecuencia, tiempo, voltios y amperes por división ajustables, y vistas separada o
+  superpuesta.
 - **Chips** — temporizador 555, amplificadores operacionales, comparadores (LM393, LM311), controlador de motor
   L293D, compuertas lógicas, contadores 4017, 4026 y 4060, decodificador 4511, display de 7 segmentos, reguladores
   de voltaje 7805/7809/7812/LM1117 y LM317, registros de desplazamiento 74HC164/165/595/597, conmutador analógico
@@ -183,10 +186,14 @@ alta — la escala está en la esquina) y circulan puntos por ellos para mostrar
 
 ### El gráfico
 
-Coloque **sondas de gráfico** (A–D, en *Medidores y sondas*) sobre los cables y presione Ejecutar — el gráfico se
-abre debajo, como un osciloscopio. Cada sonda muestra su voltaje y frecuencia; ajuste el tiempo y los voltios por
-división, o déjelos en Automático. Pase el mouse sobre el gráfico para leer valores y use **Guardar imagen…** para
-conservarlo. **Ctrl+G** lo muestra u oculta.
+Coloque **sondas de gráfico** (A–D, en *Medidores y sondas*) sobre los cables para ver su voltaje, y **sondas de
+corriente** (I1–I4) sobre un cable para ver la corriente que pasa por él: la sonda se engancha al cable que tiene
+debajo y no altera el circuito. Presione Ejecutar y el gráfico se abre debajo, como un osciloscopio. Cada sonda
+muestra su valor y frecuencia; ajuste el tiempo, los voltios y los amperes por división, o déjelos en Automático.
+Con los dos tipos de sonda puede elegir **Separados** (voltaje arriba y corriente abajo, mitad y mitad) o
+**Superpuestos** (las dos en un solo gráfico, con los voltios a la izquierda y los amperes a la derecha) para
+comparar si una onda se adelanta o se atrasa respecto de la otra. Pase el mouse sobre el gráfico para leer los
+valores y use **Guardar imagen…** para conservarlo. **Ctrl+G** lo muestra u oculta.
 
 | Filtro pasa bajos RC | Convertidor reductor (12 V de entrada, unos 5,7 V de salida) |
 |---|---|

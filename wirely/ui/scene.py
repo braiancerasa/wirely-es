@@ -1019,7 +1019,7 @@ class CircuitScene(QGraphicsScene):
                 d += spacing
 
     # lecturas: lo que mostraría un multímetro, escrito en la hoja
-    NO_READING = {"ground", "note", "scope_probe", "logic_probe", "voltmeter", "ammeter"}
+    NO_READING = {"ground", "note", "scope_probe", "current_probe", "logic_probe", "voltmeter", "ammeter"}
     SOURCES = {"cell", "battery", "dc_supply", "ac_supply", "rail_pos", "signal_gen"}
 
     def _tag(self, p, x, y, text, pinned, anchor, key=None):

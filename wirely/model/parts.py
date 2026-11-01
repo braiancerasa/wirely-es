@@ -294,6 +294,11 @@ _PARTS += [
             (_p("channel", "Canal", "A", kind="choice", choices=("A", "B", "C", "D"), on_label=True),),
             (-12, -32, 24, 34), "Póngala en un cable para representar el voltaje de ese cable en el gráfico durante la ejecución.",
             "oscilloscope scope graph trace plot", short="Sonda de gráfico"),
+    PartDef("current_probe", "Sonda de corriente", "Medidores y sondas", "I", (("1", 0, 0),),
+            (_p("channel", "Canal", "I1", kind="choice", choices=("I1", "I2", "I3", "I4"), on_label=True),),
+            (-12, -32, 24, 42), "Póngala sobre un cable para representar la corriente de ese cable en el gráfico durante "
+            "la ejecución. Se engancha al cable que tiene debajo y no altera el circuito: solo mide.",
+            "current clamp ammeter amps oscilloscope scope graph trace plot", short="Sonda de corriente"),
     PartDef("logic_probe", "Sonda lógica", "Medidores y sondas", "LP", (("1", 0, 0),), (),
             (-14, -40, 28, 42), "Muestra H (alto), L (bajo) o ? en lo que toque.",
             "high low tester", short="Sonda lógica"),

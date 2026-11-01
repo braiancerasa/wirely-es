@@ -50,7 +50,7 @@ class Live:
         self.net_v = {}           # net name -> volts
         self.parts = {}           # component id -> dict of display values
         self.flows = []           # [(a, b, phase, amps)]
-        self.samples = []         # graph probe readings since the last frame: [(t, {channel: volts})]
+        self.samples = []         # graph probe readings since the last frame: [(t, {channel: value})]
         self.vmax = 1.0
         self.t = 0.0
 
@@ -84,7 +84,8 @@ class SimController(QObject):
         self.circuit = circuit
         self.sim = Simulator(circuit)
         self.sim.recording = True
-        self.flow = FlowNetwork(circuit, self.sim.nets)
+        # la misma red que usa el simulador para las sondas de corriente (así no se resuelve dos veces)
+        self.flow = self.sim.flow if self.sim.flow is not None else FlowNetwork(circuit, self.sim.nets)
         self.wire_net = {wid: net.name for net in self.sim.nets for wid in net.wires}
         self._phase.clear()
         self._angle.clear()

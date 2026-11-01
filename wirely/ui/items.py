@@ -14,7 +14,7 @@ from ..model.units import fmt
 from . import symbols as S
 from . import theme
 
-NO_LABEL = {"ground", "rail_pos", "scope_probe", "logic_probe", "note"}
+NO_LABEL = {"ground", "rail_pos", "scope_probe", "current_probe", "logic_probe", "note"}
 LABEL_PX = 10.0
 
 

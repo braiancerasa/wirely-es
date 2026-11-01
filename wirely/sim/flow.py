@@ -27,6 +27,7 @@ class FlowNetwork:
         for w in circuit.wires.values():
             specials.update(w.points)
         self.groups = []     # per net: (points list, edges [(i, j, wire_id)], pins [(cid, pin, i)])
+        self.wire_group = {}  # wire id -> group index (para resolver solo los cables que interesan)
         for net in nets:
             pts, index, edges = [], {}, []
 
@@ -46,14 +47,20 @@ class FlowNetwork:
             pin_nodes = [(cid, pin, idx(pins[(cid, pin)])) for cid, pin in net.pins]
             grounds = [i for cid, _pin, i in pin_nodes if circuit.components[cid].kind == "ground"]
             if edges:
+                g = len(self.groups)
+                for wid in net.wires:
+                    self.wire_group[wid] = g
                 self.groups.append((pts, edges, pin_nodes, grounds))
 
-    def solve(self, pin_current):
+    def solve(self, pin_current, groups=None):
         """pin_current(cid, pin) = current INTO the part at that pin. Returns [((x1,y1),(x2,y2), amps)],
-        amps > 0 meaning conventional current flows from the first point to the second."""
+        amps > 0 meaning conventional current flows from the first point to the second. With `groups`, only
+        those nets are solved (the current probes need just the cables they sit on)."""
         out = []
         memo = self.__dict__.setdefault("_memo", {})
         for g, (pts, edges, pin_nodes, grounds) in enumerate(self.groups):
+            if groups is not None and g not in groups:
+                continue
             n = len(pts)
             inj = np.zeros(n)
             for cid, pin, i in pin_nodes:
@@ -84,3 +91,25 @@ class FlowNetwork:
             memo[g] = (now, res)
             out.extend(res)
         return out
+
+
+def segment_current(flows, seg, pos=None):
+    """Corriente que pasa por el tramo `seg` de un cable, positiva si va del primer punto del cable hacia el
+    segundo. El tramo puede estar partido en varios trozos (uniones, pines): se toma el más cercano a `pos`
+    (o el primero si no se indica)."""
+    a, b = seg
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    best = None
+    for (x1, y1), (x2, y2), amps in flows:
+        if not (on_segment((x1, y1), a, b) and on_segment((x2, y2), a, b)):
+            continue
+        sign = 1.0 if (x2 - x1) * dx + (y2 - y1) * dy >= 0 else -1.0
+        if pos is None:
+            return sign * amps
+        ex, ey = x2 - x1, y2 - y1
+        L = ex * ex + ey * ey
+        t = 0.0 if L == 0 else max(0.0, min(1.0, ((pos[0] - x1) * ex + (pos[1] - y1) * ey) / L))
+        d = (x1 + t * ex - pos[0]) ** 2 + (y1 + t * ey - pos[1]) ** 2
+        if best is None or d < best[0]:
+            best = (d, sign * amps)
+    return best[1] if best else 0.0

@@ -104,6 +104,9 @@ class _Choice:
     def currentIndex(self):
         return self.i
 
+    def setEnabled(self, _on):
+        pass
+
 
 class _Text:
     def __init__(self):
@@ -125,7 +128,9 @@ def make_graph():
     """The desktop graph panel's own logic (traces, scales, drawing), without its widgets."""
     g = GraphPanel.__new__(GraphPanel)          # skip building the desktop widgets
     g.traces, g.t_now, g.vmax_hint = {}, 0.0, 9.0
-    g.tbox, g.vbox, g.chips, g.plot = _Choice(), _Choice(), _Text(), _Nothing()
+    g.settings, g.mode = None, "separated"
+    g.tbox, g.vbox, g.abox, g.mbox = _Choice(), _Choice(), _Choice(), _Choice()
+    g.chips, g.plot = _Text(), _Nothing()
     g.clear()
     return g
 
@@ -648,7 +653,7 @@ class App:
             return ""
         sc.cancel()
         sc.set_mode("select")
-        probes = [c for c in self.circuit.components.values() if c.kind == "scope_probe"]
+        probes = [c for c in self.circuit.components.values() if c.kind in ("scope_probe", "current_probe")]
         self.graph.clear()
         self.graph_on = bool(probes) or (self.graph_on and self.graph_by_hand)
         try:
@@ -850,9 +855,10 @@ class App:
         return json.dumps({"rect": [r.x(), r.y(), r.width(), r.height()], "ops": ops})
 
     # ------------------------------------------------------------------ the graph
-    def graph_ops(self, w, h, mx, my, tb, vb):
+    def graph_ops(self, w, h, mx, my, tb, vb, view=0, ab=0):
         g = self.graph
-        g.tbox.i, g.vbox.i = int(tb), int(vb)
+        g.tbox.i, g.vbox.i, g.abox.i = int(tb), int(vb), int(ab)
+        g.mode = "overlaid" if int(view) == 1 else "separated"
         p = QPainter()
         mouse = QPointF(mx, my) if mx >= 0 else None
         g.paint_plot(p, QRectF(0, 0, w, h), mouse)
@@ -863,7 +869,9 @@ class App:
         self.graph.clear()
 
     def graph_choices(self):
-        return json.dumps({"time": [n for n, _v in TIMEBASES], "volts": [n for n, _v in VOLTS]})
+        from wirely.ui.graph import AMPS, VIEWS
+        return json.dumps({"time": [n for n, _v in TIMEBASES], "volts": [n for n, _v in VOLTS],
+                           "amps": [n for n, _v in AMPS], "views": [n for n, _k in VIEWS]})
 
     def graph_csv(self):
         """The recorded graph probe voltages as a spreadsheet (CSV): one row per time."""
@@ -875,7 +883,7 @@ class App:
             tr = self.graph.traces[ch]
             for t, v in zip(tr.t, tr.v):
                 rows.setdefault(t, {})[ch] = v
-        out = ["tiempo (s)," + ",".join(f"{ch} (V)" for ch in chans)]
+        out = ["tiempo (s)," + ",".join(f"{ch} ({self.graph._unit(ch)})" for ch in chans)]
         for t in sorted(rows):
             out.append(f"{t:.9g}," + ",".join(f"{rows[t][ch]:.6g}" if ch in rows[t] else "" for ch in chans))
         return "\n".join(out)

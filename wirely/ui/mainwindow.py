@@ -118,7 +118,7 @@ class MainWindow(QMainWindow):
         self.split = QSplitter(Qt.Vertical)
         self.split.setHandleWidth(1)
         self.split.addWidget(self.view)
-        self.graph = GraphPanel()
+        self.graph = GraphPanel(settings=self.settings)
         self.graph.closed.connect(lambda: self.show_graph(False))
         self.split.addWidget(self.graph)
         self.split.setStretchFactor(0, 3)
@@ -437,7 +437,7 @@ class MainWindow(QMainWindow):
 
     def _set_circuit(self, circuit, path):
         self.graph.clear()
-        if not any(c.kind == "scope_probe" for c in circuit.components.values()):
+        if not any(c.kind in ("scope_probe", "current_probe") for c in circuit.components.values()):
             self.show_graph(False)
         self.circuit = circuit
         self.scene.set_circuit(circuit)
@@ -670,7 +670,7 @@ class MainWindow(QMainWindow):
         self.scene.cancel()
         self.scene.set_mode("select")
         self.view.clear_toasts()
-        probes = [c for c in self.circuit.components.values() if c.kind == "scope_probe"]
+        probes = [c for c in self.circuit.components.values() if c.kind in ("scope_probe", "current_probe")]
         self.graph.clear()
         self.show_graph(bool(probes) or (self.graph.isVisible() and self.a_graph.isChecked() and
                                          getattr(self, "_graph_by_hand", False)))
@@ -863,8 +863,13 @@ class MainWindow(QMainWindow):
                           f"<p>Versión {__version__}</p>"
                           "<p>Dibuje un circuito, presione Ejecutar, véalo funcionar.<br>"
                           "Libre y de código abierto bajo la GNU GPL v3.</p>"
-                          "<p>Por Richard Willmott, construido con ayuda de Claude.<br>"
-                          "Traducido al español por Braian Cerasa.</p>")
+                          "<p>El Wirely original es de Richard Willmott, construido con ayuda de Claude.</p>"
+                          "<p><b>Esta es una versión no oficial en español (Argentina) y un fork del original:</b> "
+                          "además de traducir la interfaz, los ejemplos y la documentación, agrega funciones que el "
+                          "original no tiene y corrige algunas fallas. No está afiliada al autor ni es una versión "
+                          "oficial.</p>"
+                          "<p>Los cambios de esta versión son de Braian Cerasa.<br>"
+                          "github.com/braiancerasa/wirely-es</p>")
 
     def showEvent(self, e):
         super().showEvent(e)
