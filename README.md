@@ -82,7 +82,7 @@ conocidas.
 
 ## Descarga e instalación
 
-Los instaladores de esta traducción están en las
+Los instaladores de este fork están en las
 [**versiones publicadas**](https://github.com/braiancerasa/wirely-es/releases) — no necesita Python ni nada más.
 La app original, en inglés, se descarga desde el
 [repositorio del autor](https://github.com/wirely-app/wirely-app.github.io/releases/latest).
@@ -107,7 +107,7 @@ La app original, en inglés, se descarga desde el
 ### O úselo en un navegador web (Chromebooks, computadoras de la escuela)
 
 Abra **[braiancerasa.github.io/wirely-es](https://braiancerasa.github.io/wirely-es/)** en Chrome, Edge, Firefox o
-Safari — no hay nada que instalar y no hace falta cuenta. Es el mismo Wirely, traducido: los mismos componentes,
+Safari — no hay nada que instalar y no hace falta cuenta. Es el mismo Wirely, los mismos componentes,
 símbolos, ejemplos y simulador, ejecutándose dentro del navegador (el propio código Python de la app de escritorio,
 ejecutado por [Pyodide](https://pyodide.org)). Sus circuitos permanecen en su computadora — no se sube nada, y el
 sitio no usa cookies ni recopila datos personales. Después de la primera visita funciona sin conexión.
