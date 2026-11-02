@@ -101,6 +101,7 @@ IGNORAR = {
     "rgb colour mixing common cathode led",
     "transformer step down step up mains coil isolation",
     "relay double pole dpdt reversing motor electromagnet two changeover",
+    "current clamp ammeter amps oscilloscope scope graph trace plot",
 }
 
 

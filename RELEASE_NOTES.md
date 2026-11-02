@@ -32,6 +32,8 @@ Novedades
 
 - **Gráfico que se mueve a mano.** Con la simulación en pausa, arrastre el gráfico hacia la izquierda o la derecha para recorrer el tiempo: hacia atrás llega hasta el inicio de la simulación y hacia adelante, solo hasta donde se pausó. Sirve para alinear una onda con otra y comparar mejor su forma. Al reanudar, el gráfico vuelve solo a seguir el trazo en vivo.
 
+- **Fase de la corriente.** La sonda de corriente muestra la corriente instantánea de la rama donde está puesta, con su desfasaje real: en un circuito capacitivo la corriente adelanta al voltaje y en uno inductivo se atrasa, como en un osciloscopio. El desfasaje cambia al modificar la resistencia, el capacitor, el inductor o la frecuencia. El sentido de la sonda se fija solo con la primera corriente que circula, así que la misma rama se ve igual sin importar de qué lado se dibujó el cable.
+
 - **La versión web también.** La sonda de corriente, los selectores, las dos vistas, la simulación destructiva y el desplazamiento manual del gráfico están en la versión del navegador, con el mismo comportamiento que en escritorio.
 
 - **Sonda de tensión.** La pieza que antes se llamaba «sonda de gráfico» ahora es «sonda de tensión», para distinguirla de la sonda de corriente, que también dibuja en el gráfico. Su funcionamiento no cambia.
@@ -42,7 +44,7 @@ Novedades
 
 - **Flechas de los desplegables.** En Windows, los desplegables usan flechas propias, claras u oscuras según el tema, en lugar de la flecha nativa que se veía anticuada.
 
-- **Pruebas.** Se agregaron ocho pruebas para la sonda de corriente y el gráfico, cinco para la simulación destructiva y cinco para el desplazamiento manual del gráfico. La suite completa pasa, incluidas las comparaciones con ngspice en la compilación automática.
+- **Pruebas.** Se agregaron doce pruebas para la sonda de corriente (cuatro de ellas comparan el desfasaje con el voltaje), cinco para la simulación destructiva y cinco para el desplazamiento manual del gráfico. La suite completa pasa, incluidas las comparaciones con ngspice en la compilación automática.
 
 Cómo usarlo
 
@@ -60,6 +62,6 @@ Notas
 
 - La numeración es propia de este fork: el cuarto número es nuestra revisión, así que las versiones nunca se confunden con las del proyecto original (que usa tres números).
 
-- La sonda de corriente, las vistas del gráfico, el selector de amperes, el desplazamiento manual del gráfico, la simulación destructiva, los nombres «sonda de tensión» e «inductor» y las flechas son mejoras de este fork; no están en el proyecto original.
+- La sonda de corriente, las vistas del gráfico, el selector de amperes, el desplazamiento manual del gráfico, la simulación destructiva, los nombres «sonda de tensión» e «inductor», las flechas y la corrección de la fase de la sonda de corriente son mejoras de este fork; no están en el proyecto original.
 
 - El simulador, las piezas y el funcionamiento siguen siendo los de Wirely 1.5.3. La versión 1.5.4 del proyecto original agrega un menú de idiomas (inglés, español, alemán y japonés); este fork no lo incluye porque ya está en español.

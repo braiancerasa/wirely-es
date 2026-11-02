@@ -297,7 +297,9 @@ _PARTS += [
     PartDef("current_probe", "Sonda de corriente", "Medidores y sondas", "I", (("1", 0, 0),),
             (_p("channel", "Canal", "I1", kind="choice", choices=("I1", "I2", "I3", "I4"), on_label=True),),
             (-12, -32, 24, 42), "Póngala sobre un cable para representar la corriente de ese cable en el gráfico durante "
-            "la ejecución. Se engancha al cable que tiene debajo y no altera el circuito: solo mide.",
+            "la ejecución. Se engancha al cable que tiene debajo y no altera el circuito: solo mide. Toma como "
+            "positivo el sentido en que empieza a circular la corriente, así se ve el adelanto o el atraso respecto "
+            "del voltaje como en un osciloscopio.",
             "current clamp ammeter amps oscilloscope scope graph trace plot", short="Sonda de corriente"),
     PartDef("logic_probe", "Sonda lógica", "Medidores y sondas", "LP", (("1", 0, 0),), (),
             (-14, -40, 28, 42), "Muestra H (alto), L (bajo) o ? en lo que toque.",

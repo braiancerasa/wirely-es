@@ -29,6 +29,7 @@ D.FACTORY.update(CH.FACTORY)
 D.FACTORY.update(EX.FACTORY)
 
 GSHUNT = 1e-12
+PROBE_SIGN_MIN = 1e-9     # corriente mínima para fijar el sentido de una sonda de corriente (muy por encima de la fuga)
 
 
 class ConvergenceError(RuntimeError):
@@ -157,6 +158,9 @@ class Simulator:
                 if hook is not None:
                     self.current_probes[d.comp.value("channel")] = hook
         self.flow = FlowNetwork(c, self.nets) if self.current_probes else None
+        # sentido de cada sonda de corriente, fijado con la primera muestra no nula: así el mismo cable
+        # muestra la misma fase sin importar hacia qué lado se dibujó el cable (como una pinza bien puesta)
+        self.probe_sign = {}
         self.recording = False
         self.record = []
         self.speakers = {d.cid: (d.nodes[0], d.nodes[1]) for d in self.devices if d.comp.kind == "speaker"}
@@ -365,7 +369,12 @@ class Simulator:
                           if wid in self.flow.wire_group}
                 flows = self.flow.solve(self._pin_current, groups=groups)
                 for ch, (_wid, seg, pos) in self.current_probes.items():
-                    vals[ch] = segment_current(flows, seg, pos)
+                    raw = segment_current(flows, seg, pos)
+                    sign = self.probe_sign.get(ch)
+                    if sign is None and abs(raw) >= PROBE_SIGN_MIN:
+                        sign = 1.0 if raw > 0 else -1.0
+                        self.probe_sign[ch] = sign
+                    vals[ch] = (1.0 if sign is None else sign) * raw
             self.record.append((self.t, vals))
         was_jump = self._jump
         self._jump = False
