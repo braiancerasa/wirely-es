@@ -39,7 +39,7 @@ class Simulator:
     MAX_ITER = 60
     ABSTOL, RELTOL = 1e-6, 1e-4
 
-    def __init__(self, circuit: Circuit):
+    def __init__(self, circuit: Circuit, destructive: bool = True):
         self.circuit = circuit
         self.ctx = D.Ctx()
         self.t = 0.0
@@ -48,6 +48,8 @@ class Simulator:
         self.h_max = 1e-3
         self.struggling = False
         self._jump = True            # next step must be backward Euler
+        self.destructive = bool(destructive)
+        D.Device.BREAKABLE = self.destructive
         self._build()
 
     # ========================================================================================== netlist
@@ -169,6 +171,37 @@ class Simulator:
             d.event = None
         # parts that give out light: the eye averages it (so PWM dims them, as in real life)
         self.lights = [d for d in self.devices if d.light_now() is not None]
+
+    def set_destructive(self, on: bool):
+        """Whether parts can blow up. Turning it off repairs anything already blown and keeps it intact:
+        parts still heat up and warn, but never break."""
+        self.destructive = bool(on)
+        D.Device.BREAKABLE = self.destructive
+        if not self.destructive:
+            self._repair()
+            self.events.clear()      # ningún mensaje de rotura pendiente
+
+    def _repair(self):
+        """Clear every blown state, including inside composite parts (RGB LEDs, bridges, relays…)."""
+        seen = set()
+
+        def walk(obj):
+            if isinstance(obj, D.Device):
+                if id(obj) in seen:
+                    return
+                seen.add(id(obj))
+                obj._blown = False
+                obj._blow_blocked = False
+                obj._over = 0.0
+                obj.event = None
+                for value in vars(obj).values():
+                    walk(value)
+            elif isinstance(obj, (list, tuple)):
+                for value in obj:
+                    walk(value)
+
+        for d in self.devices:
+            walk(d)
 
     def _hook_wire(self, comp):
         """(cable, tramo, punto) que queda justo debajo de una sonda de corriente, o None si no toca ningún cable.
@@ -316,6 +349,7 @@ class Simulator:
                 self.events.append((d.cid, ev))
                 d.event = None
                 self._jump = True
+            d._blow_blocked = False      # a skipped blow-up must not swallow a later message
             if getattr(d, "changed", False):
                 d.changed = False
                 switched = True

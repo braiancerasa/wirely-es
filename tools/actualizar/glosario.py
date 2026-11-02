@@ -37,7 +37,9 @@ def cargar_reglas():
         patron = re.compile(
             rf"(?<![{LETRAS}]){re.escape(termino)}(?![{LETRAS}])", flags
         )
-        reglas.append((termino, patron, r["reemplazar"]))
+        excepto = [re.compile(rf"(?<![{LETRAS}]){re.escape(frase)}(?![{LETRAS}])", flags)
+                   for frase in r.get("excepto", [])]
+        reglas.append((termino, patron, r["reemplazar"], excepto))
     return reglas
 
 
@@ -67,8 +69,19 @@ def _reemplazo(texto, reemplazo):
 
 def aplicar_texto(texto, reglas):
     cambios = []
-    for termino, patron, reemplazo in reglas:
-        texto, n = patron.subn(lambda m, r=reemplazo: _reemplazo(m.group(0), r), texto)
+    for termino, patron, reemplazo, excepto in reglas:
+        # frases que quedan como están aunque contengan el término (p. ej. «sonda de tensión»)
+        protegidos = [(m.start(), m.end()) for p in excepto for m in p.finditer(texto)]
+        n = 0
+
+        def sub(m):
+            nonlocal n
+            if any(a <= m.start() and m.end() <= b for a, b in protegidos):
+                return m.group(0)
+            n += 1
+            return _reemplazo(m.group(0), reemplazo)
+
+        texto = patron.sub(sub, texto)
         if n:
             cambios.append((termino, reemplazo, n))
     return texto, cambios

@@ -17,7 +17,7 @@
     { "buscar": "de baja tensión", "reemplazar": "de bajo voltaje" },
     { "buscar": "caída de tensión", "reemplazar": "caída de voltaje" },
     { "buscar": "tensiones", "reemplazar": "voltajes" },
-    { "buscar": "tensión", "reemplazar": "voltaje" },
+    { "buscar": "tensión", "reemplazar": "voltaje", "excepto": ["sonda de tensión", "sondas de tensión"] },
 
     { "buscar": "CA", "reemplazar": "AC", "ignorar_mayusculas": false },
     { "buscar": "CC", "reemplazar": "DC", "ignorar_mayusculas": false },

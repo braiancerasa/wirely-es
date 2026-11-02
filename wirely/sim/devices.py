@@ -143,19 +143,45 @@ class Device:
     reactive = False
     stores_energy = False    # V×I is energy going into / out of storage, not heat: never derive power from it
     main_pins = None         # (first, second) pin indices whose voltage and current the readout shows; None = pins 0, 1
+    BREAKABLE = True         # False: parts heat up and warn, but never blow up (Simular → Simulación destructiva)
 
     def __init__(self, comp, nodes):
         self.comp = comp
         self.cid = comp.id if comp is not None else ""
         self.nodes = list(nodes)
         self.internal = []
-        self.blown = False
+        self._blown = False
+        self._blow_blocked = False   # a blow-up was skipped, so drop the message that goes with it
         self.warn = None         # short text while something is wrong (e.g. "too much current")
         self.i_pins = [0.0] * len(nodes)   # current INTO the device at each pin, after the last step
         self.power = 0.0
         self._over = 0.0         # how long it has been overloaded (s)
-        self.event = None        # message for the user when something happens (an LED pops …)
+        self._event = None       # message for the user when something happens (an LED pops …)
         self.update_params()
+
+    @property
+    def blown(self):
+        """Whether it is permanently broken. With BREAKABLE off, a part never breaks: only warn."""
+        return self._blown
+
+    @blown.setter
+    def blown(self, value):
+        if value and not Device.BREAKABLE:
+            self._blow_blocked = True      # the "se quemó" message follows; drop it too
+            return
+        self._blown = bool(value)
+
+    @property
+    def event(self):
+        return self._event
+
+    @event.setter
+    def event(self, value):
+        if value is not None and self._blow_blocked:
+            self._blow_blocked = False
+            return
+        self._event = value
+
 
     def update_params(self):
         pass

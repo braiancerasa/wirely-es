@@ -83,6 +83,7 @@ class MainWindow(QMainWindow):
         self._sound_availability(self.sound.available())
         self.simc.sound = self.sound
         self.simc.set_flow_follow(self.a_flow_follow.isChecked())
+        self.simc.set_destructive(self.a_destructive.isChecked())
         self.scene.attach_sim(self.simc)
         self.scene.show_volts = self.a_volts.isChecked()
         self.scene.show_flow = self.a_flow.isChecked()
@@ -219,10 +220,14 @@ class MainWindow(QMainWindow):
                          "sonido durante la ejecución", checkable=True)
         self.a_sound.setChecked(self.settings.value("sound", "true") == "true")
         self.a_graph = A("Gráfico", self._graph_toggled, "Ctrl+G", "graph",
-                         "Mostrar el gráfico de los voltajes en las sondas de gráfico", checkable=True)
+                         "Mostrar el gráfico de los voltajes en las sondas de tensión", checkable=True)
+        self.a_destructive = A("Simulación destructiva", self._toggle_destructive, None, None,
+                               "Los componentes se calientan y se queman si los sobrecarga. Desmárquelo para que nada se "
+                               "rompa: sirve para mirar corrientes, flujos y gráficos sin roturas", checkable=True)
         self.a_volts.setChecked(self.settings.value("volts", "true") == "true")
         self.a_flow.setChecked(self.settings.value("flow", "true") == "true")
         self.a_readings.setChecked(self.settings.value("readings", "false") == "true")
+        self.a_destructive.setChecked(self.settings.value("destructive", "true") == "true")
 
     def _tool(self, action, text_beside=False):
         b = QToolButton()
@@ -263,7 +268,7 @@ class MainWindow(QMainWindow):
                       self.a_delete, self.a_select_all, None, self.a_rotate, self.a_rotate_ccw, self.a_flip,
                       None, self.a_props]),
             ("Simular", [self.a_play, self.a_pause, self.a_stop, None, self.a_volts, self.a_flow, self.a_flow_follow,
-                          self.a_readings, self.a_copy_readings, self.a_graph, self.a_sound]),
+                          self.a_readings, self.a_copy_readings, self.a_graph, self.a_sound, self.a_destructive]),
             ("Ver", [self.a_zoom_in, self.a_zoom_out, self.a_fit, None, self.a_grid, self.a_dark, self.a_us]),
             ("Ayuda", [self.a_help, self.a_about]),
         ):
@@ -782,6 +787,12 @@ class MainWindow(QMainWindow):
         on = self.a_flow_follow.isChecked()
         self.settings.setValue("flow_follow", "true" if on else "false")
         self.simc.set_flow_follow(on)
+
+    def _toggle_destructive(self):
+        """Los componentes se pueden quemar, o son indestructibles (solo se calientan y avisan)."""
+        on = self.a_destructive.isChecked()
+        self.settings.setValue("destructive", "true" if on else "false")
+        self.simc.set_destructive(on)
 
     def edit_selected(self):
         comps = self.scene.selected_components()

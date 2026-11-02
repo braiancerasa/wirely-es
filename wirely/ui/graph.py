@@ -22,7 +22,7 @@ VIEWS = [("Separados", "separated"), ("Superpuestos", "overlaid")]
 NICE = [1e-5, 2e-5, 5e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 2e-2, 5e-2, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0]
 MAX_POINTS = 400_000
 DIVS_X, DIVS_Y = 10, 8
-HINT = ("Coloque una sonda de gráfico o de corriente (Medidores y sondas) en un cable, "
+HINT = ("Coloque una sonda de tensión o de corriente (Medidores y sondas) en un cable, "
         "luego presione Ejecutar.")
 
 
@@ -286,7 +286,7 @@ class GraphPanel(QWidget):
             area = rect.adjusted(48, 10, -12, -22)
             self._grid(p, rect, area, t0, t1)
             p.setPen(QColor(theme.TEXT_MUTED))
-            p.drawText(area, Qt.AlignCenter, "Aún no hay señales — coloque una sonda de gráfico o de corriente "
+            p.drawText(area, Qt.AlignCenter, "Aún no hay señales — coloque una sonda de tensión o de corriente "
                                              "en un cable y presione Ejecutar.")
             return
         volts, amps = self._chans("V"), self._chans("A")

@@ -57,7 +57,7 @@ class PartDef:
 CATEGORIES = [
     "Fuentes de alimentación",
     "Resistencias",
-    "Condensadores y bobinas",
+    "Condensadores e inductores",
     "Interruptores",
     "Sensores de entrada",
     "Diodos y LEDs",
@@ -119,10 +119,10 @@ _PARTS = [
             (-30, -8, 60, 16), "Se funde y abre el circuito si la corriente es demasiado alta.", "protection"),
 
     # ---------------------------------------------------------------- condensadores
-    PartDef("capacitor", "Condensador", "Condensadores y bobinas", "C", (("1", -20, 0), ("2", 20, 0)),
+    PartDef("capacitor", "Condensador", "Condensadores e inductores", "C", (("1", -20, 0), ("2", 20, 0)),
             (_p("capacitance", "Capacitancia", 100e-9, "F", on_label=True, min=1e-15),),
             (-20, -15, 40, 30), "Un condensador no polarizado (cerámico / de película).", "ceramic film"),
-    PartDef("electrolytic", "Condensador electrolítico", "Condensadores y bobinas", "C", (("+", -20, 0), ("-", 20, 0)),
+    PartDef("electrolytic", "Condensador electrolítico", "Condensadores e inductores", "C", (("+", -20, 0), ("-", 20, 0)),
             (_p("capacitance", "Capacitancia", 100e-6, "F", on_label=True, min=1e-15),
              _p("max_voltage", "Voltaje nominal", 25.0, "V", min=0)),
             (-20, -15, 40, 30), "Un condensador polarizado para valores grandes. ¡Cuidado con el lado +!", "polarised", short="Electrolítico"),
@@ -290,10 +290,10 @@ _PARTS += [
             (-30, -50, 60, 100), "Pantalla de cátodo común con resistencias incorporadas: un segmento se enciende cuando "
             "su pin está en alto.", "seven segment led digit", short="7 segmentos"),
 
-    PartDef("scope_probe", "Sonda de gráfico", "Medidores y sondas", "P", (("1", 0, 0),),
+    PartDef("scope_probe", "Sonda de tensión", "Medidores y sondas", "P", (("1", 0, 0),),
             (_p("channel", "Canal", "A", kind="choice", choices=("A", "B", "C", "D"), on_label=True),),
             (-12, -32, 24, 34), "Póngala en un cable para representar el voltaje de ese cable en el gráfico durante la ejecución.",
-            "oscilloscope scope graph trace plot", short="Sonda de gráfico"),
+            "oscilloscope scope graph trace plot", short="Sonda de tensión"),
     PartDef("current_probe", "Sonda de corriente", "Medidores y sondas", "I", (("1", 0, 0),),
             (_p("channel", "Canal", "I1", kind="choice", choices=("I1", "I2", "I3", "I4"), on_label=True),),
             (-12, -32, 24, 42), "Póngala sobre un cable para representar la corriente de ese cable en el gráfico durante "
@@ -307,9 +307,9 @@ _PARTS += [
 
 # ------------------------------------------------------------------------------------------------ componentes r4
 _PARTS += [
-    PartDef("inductor", "Bobina", "Condensadores y bobinas", "L", TWO,
+    PartDef("inductor", "Inductor", "Condensadores e inductores", "L", TWO,
             (_p("inductance", "Inductancia", 10e-3, "H", on_label=True, min=1e-9),),
-            (-30, -10, 60, 18), "Una bobina: se opone a los cambios de corriente (almacena energía en un campo magnético).",
+            (-30, -10, 60, 18), "Un inductor: se opone a los cambios de corriente (almacena energía en un campo magnético).",
             "coil choke"),
     PartDef("relay", "Relé", "Interruptores", "RL",
             (("C1", -20, -30), ("C2", -20, 30), ("COM", 20, 30), ("NC", 10, -30), ("NO", 30, -30)),

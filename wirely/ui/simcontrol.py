@@ -65,6 +65,7 @@ class SimController(QObject):
         self.state = "stopped"
         self.sim = None
         self.speed = 1.0
+        self.destructive = True     # los componentes se pueden quemar (Simular → Simulación destructiva)
         self.flow_speed = 1.0       # multiplicador de la animación del flujo (no toca el circuito)
         self.flow_follow = False    # si es True, el flujo sigue la velocidad de simulación
         D.Device.eye_window = 0.066
@@ -82,7 +83,7 @@ class SimController(QObject):
     # ------------------------------------------------------------------ control
     def start(self, circuit):
         self.circuit = circuit
-        self.sim = Simulator(circuit)
+        self.sim = Simulator(circuit, destructive=self.destructive)
         self.sim.recording = True
         # la misma red que usa el simulador para las sondas de corriente (así no se resuelve dos veces)
         self.flow = self.sim.flow if self.sim.flow is not None else FlowNetwork(circuit, self.sim.nets)
@@ -142,6 +143,16 @@ class SimController(QObject):
     def set_flow_follow(self, on: bool = True):
         """Que los puntos sigan la velocidad de simulación: en cámara lenta el flujo también se frena."""
         self.flow_follow = bool(on)
+
+    def set_destructive(self, on: bool = True):
+        """Si los componentes pueden quemarse. Al desactivarlo, lo que ya estaba roto se repara."""
+        self.destructive = bool(on)
+        if self.sim is not None:
+            self.sim.set_destructive(self.destructive)
+            if self.state == "paused":          # mostrar el efecto enseguida
+                self.sim.run_until(self.sim.t + 1e-4)
+                self._compute_frame(0.0)
+            self.frame.emit()
 
     def flow_factor(self) -> float:
         """Multiplicador que se aplica a la velocidad de los puntos en este momento."""

@@ -704,6 +704,11 @@ const ACTIONS = {
   stop: () => { app.stop(); afterRunChange(); },
   pause: () => { app.action("pause"); afterRunChange(); },
   graph: () => { app.action("graph"); refreshUI(); drawGraphSoon(); },
+  destructive: () => {
+    const on = !ui.destructive;
+    app.set_destructive(on);
+    try { localStorage.setItem("wirely-destructive", on ? "true" : "false"); } catch (e) { /* storage off */ }
+  },
 };
 
 function doAction(name) {
@@ -849,6 +854,7 @@ const MENUS = {
     [check(ui.flow_follow) + "El flujo sigue la velocidad de simulación", "flow_follow", ""],
     [check(ui.readings) + "Lecturas", "readings", ""], ["Copiar lecturas", "copy_readings", "", ui.sim !== "stopped"],
     [check(ui.graph) + "Gráfico", "graph", "Ctrl+G"], [check(ui.sound) + "Sonido", "sound", ""],
+    [check(ui.destructive) + "Simulación destructiva", "destructive", ""],
   ],
   view: () => [
     ["Acercar", "zoom_in", "+"], ["Alejar", "zoom_out", "−"], ["Ajustar zoom", "zoom_fit", "Ctrl+0"], null,
@@ -1503,7 +1509,7 @@ function setupGraph() {
   $("graphPic").addEventListener("click", () => plot.toBlob((b) => download(b, "graph.png"), "image/png"));
   $("graphCsv").addEventListener("click", () => {
     const csv = app.graph_csv();
-    if (!csv) { toast("Todavía no hay lecturas — coloque una sonda de gráfico sobre un cable y presione Ejecutar.", "info"); return; }
+    if (!csv) { toast("Todavía no hay lecturas — coloque una sonda de tensión sobre un cable y presione Ejecutar.", "info"); return; }
     download(new Blob([csv], { type: "text/csv" }), "lecturas del gráfico.csv");
   });
   plot.addEventListener("pointermove", (e) => { const r = plot.getBoundingClientRect(); plotMouse = [e.clientX - r.left, e.clientY - r.top]; drawGraph(); });
@@ -1625,6 +1631,7 @@ async function setupUI() {
   applyColours(J(app.set_theme(mode)));
   document.documentElement.dataset.theme = mode;
   try { ui.us = app.set_symbols(localStorage.getItem("wirely-symbols") || "uk") === "us"; } catch (e) { /* storage off */ }
+  try { if (localStorage.getItem("wirely-destructive") === "false") app.set_destructive(false); } catch (e) { /* storage off */ }
   setupToolbar();
   setupGallery();
   setupGraph();

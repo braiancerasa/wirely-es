@@ -465,6 +465,8 @@ class App:
             return sc.readings_text()
         elif name == "sound":
             self.sound_on = not self.sound_on
+        elif name == "destructive":
+            self.simc.set_destructive(not self.simc.destructive)
         elif name == "graph":
             self.graph_on = not self.graph_on
             self.graph_by_hand = self.graph_on
@@ -496,6 +498,7 @@ class App:
             "undo": self.hi > 0 and not running, "redo": self.hi < len(self.history) - 1 and not running,
             "paste": bool(self.clip) and not running, "volts": sc.show_volts, "flow": sc.show_flow, "readings": sc.show_readings,
             "flow_follow": self.simc.flow_follow,
+            "destructive": self.simc.destructive,
             "sound": self.sound_on, "graph": self.graph_on, "grid": sc.show_grid, "dark": theme.MODE == "dark", "us": S.STYLE == "us",
             "dirty": self.is_dirty(), "name": self.name, "empty": self.circuit.is_empty(),
             "counts": f"{n} componente{'s' * (n != 1)} · {w} cable{'s' * (w != 1)}",
@@ -681,6 +684,10 @@ class App:
     def set_flow_follow(self, on=True):
         """Que los puntos sigan la velocidad de simulación (cámara lenta)."""
         self.simc.set_flow_follow(bool(on))
+
+    def set_destructive(self, on=True):
+        """Si los componentes se pueden quemar (Simular → Simulación destructiva)."""
+        self.simc.set_destructive(bool(on))
 
     def flow_speeds(self):
         return json.dumps(SC.FLOW_SPEEDS)

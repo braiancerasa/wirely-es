@@ -137,7 +137,7 @@ La versión web es un poco más lenta que la app de escritorio y no puede export
 |---|---|
 | ![](docs/images/motor.gif) | ![](docs/images/pop.gif) |
 
-![Un intermitente con 555 con sondas de gráfico en la salida y en el condensador de temporización](docs/images/graph.gif)
+![Un intermitente con 555 con sondas de tensión en la salida y en el condensador de temporización](docs/images/graph.gif)
 
 ## Cómo funciona
 
@@ -186,7 +186,7 @@ alta — la escala está en la esquina) y circulan puntos por ellos para mostrar
 
 ### El gráfico
 
-Coloque **sondas de gráfico** (A–D, en *Medidores y sondas*) sobre los cables para ver su voltaje, y **sondas de
+Coloque **sondas de tensión** (A–D, en *Medidores y sondas*) sobre los cables para ver su voltaje, y **sondas de
 corriente** (I1–I4) sobre un cable para ver la corriente que pasa por él: la sonda se engancha al cable que tiene
 debajo y no altera el circuito. Presione Ejecutar y el gráfico se abre debajo, como un osciloscopio. Cada sonda
 muestra su valor y frecuencia; ajuste el tiempo, los voltios y los amperes por división, o déjelos en Automático.
