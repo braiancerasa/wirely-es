@@ -120,6 +120,9 @@ class _Nothing:
     def update(self):
         pass
 
+    def refresh_cursor(self):
+        pass
+
     def isVisible(self):
         return True
 
@@ -128,6 +131,7 @@ def make_graph():
     """The desktop graph panel's own logic (traces, scales, drawing), without its widgets."""
     g = GraphPanel.__new__(GraphPanel)          # skip building the desktop widgets
     g.traces, g.t_now, g.vmax_hint = {}, 0.0, 9.0
+    g.pan, g.following = 0.0, True
     g.settings, g.mode = None, "separated"
     g.tbox, g.vbox, g.abox, g.mbox = _Choice(), _Choice(), _Choice(), _Choice()
     g.chips, g.plot = _Text(), _Nothing()
@@ -211,6 +215,7 @@ class App:
         self.toasts.append([text, "error" if self.simc.is_broken(cid) else "warn"])
 
     def _on_sim_state(self, state):
+        self.graph.set_follow(state == "running")
         if state == "stopped":
             # switch positions and slider settings changed while running are kept, without an undo step
             self.history[self.hi] = self.circuit.to_dict()
@@ -870,7 +875,11 @@ class App:
         mouse = QPointF(mx, my) if mx >= 0 else None
         g.paint_plot(p, QRectF(0, 0, w, h), mouse)
         g._update_chips()
-        return json.dumps({"ops": p.ops, "chips": g.chips.text})
+        return json.dumps({"ops": p.ops, "chips": g.chips.text, "pan": g.can_pan()})
+
+    def graph_pan(self, dx, width):
+        """Arrastre del gráfico en pausa: dx píxeles hacia la derecha muestran tiempos anteriores."""
+        self.graph.pan_by(float(dx), float(width))
 
     def graph_clear(self):
         self.graph.clear()

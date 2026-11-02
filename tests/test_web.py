@@ -128,6 +128,26 @@ def test_flow_speed_control_is_exposed_to_the_page():
     assert state is True
 
 
+def test_the_web_graph_can_be_panned_by_hand_when_paused():
+    out = run_web("""
+        import json, wirely_web
+        app = wirely_web.App()
+        app.graph.tbox.i = 4                       # 100 ms por cuadro: la ventana muestra 1 s
+        app.graph.add_samples([(i * 0.01, {"A": 1.0}) for i in range(201)], 2.0)
+        app.graph.set_follow(False)                 # en pausa
+        before = app.graph.pan
+        app.graph_pan(320, 640)                     # medio gráfico hacia la derecha: medio segundo atrás
+        after = app.graph.pan
+        can = json.loads(app.graph_ops(640, 320, -1, -1, 4, 0, 0, 0))["pan"]
+        app.graph.set_follow(True)                  # al reanudar
+        print(json.dumps([before, after, can, app.graph.pan]))
+    """)
+    before, after, can, at_end = json.loads(out.strip().splitlines()[-1])
+    assert before == 0 and after == 0.5
+    assert can is True
+    assert at_end == 0
+
+
 def test_fallback_numpy_solves_like_numpy():
     spec = importlib.util.spec_from_file_location("numpy_lite", os.path.join(FALLBACK, "numpy", "__init__.py"))
     lite = importlib.util.module_from_spec(spec)

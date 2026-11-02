@@ -1,4 +1,4 @@
-**Wirely ES 1.5.4.3:** sonda de corriente, gráfico con voltaje y corriente, y simulación destructiva.
+**Wirely ES 1.5.4.3:** sonda de corriente, gráfico con voltaje y corriente que se mueve a mano, y simulación destructiva.
 
 _Wirely es un simulador de circuitos creado por Richard Willmott. Esta es una versión no oficial en español (Argentina) y un fork del proyecto original: además de la traducción, agrega funciones y correcciones propias. No está afiliada al autor ni es una versión oficial. Todo el crédito del programa, el diseño y el código original corresponde a su autor._
 
@@ -30,7 +30,9 @@ Novedades
 
 - **Selector de amperes.** Al lado de «Voltios» hay un selector «Amperes» con escala automática o 1 mA, 10 mA, 100 mA y 1 A por división. La vista, el tiempo y las escalas se recuerdan entre sesiones. Si solo hay sondas de un tipo, el panel queda como antes.
 
-- **La versión web también.** La sonda de corriente, los selectores, las dos vistas y la simulación destructiva están en la versión del navegador, con el mismo comportamiento que en escritorio.
+- **Gráfico que se mueve a mano.** Con la simulación en pausa, arrastre el gráfico hacia la izquierda o la derecha para recorrer el tiempo: hacia atrás llega hasta el inicio de la simulación y hacia adelante, solo hasta donde se pausó. Sirve para alinear una onda con otra y comparar mejor su forma. Al reanudar, el gráfico vuelve solo a seguir el trazo en vivo.
+
+- **La versión web también.** La sonda de corriente, los selectores, las dos vistas, la simulación destructiva y el desplazamiento manual del gráfico están en la versión del navegador, con el mismo comportamiento que en escritorio.
 
 - **Sonda de tensión.** La pieza que antes se llamaba «sonda de gráfico» ahora es «sonda de tensión», para distinguirla de la sonda de corriente, que también dibuja en el gráfico. Su funcionamiento no cambia.
 
@@ -40,13 +42,15 @@ Novedades
 
 - **Flechas de los desplegables.** En Windows, los desplegables usan flechas propias, claras u oscuras según el tema, en lugar de la flecha nativa que se veía anticuada.
 
-- **Pruebas.** Se agregaron ocho pruebas para la sonda de corriente y el gráfico, y cinco para la simulación destructiva. La suite completa pasa, incluidas las comparaciones con ngspice en la compilación automática.
+- **Pruebas.** Se agregaron ocho pruebas para la sonda de corriente y el gráfico, cinco para la simulación destructiva y cinco para el desplazamiento manual del gráfico. La suite completa pasa, incluidas las comparaciones con ngspice en la compilación automática.
 
 Cómo usarlo
 
 - Coloque una **sonda de corriente** sobre el cable que quiere medir, elija su canal (I1–I4) y presione Ejecutar. El gráfico se abre solo.
 
 - Para ver las dos señales juntas, elija **Superpuestos**; para compararlas por separado, **Separados**.
+
+- Para comparar dos ondas con más detalle, pause la simulación y arrastre el gráfico: se mueve por el tiempo hasta el inicio de la simulación. Al reanudar, vuelve solo a seguir el trazo en vivo.
 
 - La sonda no corta el cable ni agrega una resistencia: el circuito funciona igual que sin ella.
 
@@ -56,6 +60,6 @@ Notas
 
 - La numeración es propia de este fork: el cuarto número es nuestra revisión, así que las versiones nunca se confunden con las del proyecto original (que usa tres números).
 
-- La sonda de corriente, las vistas del gráfico, el selector de amperes, la simulación destructiva, los nombres «sonda de tensión» e «inductor» y las flechas son mejoras de este fork; no están en el proyecto original.
+- La sonda de corriente, las vistas del gráfico, el selector de amperes, el desplazamiento manual del gráfico, la simulación destructiva, los nombres «sonda de tensión» e «inductor» y las flechas son mejoras de este fork; no están en el proyecto original.
 
 - El simulador, las piezas y el funcionamiento siguen siendo los de Wirely 1.5.3. La versión 1.5.4 del proyecto original agrega un menú de idiomas (inglés, español, alemán y japonés); este fork no lo incluye porque ya está en español.

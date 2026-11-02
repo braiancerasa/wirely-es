@@ -694,6 +694,7 @@ class MainWindow(QMainWindow):
 
     def _on_sim_state(self, state):
         running = state == "running"
+        self.graph.set_follow(running)
         noisy = any(c.kind in ("buzzer", "speaker", "motor", "relay", "relay_dpdt", "solenoid")
                     for c in self.circuit.components.values())
         if running and noisy:

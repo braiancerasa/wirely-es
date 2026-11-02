@@ -49,15 +49,51 @@ class Plot(QWidget):
         self.panel = panel
         self.setMinimumHeight(150)
         self.setMouseTracking(True)
+        self.setToolTip("Arrastre el gráfico para moverse por el tiempo mientras la simulación está en pausa")
         self._mouse = None
+        self._drag = None       # x del último movimiento mientras se arrastra para mover el gráfico
+
+    def refresh_cursor(self):
+        if self._drag is not None:
+            self.setCursor(Qt.ClosedHandCursor)
+        elif self.panel.can_pan():
+            self.setCursor(Qt.OpenHandCursor)
+        else:
+            self.unsetCursor()
 
     def leaveEvent(self, e):
         self._mouse = None
+        self.refresh_cursor()
         self.update()
 
+    def mousePressEvent(self, e):
+        if e.button() == Qt.LeftButton and self.panel.can_pan():
+            self._drag = e.position().x()
+            self._mouse = None
+            self.refresh_cursor()
+            e.accept()
+            return
+        super().mousePressEvent(e)
+
     def mouseMoveEvent(self, e):
-        self._mouse = e.position()
+        pos = e.position()
+        if self._drag is not None:
+            dx = pos.x() - self._drag
+            self._drag = pos.x()
+            self.panel.pan_by(dx, self.width())
+            self._mouse = None
+        else:
+            self._mouse = pos
+            self.refresh_cursor()
         self.update()
+
+    def mouseReleaseEvent(self, e):
+        if self._drag is not None and e.button() == Qt.LeftButton:
+            self._drag = None
+            self.refresh_cursor()
+            e.accept()
+            return
+        super().mouseReleaseEvent(e)
 
     def paintEvent(self, _e):
         p = QPainter(self)
@@ -76,6 +112,8 @@ class GraphPanel(QWidget):
         self.settings = settings
         self.traces: dict[str, Trace] = {}
         self.t_now = 0.0
+        self.pan = 0.0              # segundos que la vista está corrida hacia atrás (solo en pausa)
+        self.following = True       # mientras ejecuta, el gráfico sigue el trazo en vivo
         self.vmax_hint = 9.0
         self.mode = "separated"
         v = QVBoxLayout(self)
@@ -177,8 +215,34 @@ class GraphPanel(QWidget):
     def clear(self):
         self.traces = {}
         self.t_now = 0.0
+        self.pan = 0.0
         self.chips.setText(HINT)
         self._sync_selectors()
+        self.plot.update()
+
+    def set_follow(self, on: bool):
+        """Con la simulación en marcha el gráfico sigue el trazo en vivo; en pausa se puede arrastrar."""
+        self.following = bool(on)
+        if self.following:
+            self.pan = 0.0          # al reanudar vuelve a donde estaba para seguir dibujando
+        self.plot.refresh_cursor()
+        self.plot.update()
+
+    def can_pan(self):
+        """Se puede mover a mano solo cuando no está dibujando en vivo y hay algo para mirar."""
+        return not self.following and self.has_data()
+
+    def _max_pan(self, span=None):
+        """Cuánto se puede retroceder: hasta el inicio de la simulación (el borde izquierdo llega a 0)."""
+        span = span if span is not None else self.timebase() * DIVS_X
+        return max(0.0, max(self.t_now, span) - span)
+
+    def pan_by(self, dx, width):
+        """Mueve la vista dx píxeles: a la derecha se ven tiempos anteriores, a la izquierda, posteriores."""
+        if not self.can_pan() or width <= 0:
+            return
+        span = self.timebase() * DIVS_X
+        self.pan = min(max(0.0, self.pan + dx / width * span), self._max_pan(span))
         self.plot.update()
 
     def add_samples(self, samples, t_now):
@@ -280,8 +344,10 @@ class GraphPanel(QWidget):
         f.setPixelSize(10)
         p.setFont(f)
         tdiv = self.timebase()
-        t1 = max(self.t_now, tdiv * DIVS_X)
-        t0 = t1 - tdiv * DIVS_X
+        span = tdiv * DIVS_X
+        self.pan = min(max(0.0, self.pan), self._max_pan(span))
+        t1 = max(self.t_now, span) - self.pan
+        t0 = t1 - span
         if not self.traces:
             area = rect.adjusted(48, 10, -12, -22)
             self._grid(p, rect, area, t0, t1)

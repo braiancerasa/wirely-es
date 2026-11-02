@@ -1496,6 +1496,7 @@ async function exportPicture(toClipboard) {
 // ============================================================================================ the graph
 const plot = $("plot");
 let plotMouse = null;
+let plotCanPan = false, plotDrag = null;
 function graphShown() { return ui.graph && !$("graphPanel").hidden; }
 function setupGraph() {
   const ch = J(app.graph_choices());
@@ -1512,8 +1513,37 @@ function setupGraph() {
     if (!csv) { toast("Todavía no hay lecturas — coloque una sonda de tensión sobre un cable y presione Ejecutar.", "info"); return; }
     download(new Blob([csv], { type: "text/csv" }), "lecturas del gráfico.csv");
   });
-  plot.addEventListener("pointermove", (e) => { const r = plot.getBoundingClientRect(); plotMouse = [e.clientX - r.left, e.clientY - r.top]; drawGraph(); });
-  plot.addEventListener("pointerleave", () => { plotMouse = null; drawGraph(); });
+  // en pausa, arrastrar el gráfico lo mueve por el tiempo (en marcha sigue el trazo en vivo)
+  plot.title = "Arrastre el gráfico para moverse por el tiempo mientras la simulación está en pausa";
+  plot.style.touchAction = "none";
+  plot.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 || !plotCanPan) return;
+    plotDrag = { x: e.clientX, id: e.pointerId };
+    plotMouse = null;
+    try { plot.setPointerCapture(e.pointerId); } catch (err) { /* sin captura */ }
+    plot.style.cursor = "grabbing";
+    e.preventDefault();
+    drawGraph();
+  });
+  plot.addEventListener("pointermove", (e) => {
+    const r = plot.getBoundingClientRect();
+    if (plotDrag) {
+      app.graph_pan(e.clientX - plotDrag.x, r.width);
+      plotDrag.x = e.clientX;
+    } else {
+      plotMouse = [e.clientX - r.left, e.clientY - r.top];
+    }
+    drawGraph();
+  });
+  const endPlotDrag = () => {
+    if (!plotDrag) return;
+    try { plot.releasePointerCapture(plotDrag.id); } catch (err) { /* ya la había soltado */ }
+    plotDrag = null;
+    drawGraph();
+  };
+  plot.addEventListener("pointerup", endPlotDrag);
+  plot.addEventListener("pointercancel", endPlotDrag);
+  plot.addEventListener("pointerleave", () => { if (!plotDrag) { plotMouse = null; drawGraph(); } });
 }
 let graphTimer = null;
 function drawGraphSoon() { clearTimeout(graphTimer); graphTimer = setTimeout(drawGraph, 30); }
@@ -1528,6 +1558,8 @@ function drawGraph() {
   }
   const g = J(app.graph_ops(r.width, r.height, plotMouse ? plotMouse[0] : -1, plotMouse ? plotMouse[1] : -1,
     +$("tbox").value, +$("vbox").value, +$("mbox").value, +$("abox").value));
+  plotCanPan = !!g.pan;
+  plot.style.cursor = plotDrag ? "grabbing" : (plotCanPan ? "grab" : "");
   const ctx = plot.getContext("2d");
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, r.width, r.height);
