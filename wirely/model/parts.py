@@ -215,7 +215,8 @@ _PARTS += [
              _p("offset", "Desplazamiento", 0.0, "V", min=-1000, max=1000),
              _p("duty", "Ciclo de trabajo (cuadrada)", 50.0, "%", min=1, max=99,
                 help="Qué parte de cada ciclo pasa en alto una onda cuadrada — para PWM")),
-            (-30, -20, 60, 40), "Genera ondas cuadradas, senoidales o triangulares — ideal con el gráfico.",
+            (-30, -20, 60, 40), "Genera ondas cuadradas, senoidales o triangulares — ideal con el gráfico. El "
+            "voltaje sale por el polo +, en cualquier orientación.",
             "function generator clock pulse square wave", short="Generador de señal"),
 
     PartDef("xtal_clock", "Reloj de cristal", "Fuentes de alimentación", "X", (("OUT", 40, 0),),

@@ -101,9 +101,9 @@ class Simulator:
                         parent[ra] = rb
         grounded_roots = {find(n) for n in grounded}
         ref_of_root = {}
-        # prefer the negative terminal of a supply as the island's 0 V
+        # prefer the negative terminal of a supply as the island's 0 V (the signal generator included)
         for comp, cls, nodes in dev_raw_nodes:
-            if cls is D.Source and len(nodes) == 2 and nodes[1] >= 0:
+            if issubclass(cls, D.Source) and len(nodes) == 2 and nodes[1] >= 0:
                 r = find(nodes[1])
                 if r not in grounded_roots:
                     ref_of_root.setdefault(r, nodes[1])

@@ -294,6 +294,33 @@ def test_comparator_switches_as_the_input_crosses():
     assert highs > 10 and lows > 10
 
 
+@pytest.mark.parametrize("rot,flip", [(0, False), (1, False), (2, False), (3, False),
+                                      (0, True), (1, True), (2, True), (3, True)])
+def test_signal_generator_keeps_its_voltage_on_the_positive_pin(rot, flip):
+    """Sin 0 V en el circuito, el generador tiene que tomar su pata negativa como referencia, en cualquier
+    orientación: la tensión sale siempre por el +, nunca por el −."""
+    c, (gen, _r) = build([("signal_gen", ("a", "b"),
+                           {"waveform": "Cuadrada", "frequency": 1.0, "amplitude": 5.0}, rot, flip),
+                          ("resistor", ("a", "b"), {"resistance": 1000.0})])
+    s = Simulator(c)
+    s.dc()
+    assert s.pin_voltage(gen.id, "-") == pytest.approx(0.0, abs=1e-9)
+    assert s.pin_voltage(gen.id, "+") == pytest.approx(5.0, abs=0.01)
+
+
+def test_flipped_signal_generator_delivers_from_its_positive_pin():
+    """Vertical y volteado, el + queda abajo: la tensión tiene que salir por ahí y el cable de arriba queda en 0 V."""
+    c, (gen, _r) = build([("signal_gen", ("a", "b"),
+                           {"waveform": "Cuadrada", "frequency": 1.0, "amplitude": 5.0}, 1, True),
+                          ("resistor", ("a", "b"), {"resistance": 1000.0})])
+    s = Simulator(c)
+    s.dc()
+    pos = gen.pin_positions()
+    assert pos["+"][1] > pos["-"][1]          # el + está en el cable de abajo
+    assert s.pin_voltage(gen.id, "+") == pytest.approx(5.0, abs=0.01)
+    assert s.pin_voltage(gen.id, "-") == pytest.approx(0.0, abs=1e-9)
+
+
 # ------------------------------------------------------------------------------------------- motor driver
 def l293d(a1, a2, en=True, load=("motor", {}), v2=9):
     return run([("dc_supply", ("v5", "0"), {"voltage": 5}), ("dc_supply", ("v9", "0"), {"voltage": v2}),

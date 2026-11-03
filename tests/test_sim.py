@@ -19,7 +19,7 @@ from wirely.sim.engine import Simulator
 
 # ----------------------------------------------------------------------------------------- helpers
 def build(spec):
-    """Make a real drawn circuit from a list of (kind, (net, net, …), props).
+    """Make a real drawn circuit from a list of (kind, (net, net, …), props[, rot, flip]).
 
     Every pin gets its own wire: straight up (or down) to a private lane far from the parts, then along to
     its net's own vertical bus line. Lanes and buses only cross each other (never touch), so the only
@@ -29,8 +29,11 @@ def build(spec):
     net_x = {}
     bus = {}
     k = 0
-    for col, (kind, nets, props) in enumerate(spec):
-        comp = c.add(kind, col * 3000, 0, props=props)
+    for col, item in enumerate(spec):
+        kind, nets, props = item[0], item[1], item[2]
+        rot = item[3] if len(item) > 3 else 0
+        flip = item[4] if len(item) > 4 else False
+        comp = c.add(kind, col * 3000, 0, rot=rot, flip=flip, props=props)
         comps.append(comp)
         names = [n for n, _x, _y in comp.part.pins]
         assert len(names) == len(nets), (kind, names)
