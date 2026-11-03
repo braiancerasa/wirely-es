@@ -189,11 +189,14 @@ alta — la escala está en la esquina) y circulan puntos por ellos para mostrar
 Coloque **sondas de tensión** (A–D, en *Medidores y sondas*) sobre los cables para ver su voltaje, y **sondas de
 corriente** (I1–I4) sobre un cable para ver la corriente que pasa por él: la sonda se engancha al cable que tiene
 debajo y no altera el circuito. Presione Ejecutar y el gráfico se abre debajo, como un osciloscopio. Cada sonda
-muestra su valor y frecuencia; ajuste el tiempo, los voltios y los amperes por división, o déjelos en Automático.
-Con los dos tipos de sonda puede elegir **Separados** (voltaje arriba y corriente abajo, mitad y mitad) o
-**Superpuestos** (las dos en un solo gráfico, con los voltios a la izquierda y los amperes a la derecha) para
-comparar si una onda se adelanta o se atrasa respecto de la otra. Pase el mouse sobre el gráfico para leer los
-valores y use **Guardar imagen…** para conservarlo. **Ctrl+G** lo muestra u oculta.
+muestra su valor y frecuencia; escriba el tiempo, el voltaje y la corriente por división y elija solo la unidad
+(s, ms o µs; V o mV; A, mA o µA), o deje el cuadro vacío para Automático. La rueda del mouse sobre el gráfico acerca
+o aleja el voltaje y la corriente a la vez, sin cambiar el tiempo, y mantiene el cero al medio. Para correr el cero
+de un eje, arrastre su regla lateral hacia arriba o hacia abajo; las dos reglas son independientes y un doble clic
+las devuelve al centro. Con los dos tipos de sonda puede elegir **Separados** (voltaje arriba y corriente abajo,
+mitad y mitad) o **Superpuestos** (las dos en un solo gráfico, con el voltaje a la izquierda y la corriente a la
+derecha) para comparar si una onda se adelanta o se atrasa respecto de la otra. Pase el mouse sobre el gráfico para
+leer los valores y use **Guardar imagen…** para conservarlo. **Ctrl+G** lo muestra u oculta.
 
 | Filtro pasa bajos RC | Convertidor reductor (12 V de entrada, unos 5,7 V de salida) |
 |---|---|

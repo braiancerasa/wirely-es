@@ -140,23 +140,28 @@ def test_graph_units_and_the_two_views():
     g.clear()
     g.add_samples([(0.0, {"A": 1.0}), (0.1, {"A": 2.0})], 0.1)
     assert g.plot_mode() == "single"
-    assert g.abox.isEnabled() is False and g.vbox.isEnabled() is True
+    assert g.aval.isEnabled() is False and g.vval.isEnabled() is True
     g.clear()
     g.add_samples([(0.0, {"I2": 0.001}), (0.1, {"I2": 0.002})], 0.1)
-    assert g.plot_mode() == "single" and g.vbox.isEnabled() is False and g.abox.isEnabled() is True
+    assert g.plot_mode() == "single" and g.vval.isEnabled() is False and g.aval.isEnabled() is True
 
 
 def test_graph_remembers_the_view_and_the_scales(win):
     from wirely.ui.graph import GraphPanel
     g = win.graph
     g.mbox.setCurrentIndex(1)
-    g.abox.setCurrentIndex(2)
-    g.vbox.setCurrentIndex(3)
+    g.aval.setText("10")
+    g.aunit.setCurrentText("mA")
+    g._amp_edited()
+    g.vval.setText("2")
+    g.vunit.setCurrentText("V")
+    g._volt_edited()
     assert win.settings.value("graph_view") == "overlaid"
-    assert win.settings.value("graph_amps") == 2
+    assert float(win.settings.value("graph_amp_div")) == pytest.approx(0.01)
     again = GraphPanel(settings=win.settings)
     assert again.mode == "overlaid"
-    assert again.abox.currentIndex() == 2 and again.vbox.currentIndex() == 3
+    assert again.amp_div == pytest.approx(0.01) and again.volt_div == pytest.approx(2.0)
+    assert again.scale_config()["amps"] == "10" and again.scale_config()["amp_unit"] == "mA"
 
 
 def test_a_current_probe_opens_the_graph(win):

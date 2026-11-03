@@ -132,13 +132,13 @@ def test_the_web_graph_can_be_panned_by_hand_when_paused():
     out = run_web("""
         import json, wirely_web
         app = wirely_web.App()
-        app.graph.tbox.i = 4                       # 100 ms por cuadro: la ventana muestra 1 s
+        app.graph.set_scales("100", "ms", "", "V", "", "mA")   # 100 ms por cuadro: la ventana muestra 1 s
         app.graph.add_samples([(i * 0.01, {"A": 1.0}) for i in range(201)], 2.0)
         app.graph.set_follow(False)                 # en pausa
         before = app.graph.pan
         app.graph_pan(320, 640)                     # medio gráfico hacia la derecha: medio segundo atrás
         after = app.graph.pan
-        can = json.loads(app.graph_ops(640, 320, -1, -1, 4, 0, 0, 0))["pan"]
+        can = json.loads(app.graph_ops(640, 320, -1, -1, "100", "ms", "", "V", "", "mA", 0))["pan"]
         app.graph.set_follow(True)                  # al reanudar
         print(json.dumps([before, after, can, app.graph.pan]))
     """)
@@ -146,6 +146,25 @@ def test_the_web_graph_can_be_panned_by_hand_when_paused():
     assert before == 0 and after == 0.5
     assert can is True
     assert at_end == 0
+
+
+def test_the_web_graph_zooms_and_moves_each_zero():
+    out = run_web("""
+        import json, wirely_web
+        app = wirely_web.App()
+        app.graph.add_samples([(i * 0.01, {"A": 5.0, "I1": 0.010}) for i in range(201)], 2.0)
+        before = json.loads(app.graph_config())
+        zoomed = json.loads(app.graph_zoom(1))
+        axis = json.loads(app.graph_axis(10, 50, 640, 320))["axis"]
+        app.graph_zero("V", -10, 640, 320)
+        after = json.loads(app.graph_config())
+        print(json.dumps([before["volts"], zoomed["volts"], before["amps"], zoomed["amps"],
+                          axis, after["v_offset"], after["a_offset"]]))
+    """)
+    volts0, volts1, amps0, amps1, axis, v_offset, a_offset = json.loads(out.strip().splitlines()[-1])
+    assert volts0 == "" and amps0 == ""                # arrancan en Auto
+    assert float(volts1) > 0 and float(amps1) > 0      # la rueda fija las dos escalas
+    assert axis == "V" and v_offset > 0 and a_offset == 0
 
 
 def test_fallback_numpy_solves_like_numpy():

@@ -117,6 +117,8 @@ button, select, input, textarea { font: inherit; color: inherit; }
 #chips { flex: 1; min-width: 120px; }
 .graphTop label { color: var(--TEXT_MUTED); }
 .graphTop select { border: 1px solid var(--BORDER); border-radius: 5px; padding: 3px 5px; background: var(--INPUT); color: var(--TEXT); }
+.graphTop input { width: 4.4em; border: 1px solid var(--BORDER); border-radius: 5px; padding: 3px 5px; background: var(--INPUT); color: var(--TEXT); }
+.graphTop input::placeholder { color: var(--TEXT_MUTED); }
 .graphTop button, .btn { border: 1px solid var(--BORDER); border-radius: 5px; padding: 4px 12px; background: var(--INPUT); cursor: pointer; }
 .graphTop button:hover, .btn:hover { border-color: var(--ACCENT); }
 #plot { flex: 1; width: 100%; min-height: 0; margin-top: 4px; }

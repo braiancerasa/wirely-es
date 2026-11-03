@@ -18,7 +18,9 @@ from wirely.ui.graph import GraphPanel  # noqa: E402
 def make_panel(t_now=2.0):
     QApplication.instance() or QApplication([])
     g = GraphPanel()
-    g.tbox.setCurrentIndex(4)          # 100 ms por cuadro: la ventana muestra 1 s
+    g.tval.setText("100")
+    g.tunit.setCurrentText("ms")
+    g._time_edited()                   # 100 ms por cuadro: la ventana muestra 1 s
     g.add_samples([(i * 0.01, {"A": 1.0}) for i in range(int(t_now / 0.01) + 1)], t_now)
     return g
 

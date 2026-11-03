@@ -267,7 +267,9 @@ SHORTCUTS = [
     ("Ejecutar / pausar / detener", "F5  /  F6  /  Mayús+F5 (o los botones en el centro de la barra de herramientas)"),
     ("Durante la ejecución", "Haga clic en interruptores, mantenga presionados los pulsadores, arrastre los deslizadores, pase el mouse para leer voltajes"),
     ("Gráfico (osciloscopio)", "Coloque sondas de tensión (A–D) en los cables, presione Ejecutar; Ctrl+G muestra / oculta el gráfico. "
-                               "En pausa, arrastre el gráfico para moverlo por el tiempo"),
+                               "En pausa, arrastre el gráfico para moverlo por el tiempo. La rueda del mouse acerca o aleja el "
+                               "voltaje y la corriente a la vez; arrastre una regla lateral para correr el cero de ese eje "
+                               "(doble clic la devuelve al centro)"),
     ("Lecturas", "Durante la ejecución, el botón Lecturas muestra el voltaje y la corriente en cada cable y componente — "
                  "o haga clic en cualquier cable o componente para fijar solo su lectura (clic de nuevo para desfijar). Arrastre una lectura para "
                  "moverla fuera del camino"),

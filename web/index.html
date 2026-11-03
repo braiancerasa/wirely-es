@@ -94,9 +94,9 @@
           <span class="sectionHeader">Gráfico</span>
           <span id="chips" class="muted">Coloque una sonda de tensión o de corriente (Medidores y sondas) sobre un cable y presione Ejecutar.</span>
           <label>Vista <select id="mbox" title="Gráficos separados (voltaje arriba, corriente abajo) o superpuestos en uno solo"></select></label>
-          <label>Tiempo <select id="tbox" title="Tiempo por cuadro horizontal"></select></label>
-          <label>Voltios <select id="vbox" title="Voltios por cuadro vertical"></select></label>
-          <label>Amperes <select id="abox" title="Amperes por cuadro vertical"></select></label>
+          <label>Tiempo <input id="tval" type="text" inputmode="decimal" placeholder="Auto" title="Valor por cuadro horizontal; vacío = Auto"><select id="tunit" title="Unidad de tiempo"></select></label>
+          <label>Voltaje <input id="vval" type="text" inputmode="decimal" placeholder="Auto" title="Voltaje por cuadro vertical; vacío = Auto"><select id="vunit" title="Unidad de voltaje"></select></label>
+          <label>Corriente <input id="aval" type="text" inputmode="decimal" placeholder="Auto" title="Corriente por cuadro vertical; vacío = Auto"><select id="aunit" title="Unidad de corriente"></select></label>
           <button id="graphClear">Limpiar</button>
           <button id="graphPic" title="Guardar el gráfico como imagen">Guardar imagen</button>
           <button id="graphCsv" title="Guardar las lecturas como planilla de cálculo (CSV)">Guardar datos</button>

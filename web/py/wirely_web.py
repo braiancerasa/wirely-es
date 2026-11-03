@@ -40,7 +40,7 @@ from wirely.model.units import fmt, has_unit_box, join, parse, split, unit_choic
 from wirely.sim.audio import Synth                                   # noqa: E402
 from wirely.ui import icons, symbols as S, theme                     # noqa: E402
 from wirely.ui import simcontrol as SC                               # noqa: E402
-from wirely.ui.graph import TIMEBASES, VOLTS, GraphPanel             # noqa: E402
+from wirely.ui.graph import AMP_UNITS, TIME_UNITS, VOLT_UNITS, VIEWS, GraphPanel   # noqa: E402
 from wirely.ui.items import ComponentItem, DraftWire, WireItem, live_look_key  # noqa: E402
 from wirely.ui.live_items import SliderItem                          # noqa: E402
 from wirely.ui.scene import CircuitScene                             # noqa: E402
@@ -130,10 +130,8 @@ class _Nothing:
 def make_graph():
     """The desktop graph panel's own logic (traces, scales, drawing), without its widgets."""
     g = GraphPanel.__new__(GraphPanel)          # skip building the desktop widgets
-    g.traces, g.t_now, g.vmax_hint = {}, 0.0, 9.0
-    g.pan, g.following = 0.0, True
-    g.settings, g.mode = None, "separated"
-    g.tbox, g.vbox, g.abox, g.mbox = _Choice(), _Choice(), _Choice(), _Choice()
+    g.settings = None
+    g._init_state()
     g.chips, g.plot = _Text(), _Nothing()
     g.clear()
     return g
@@ -867,27 +865,60 @@ class App:
         return json.dumps({"rect": [r.x(), r.y(), r.width(), r.height()], "ops": ops})
 
     # ------------------------------------------------------------------ the graph
-    def graph_ops(self, w, h, mx, my, tb, vb, view=0, ab=0):
+    def graph_ops(self, w, h, mx, my, time_text="", time_unit="ms", volt_text="", volt_unit="V",
+                  amp_text="", amp_unit="mA", view=0):
         g = self.graph
-        g.tbox.i, g.vbox.i, g.abox.i = int(tb), int(vb), int(ab)
+        g.set_scales(time_text, time_unit, volt_text, volt_unit, amp_text, amp_unit)
         g.mode = "overlaid" if int(view) == 1 else "separated"
         p = QPainter()
         mouse = QPointF(mx, my) if mx >= 0 else None
         g.paint_plot(p, QRectF(0, 0, w, h), mouse)
         g._update_chips()
-        return json.dumps({"ops": p.ops, "chips": g.chips.text, "pan": g.can_pan()})
+        return json.dumps({"ops": p.ops, "chips": g.chips.text, "pan": g.can_pan(),
+                           "scales": g.scale_config()})
 
     def graph_pan(self, dx, width):
         """Arrastre del gráfico en pausa: dx píxeles hacia la derecha muestran tiempos anteriores."""
         self.graph.pan_by(float(dx), float(width))
 
+    def graph_zoom(self, steps):
+        """Rueda del mouse sobre el gráfico: cambia el rango vertical de voltaje y corriente."""
+        self.graph.zoom_vertical(float(steps))
+        return json.dumps(self.graph.scale_config())
+
+    def graph_axis(self, x, y, w, h):
+        """Qué regla lateral hay bajo el puntero: V, A o vacío."""
+        axis, _height = self.graph.axis_at(float(x), float(y), float(w), float(h))
+        return json.dumps({"axis": axis or ""})
+
+    def graph_zero(self, axis, dy, w, h):
+        """Arrastre vertical de una regla lateral: corre solo el cero de ese eje."""
+        lay = self.graph._layout_areas(QRectF(0, 0, float(w), float(h)))
+        area = lay.get("v" if axis == "V" else "a")
+        height = area.height() if area is not None else float(h)
+        self.graph.zero_by(axis, float(dy), height)
+        return json.dumps(self.graph.scale_config())
+
+    def graph_reset_zero(self, axis):
+        self.graph.reset_zero(axis)
+        return json.dumps(self.graph.scale_config())
+
     def graph_clear(self):
         self.graph.clear()
 
     def graph_choices(self):
-        from wirely.ui.graph import AMPS, VIEWS
-        return json.dumps({"time": [n for n, _v in TIMEBASES], "volts": [n for n, _v in VOLTS],
-                           "amps": [n for n, _v in AMPS], "views": [n for n, _k in VIEWS]})
+        return json.dumps({"time": [[n, f] for n, f in TIME_UNITS],
+                           "volts": [[n, f] for n, f in VOLT_UNITS],
+                           "amps": [[n, f] for n, f in AMP_UNITS],
+                           "views": [n for n, _k in VIEWS]})
+
+    def graph_config(self):
+        return json.dumps(self.graph.scale_config())
+
+    def graph_set_offsets(self, v_offset, a_offset):
+        self.graph.v_offset = self.graph._clamp_offset(float(v_offset))
+        self.graph.a_offset = self.graph._clamp_offset(float(a_offset))
+        return ""
 
     def graph_csv(self):
         """The recorded graph probe voltages as a spreadsheet (CSV): one row per time."""

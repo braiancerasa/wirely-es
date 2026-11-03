@@ -1496,15 +1496,91 @@ async function exportPicture(toClipboard) {
 // ============================================================================================ the graph
 const plot = $("plot");
 let plotMouse = null;
-let plotCanPan = false, plotDrag = null;
+let plotCanPan = false, plotDrag = null, plotZero = null, plotHoverAxis = null;
+const graphUnits = {};
 function graphShown() { return ui.graph && !$("graphPanel").hidden; }
+
+function fillGraphUnits(id, list, preferred) {
+  const s = $(id);
+  graphUnits[id] = Object.fromEntries(list);
+  list.forEach(([name]) => { const o = document.createElement("option"); o.value = name; o.textContent = name; s.appendChild(o); });
+  if (list.some(([name]) => name === preferred)) s.value = preferred;
+  s.dataset.unit = s.value;
+}
+
+function graphNumber(x) { return String(Number(Number(x).toPrecision(8))); }
+
+function convertGraphUnit(valueId, unitId) {
+  const select = $(unitId), input = $(valueId);
+  const old = select.dataset.unit || select.value, now = select.value;
+  const factors = graphUnits[unitId] || {};
+  const text = input.value.trim().replace(",", ".");
+  if (text && old !== now && factors[old] && factors[now]) {
+    const value = parseFloat(text);
+    if (Number.isFinite(value) && value > 0) input.value = graphNumber(value * factors[old] / factors[now]);
+  }
+  select.dataset.unit = now;
+}
+
+let graphSaveTimer = null;
+function saveGraphPrefs() {
+  clearTimeout(graphSaveTimer);
+  graphSaveTimer = setTimeout(() => {
+    try {
+      const c = J(app.graph_config());
+      localStorage.setItem("wirely-graph", JSON.stringify({
+        time: $("tval").value, time_unit: $("tunit").value,
+        volts: $("vval").value, volt_unit: $("vunit").value,
+        amps: $("aval").value, amp_unit: $("aunit").value,
+        view: +$("mbox").value || 0, v_offset: c.v_offset, a_offset: c.a_offset,
+      }));
+    } catch (e) { /* almacenamiento desactivado */ }
+  }, 150);
+}
+
+function restoreGraphPrefs() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem("wirely-graph") || "null"); } catch (e) { saved = null; }
+  if (!saved) return;
+  const pairs = [["tval", "tunit", saved.time, saved.time_unit],
+                 ["vval", "vunit", saved.volts, saved.volt_unit],
+                 ["aval", "aunit", saved.amps, saved.amp_unit]];
+  for (const [valueId, unitId, value, unit] of pairs) {
+    if (typeof value === "string") $(valueId).value = value;
+    if (graphUnits[unitId] && Object.prototype.hasOwnProperty.call(graphUnits[unitId], unit)) {
+      $(unitId).value = unit;
+      $(unitId).dataset.unit = unit;
+    }
+  }
+  if (saved.view === 0 || saved.view === 1) $("mbox").value = String(saved.view);
+  try { app.graph_set_offsets(saved.v_offset || 0, saved.a_offset || 0); } catch (e) { /* versión sin desplazamiento */ }
+}
+
+function applyGraphScales(c) {
+  const pairs = [["tval", "tunit", c.time, c.time_unit],
+                 ["vval", "vunit", c.volts, c.volt_unit],
+                 ["aval", "aunit", c.amps, c.amp_unit]];
+  for (const [valueId, unitId, value, unit] of pairs) {
+    $(valueId).value = value;
+    if (graphUnits[unitId] && Object.prototype.hasOwnProperty.call(graphUnits[unitId], unit)) {
+      $(unitId).value = unit;
+      $(unitId).dataset.unit = unit;
+    }
+  }
+}
+
 function setupGraph() {
   const ch = J(app.graph_choices());
-  for (const [id, list] of [["tbox", ch.time], ["vbox", ch.volts], ["abox", ch.amps], ["mbox", ch.views]]) {
-    const s = $(id);
-    list.forEach((name, i) => { const o = document.createElement("option"); o.value = i; o.textContent = name; s.appendChild(o); });
-    s.addEventListener("change", drawGraph);
+  fillGraphUnits("tunit", ch.time, "ms");
+  fillGraphUnits("vunit", ch.volts, "V");
+  fillGraphUnits("aunit", ch.amps, "mA");
+  ch.views.forEach((name, i) => { const o = document.createElement("option"); o.value = i; o.textContent = name; $("mbox").appendChild(o); });
+  restoreGraphPrefs();
+  for (const [valueId, unitId] of [["tval", "tunit"], ["vval", "vunit"], ["aval", "aunit"]]) {
+    $(valueId).addEventListener("input", () => { drawGraph(); saveGraphPrefs(); });
+    $(unitId).addEventListener("change", () => { convertGraphUnit(valueId, unitId); drawGraph(); saveGraphPrefs(); });
   }
+  $("mbox").addEventListener("change", () => { drawGraph(); saveGraphPrefs(); });
   $("graphClear").addEventListener("click", () => { app.graph_clear(); drawGraph(); });
   $("graphClose").addEventListener("click", () => doAction("graph"));
   $("graphPic").addEventListener("click", () => plot.toBlob((b) => download(b, "graph.png"), "image/png"));
@@ -1513,10 +1589,25 @@ function setupGraph() {
     if (!csv) { toast("Todavía no hay lecturas — coloque una sonda de tensión sobre un cable y presione Ejecutar.", "info"); return; }
     download(new Blob([csv], { type: "text/csv" }), "lecturas del gráfico.csv");
   });
-  // en pausa, arrastrar el gráfico lo mueve por el tiempo (en marcha sigue el trazo en vivo)
-  plot.title = "Arrastre el gráfico para moverse por el tiempo mientras la simulación está en pausa";
+  // en pausa, arrastrar el gráfico lo mueve por el tiempo (en marcha sigue el trazo en vivo);
+  // arrastrar una regla lateral corre el cero de ese eje, y la rueda acerca o aleja el eje vertical
+  plot.title = "Rueda: acerca o aleja el voltaje y la corriente. Arrastre el gráfico para moverse por el tiempo " +
+               "en pausa; arrastre una regla lateral para correr el cero.";
   plot.style.touchAction = "none";
+  const axisAt = (e, r) => {
+    const a = J(app.graph_axis(e.clientX - r.left, e.clientY - r.top, r.width, r.height));
+    return a.axis || null;
+  };
   plot.addEventListener("pointerdown", (e) => {
+    const r = plot.getBoundingClientRect();
+    const axis = axisAt(e, r);
+    if (e.button === 0 && axis) {
+      plotZero = { axis, y: e.clientY, id: e.pointerId };
+      try { plot.setPointerCapture(e.pointerId); } catch (err) { /* sin captura */ }
+      plot.style.cursor = "ns-resize";
+      e.preventDefault();
+      return;
+    }
     if (e.button !== 0 || !plotCanPan) return;
     plotDrag = { x: e.clientX, id: e.pointerId };
     plotMouse = null;
@@ -1527,15 +1618,29 @@ function setupGraph() {
   });
   plot.addEventListener("pointermove", (e) => {
     const r = plot.getBoundingClientRect();
-    if (plotDrag) {
+    if (plotZero) {
+      app.graph_zero(plotZero.axis, e.clientY - plotZero.y, r.width, r.height);
+      plotZero.y = e.clientY;
+      drawGraph();
+      saveGraphPrefs();
+    } else if (plotDrag) {
       app.graph_pan(e.clientX - plotDrag.x, r.width);
       plotDrag.x = e.clientX;
+      drawGraph();
     } else {
       plotMouse = [e.clientX - r.left, e.clientY - r.top];
+      plotHoverAxis = axisAt(e, r);
+      drawGraph();
     }
-    drawGraph();
   });
   const endPlotDrag = () => {
+    if (plotZero) {
+      try { plot.releasePointerCapture(plotZero.id); } catch (err) { /* ya la había soltado */ }
+      plotZero = null;
+      saveGraphPrefs();
+      drawGraph();
+      return;
+    }
     if (!plotDrag) return;
     try { plot.releasePointerCapture(plotDrag.id); } catch (err) { /* ya la había soltado */ }
     plotDrag = null;
@@ -1543,7 +1648,27 @@ function setupGraph() {
   };
   plot.addEventListener("pointerup", endPlotDrag);
   plot.addEventListener("pointercancel", endPlotDrag);
-  plot.addEventListener("pointerleave", () => { if (!plotDrag) { plotMouse = null; drawGraph(); } });
+  plot.addEventListener("pointerleave", () => {
+    if (!plotDrag && !plotZero) { plotMouse = null; plotHoverAxis = null; drawGraph(); }
+  });
+  plot.addEventListener("dblclick", (e) => {
+    const r = plot.getBoundingClientRect();
+    const axis = axisAt(e, r);
+    if (!axis) return;
+    e.preventDefault();
+    app.graph_reset_zero(axis);
+    drawGraph();
+    saveGraphPrefs();
+  });
+  plot.addEventListener("wheel", (e) => {
+    if (!graphShown()) return;
+    e.preventDefault();
+    const delta = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY;
+    if (!delta) return;
+    applyGraphScales(J(app.graph_zoom(-delta / 120)));
+    drawGraph();
+    saveGraphPrefs();
+  }, { passive: false });
 }
 let graphTimer = null;
 function drawGraphSoon() { clearTimeout(graphTimer); graphTimer = setTimeout(drawGraph, 30); }
@@ -1557,9 +1682,11 @@ function drawGraph() {
     plot.height = Math.round(r.height * dpr);
   }
   const g = J(app.graph_ops(r.width, r.height, plotMouse ? plotMouse[0] : -1, plotMouse ? plotMouse[1] : -1,
-    +$("tbox").value, +$("vbox").value, +$("mbox").value, +$("abox").value));
+    $("tval").value, $("tunit").value, $("vval").value, $("vunit").value,
+    $("aval").value, $("aunit").value, +$("mbox").value));
   plotCanPan = !!g.pan;
-  plot.style.cursor = plotDrag ? "grabbing" : (plotCanPan ? "grab" : "");
+  plot.style.cursor = plotZero ? "ns-resize" : plotDrag ? "grabbing" :
+    plotHoverAxis ? "ns-resize" : (plotCanPan ? "grab" : "");
   const ctx = plot.getContext("2d");
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, r.width, r.height);
